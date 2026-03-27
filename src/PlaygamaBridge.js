@@ -272,6 +272,8 @@ class PlaygamaBridge {
             platformId = PLATFORM_ID.GAME_DISTRIBUTION
         } else if (__INCLUDE_LAGGED__ && url.hostname.includes('lagged.')) {
             platformId = PLATFORM_ID.LAGGED
+        } else if (__INCLUDE_OK__ && (url.searchParams.get('vk_client') === 'ok' || url.searchParams.has('vk_ok_app_id'))) {
+            platformId = PLATFORM_ID.OK
         } else if (__INCLUDE_VK__ && ((url.searchParams.has('api_id') && url.searchParams.has('viewer_id') && url.searchParams.has('auth_key')) || url.searchParams.has('vk_app_id'))) {
             platformId = PLATFORM_ID.VK
         } else if (__INCLUDE_ABSOLUTE_GAMES__ && (url.searchParams.has('app_id') && url.searchParams.has('player_id') && url.searchParams.has('game_sid') && url.searchParams.has('auth_key'))) {
@@ -307,6 +309,11 @@ class PlaygamaBridge {
         } else if (__INCLUDE_GAMESNACKS__ && typeof window.GameSnacks !== 'undefined') {
             platformId = PLATFORM_ID.GAMESNACKS
         }
+
+        console.info(
+            `%c [Bridge] Platform detected: ${platformId} `,
+            'background: #2563eb; color: white; border-radius: 3px; padding: 1px 4px',
+        )
 
         const PlatformBridge = await fetchPlatformBridge(platformId)
         this.#platformBridge = new PlatformBridge()

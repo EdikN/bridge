@@ -189,6 +189,7 @@ export const ACTION_NAME = {
     SET_REWARDED_STATE: 'set_rewarded_state',
     SHOW_INTERSTITIAL: 'show_interstitial',
     SHOW_REWARDED: 'show_rewarded',
+    VIBRATE: 'vibrate',
 }
 
 export const ERROR = {

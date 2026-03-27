@@ -131,6 +131,10 @@ class VkPlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    get isVibrationSupported() {
+        return true
+    }
+
     _isBannerSupported = true
 
     #platform
@@ -413,15 +417,17 @@ class VkPlatformBridge extends PlatformBridgeBase {
 
     // social
     inviteFriends() {
-        return this.#sendRequestToVKBridge(ACTION_NAME.INVITE_FRIENDS, 'VKWebAppShowInviteBox', { }, 'success')
+        return this._sendRequestToVKBridge(ACTION_NAME.INVITE_FRIENDS, 'VKWebAppShowInviteBox', { }, 'success')
     }
 
     joinCommunity(options) {
-        if (!options || !options.groupId) {
+        // Read groupId from config first — allows calling without arguments
+        const configGroupId = this._options?.social?.joinCommunity?.[this.platformId]
+        let groupId = configGroupId ?? options?.groupId
+
+        if (!groupId) {
             return Promise.reject()
         }
-
-        let { groupId } = options
 
         if (typeof groupId === 'string') {
             groupId = parseInt(groupId, 10)
@@ -430,7 +436,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
             }
         }
 
-        return this.#sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
+        return this._sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
             .then(() => {
                 window.open(`https://vk.com/public${groupId}`)
             })
@@ -442,7 +448,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
             parameters.link = options.link
         }
 
-        return this.#sendRequestToVKBridge(ACTION_NAME.SHARE, 'VKWebAppShare', parameters, 'type')
+        return this._sendRequestToVKBridge(ACTION_NAME.SHARE, 'VKWebAppShare', parameters, 'type')
     }
 
     addToHomeScreen() {
@@ -450,19 +456,24 @@ class VkPlatformBridge extends PlatformBridgeBase {
             return Promise.reject()
         }
 
-        return this.#sendRequestToVKBridge(ACTION_NAME.ADD_TO_HOME_SCREEN, 'VKWebAppAddToHomeScreen')
+        return this._sendRequestToVKBridge(ACTION_NAME.ADD_TO_HOME_SCREEN, 'VKWebAppAddToHomeScreen')
     }
 
     addToFavorites() {
-        return this.#sendRequestToVKBridge(ACTION_NAME.ADD_TO_FAVORITES, 'VKWebAppAddToFavorites')
+        return this._sendRequestToVKBridge(ACTION_NAME.ADD_TO_FAVORITES, 'VKWebAppAddToFavorites')
     }
 
     // clipboard
     clipboardWrite(text) {
-        return this.#sendRequestToVKBridge(ACTION_NAME.CLIPBOARD_WRITE, 'VKWebAppCopyText', { text })
+        return this._sendRequestToVKBridge(ACTION_NAME.CLIPBOARD_WRITE, 'VKWebAppCopyText', { text })
     }
 
-    #sendRequestToVKBridge(actionName, vkMethodName, parameters = { }, responseSuccessKey = 'result') {
+    // device
+    vibrate() {
+        return this._sendRequestToVKBridge(ACTION_NAME.VIBRATE, 'VKWebAppVibrate')
+    }
+
+    _sendRequestToVKBridge(actionName, vkMethodName, parameters = { }, responseSuccessKey = 'result') {
         let promiseDecorator = this._getPromiseDecorator(actionName)
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(actionName)

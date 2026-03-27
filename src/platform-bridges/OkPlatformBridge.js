@@ -23,7 +23,7 @@ import {
 import {
     PLATFORM_ID,
     ACTION_NAME, STORAGE_TYPE,
-    ERROR, REWARDED_STATE, INTERSTITIAL_STATE, BANNER_STATE,
+    ERROR, REWARDED_STATE, INTERSTITIAL_STATE, BANNER_STATE, LEADERBOARD_TYPE,
 } from '../constants'
 
 const SDK_URL = '//api.ok.ru/js/fapi5.js'
@@ -55,6 +55,11 @@ class OkPlatformBridge extends PlatformBridgeBase {
 
     get isRewardedSupported() {
         return true
+    }
+
+    // leaderboards
+    get leaderboardsType() {
+        return LEADERBOARD_TYPE.NOT_AVAILABLE
     }
 
     // social

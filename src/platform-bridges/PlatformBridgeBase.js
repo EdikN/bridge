@@ -253,6 +253,10 @@ class PlatformBridgeBase {
         return true
     }
 
+    get isVibrationSupported() {
+        return false
+    }
+
     // achievements
     get isAchievementsSupported() {
         return false
@@ -576,6 +580,11 @@ class PlatformBridgeBase {
     }
 
     leaderboardsShowNativePopup() {
+        return Promise.reject()
+    }
+
+    // device
+    vibrate() {
         return Promise.reject()
     }
 
