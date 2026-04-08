@@ -308,6 +308,8 @@ class PlaygamaBridge {
             platformId = PLATFORM_ID.TIKTOK
         } else if (__INCLUDE_GAMESNACKS__ && typeof window.GameSnacks !== 'undefined') {
             platformId = PLATFORM_ID.GAMESNACKS
+        } else if (__INCLUDE_GAME_MONETIZE__ && (url.hostname.includes('gamemonetize.com') || url.hostname.includes('gamemonetize.co') || url.hostname.includes('distributegames.com'))) {
+            platformId = PLATFORM_ID.GAME_MONETIZE
         }
 
         console.info(

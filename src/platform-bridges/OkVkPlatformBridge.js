@@ -54,10 +54,34 @@ class OkVkPlatformBridge extends VkPlatformBridge {
             }
         }
 
-        return this._sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
-            .then(() => {
-                window.open(`https://ok.ru/group/${groupId}`)
-            })
+        // В ОК VKWebAppJoinGroup может выдавать ошибку или не работать корректно во фрейме,
+        // поэтому мы просто напрямую открываем вкладку группы (как и ожидается на платформе).
+        window.open(`https://ok.ru/group/${groupId}`)
+        return Promise.resolve()
+    }
+
+    share(options) {
+        let link = options?.link
+
+        // Если ссылка не передана явно, нужно обязательно передать ссылку на игру,
+        // иначе при вызове VKWebAppShare встроенный парсер Одноклассников (web-grabber)
+        // не сможет получить метаданные по текущему URL фрейма (что и вызовет ошибку).
+        if (!link) {
+            const url = new URL(window.location.href)
+            if (url.searchParams.has('vk_ok_app_id')) {
+                link = `https://ok.ru/game/${url.searchParams.get('vk_ok_app_id')}`
+            } else if (url.searchParams.has('vk_app_id')) {
+                link = `https://ok.ru/game/${url.searchParams.get('vk_app_id')}`
+            }
+        }
+
+        if (link) {
+            return this._sendRequestToVKBridge(ACTION_NAME.SHARE, 'VKWebAppShare', { link }, 'type')
+                .catch(() => this._sendRequestToVKBridge(ACTION_NAME.SHARE, 'VKWebAppShowWallPostBox', { message: link }, 'type'))
+        }
+
+        // Если сформировать ссылку не удалось, просто предлагаем поделиться через WallPost
+        return this._sendRequestToVKBridge(ACTION_NAME.SHARE, 'VKWebAppShowWallPostBox', { message: '' }, 'type')
     }
 }
 
