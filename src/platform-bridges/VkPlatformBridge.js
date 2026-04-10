@@ -135,6 +135,10 @@ class VkPlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    get isPaymentsSupported() {
+        return true
+    }
+
     _isBannerSupported = true
 
     #platform
@@ -469,8 +473,33 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     // device
-    vibrate() {
-        return this._sendRequestToVKBridge(ACTION_NAME.VIBRATE, 'VKWebAppVibrate')
+    // payments
+    paymentsPurchase(id) {
+        const product = this._paymentsGetProductPlatformData(id)
+        let platformProductId = product ? product.id : id
+
+        if (typeof platformProductId === 'number') {
+            platformProductId = platformProductId.toString()
+        }
+
+        return this._sendRequestToVKBridge(
+            ACTION_NAME.PURCHASE,
+            'VKWebAppShowOrderBox',
+            { type: 'item', item: platformProductId },
+            'order_id',
+        ).then((data) => {
+            const purchase = { id, ...data }
+            this._paymentsPurchases.push(purchase)
+            return purchase
+        })
+    }
+
+    paymentsGetPurchases() {
+        return Promise.resolve(this._paymentsPurchases)
+    }
+
+    paymentsGetCatalog() {
+        return Promise.resolve(this._paymentsGetProductsPlatformData())
     }
 
     _sendRequestToVKBridge(actionName, vkMethodName, parameters = { }, responseSuccessKey = 'result') {
