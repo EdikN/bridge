@@ -59,33 +59,35 @@ class GameModule extends ModuleBase {
             return
         }
 
-        const fill = document.getElementById('fillRect')
-        const gradientMover = document.getElementById('gradientMover')
-        const logo = document.getElementById('logo')
-        const loadingOverlay = document.getElementById('loading-overlay')
+        const fill = document.getElementById('cs-fill')
+        const num = document.getElementById('cs-num')
+        const loadingOverlay = document.getElementById('cookie-splash')
 
-        if (!fill || !gradientMover || !logo || !loadingOverlay) {
+        if (!fill && !num && !loadingOverlay) {
             return
         }
 
         this._currentLoadingProgress = percent
-
         const progress = Math.max(0, Math.min(100, percent))
-        const translateY = 100 - progress
-        fill.style.transform = `translateY(${translateY}%)`
+
+        if (fill) {
+            fill.style.height = `${progress}%`
+            fill.style.borderTop = progress > 0 ? '1px solid rgba(255,255,255,0.4)' : 'none'
+        }
+
+        if (num) {
+            num.textContent = `${Math.round(progress)}%`
+        }
 
         if (progress === 100) {
             this._loadingProcessCompleted = true
 
-            setTimeout(() => {
-                fill.style.display = 'none'
-                gradientMover.style.display = 'block'
-                gradientMover.classList.add('gradient-mover')
-            }, 400)
-            setTimeout(() => logo.classList.add('logo-fade-out'), 900)
-            setTimeout(() => loadingOverlay.remove(), 1400)
-        } else {
-            gradientMover.classList.remove('gradient-mover')
+            if (loadingOverlay) {
+                setTimeout(() => {
+                    loadingOverlay.style.opacity = '0'
+                    setTimeout(() => loadingOverlay.remove(), 850)
+                }, 500)
+            }
         }
     }
 }

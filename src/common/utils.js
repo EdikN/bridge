@@ -489,216 +489,107 @@ export function showAdFailurePopup(platformId) {
     })
 }
 
-export function createProgressLogo(showFullLoadingLogo) {
+export function createProgressLogo() {
+    if (document.getElementById('cookie-splash')) {
+        return
+    }
+
     const style = document.createElement('style')
+    style.id = 'cookie-splash-styles'
     style.textContent = `
-        .fullscreen {
-            background: #242424;
-            width: 100vw;
-            height: 100vh;
+        #cookie-splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #050505; color: white; z-index: 999999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            transition: opacity 0.8s ease-in-out;
+            user-select: none;
+        }
+
+        .cs-cookie-container {
+            position: relative; width: 180px; height: 180px; margin-bottom: 24px;
+            border-radius: 50%;
+            animation: cs-float 3s ease-in-out infinite;
+            filter: drop-shadow(0 20px 40px rgba(210,105,30,0.2));
+        }
+
+        @keyframes cs-float {
+            0%, 100% { transform: translateY(0); filter: drop-shadow(0 20px 40px rgba(210,105,30,0.2)); }
+            50% { transform: translateY(-8px); filter: drop-shadow(0 20px 60px rgba(210,105,30,0.35)); }
+        }
+
+        .cs-cookie-bg {
+            position: absolute; inset: 0;
+            background: #1A0F08; border-radius: 50%;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+            border: 3px dashed rgba(62,36,19,0.5);
+            overflow: hidden;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+
+        .cs-cookie-fill {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: radial-gradient(circle at 30% 30%, #E6AB73, #D48E53, #A66332);
+            height: 0%;
+            overflow: hidden;
+            transition: height 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
+            border-top: 1px solid rgba(255,255,255,0.3);
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3);
+        }
+
+        .cs-cookie-texture {
+            position: absolute; inset: 0; opacity: 0.15;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            mix-blend-mode: multiply;
+        }
+
+        .cs-cookie-chips-wrapper {
+            position: absolute; bottom: 0; left: 0; width: 180px; height: 180px;
+        }
+
+        .cs-chip {
             position: absolute;
-            top: 0px;
-            left: 0px;
+            background: #2D1606;
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.8), inset 1px 1px 3px rgba(255,255,255,0.15), 2px 2px 5px rgba(0,0,0,0.4);
         }
 
-        #loading-overlay {
-            font-size: 20px;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+        .cs-chip:nth-child(1) { width: 22px; height: 18px; top: 18%; left: 22%; transform: rotate(15deg); }
+        .cs-chip:nth-child(2) { width: 16px; height: 16px; top: 25%; left: 68%; transform: rotate(-35deg); border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        .cs-chip:nth-child(3) { width: 26px; height: 22px; top: 52%; left: 42%; transform: rotate(75deg); }
+        .cs-chip:nth-child(4) { width: 18px; height: 20px; top: 48%; left: 12%; transform: rotate(-15deg); border-radius: 50%; }
+        .cs-chip:nth-child(5) { width: 17px; height: 17px; top: 78%; left: 28%; transform: rotate(45deg); }
+        .cs-chip:nth-child(6) { width: 24px; height: 20px; top: 68%; left: 68%; transform: rotate(-10deg); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
 
-        #logo {
-            width: 10%;
-            max-width: 300px;
-            min-width: 120px;
-            overflow: visible;
-        }
-
-        .fill-rect {
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-        }
-
-        #gradientMover {
-            display: none;
-        }
-
-        .gradient-mover {
-            animation: moveGradient 0.4s linear;
-        }
-
-        @keyframes moveGradient {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-250%); }
-        }
-
-        .logo-fade-out {
-            animation: logoFadeOut 1s linear;
-        }
-
-        .logo-fade-out path {
-            fill: white;
-            stroke: white;
-        }
-
-        @keyframes logoFadeOut {
-            0% { opacity: 1; }
-            50% { opacity: 0; }
-            100% { opacity: 0; }
+        .cs-percent {
+            font-size: 32px; font-weight: 900; font-style: italic; letter-spacing: -1px;
+            color: #E6AB73; margin-top: 8px;
+            text-shadow: 0 4px 10px rgba(210,105,30,0.2);
         }
     `
     document.head.appendChild(style)
 
     const overlay = document.createElement('div')
-    overlay.id = 'loading-overlay'
-    overlay.className = 'fullscreen'
+    overlay.id = 'cookie-splash'
+
+    overlay.innerHTML = `
+        <div class="cs-cookie-container">
+            <div class="cs-cookie-bg">
+                <div id="cs-fill" class="cs-cookie-fill">
+                    <div class="cs-cookie-chips-wrapper">
+                        <div class="cs-chip"></div>
+                        <div class="cs-chip"></div>
+                        <div class="cs-chip"></div>
+                        <div class="cs-chip"></div>
+                        <div class="cs-chip"></div>
+                        <div class="cs-chip"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="cs-num" class="cs-percent">0%</div>
+    `
     document.body.appendChild(overlay)
-
-    const defaultPreset = {
-        viewBox: '0 0 633 819',
-        paths: [
-            'M632 1V632H1V1H632ZM350 125.586V507.414L380.586 538H546V451H478.599L478.308 451.278L454.598 474H443.406L450.944 452.328L451 452.169V187.459L457.369 182H546V95H380.586L350 125.586ZM283 125.586L252.414 95H87V182H175.631L182 187.459V445.54L175.631 451H87V538H252.414L283 507.414V125.586Z',
-            'M633 687V660H548V687H560V791H548V819H633V792H601L592 801H587L590 792V752H627V725H590V687H633Z',
-            'M533 718V675L518 660H450L435 675V802L450 819H518L533 804V734H482V761H503V788L499 792H476L467 801H462L465 792V691L469 687H499L503 691V718H533Z',
-            'M402 660H310V687H322V792H310V819H402L417 804V675L402 660ZM387 788L383 792H363L354 801H349L352 792V687H383L387 691V788Z',
-            'M295 687V660H239V687H251V792H239V819H295V792H283V687H295Z',
-            'M215 791L200 760H209L224 745V675L209 660H121V687H132V792H121V819H162V760H166L193 819H227V791H215ZM194 729L190 733H173L164 742H159L162 733V687H190L194 691V729Z',
-            'M106 724V675L91 660H0V687H12V792H0V819H91L106 804V749L89 744V728L106 724ZM73 788L69 792H53L44 801H39L42 792V752H73V788ZM73 725H53L44 734H39L42 725V687H69L73 691V725Z',
-        ],
-        fillColor: '#aa76ff',
-        strokeColor: '#aa76ff',
-        gradientStops: [
-            { offset: '0.235577', color: '#aa76ff' },
-            { offset: '0.240685', color: 'white' },
-            { offset: '0.659749', color: '#aa76ff' },
-        ],
-    }
-
-    const fullBridgePreset = {
-        viewBox: '0 0 633 918',
-        paths: [
-            'M633 687V660H548V687H560V791H548V819H633V792H601L592 801H587L590 792V752H627V725H590V687H633Z',
-            'M533 718V675L518 660H450L435 675V802L450 819H518L533 804V734H482V761H503V788L499 792H476L467 801H462L465 792V691L469 687H499L503 691V718H533Z',
-            'M612 847H564V894H579V861H591V894H606V861H612C615 861 617 864 617 867V894H633V868C633 856 623 847 612 847Z',
-            'M533 846C519 846 508 857 508 870C508 884 519 895 533 895C546 895 557 884 557 870C557 857 546 846 533 846ZM533 880C528 880 524 875 524 870C524 865 528 861 533 861C538 861 542 865 542 870C542 875 538 880 533 880Z',
-            'M402 660H310V687H322V792H310V819H402L417 804V675L402 660ZM387 788L383 792H363L354 801H349L352 792V687H383L387 691V788Z',
-            'M484 861H502V847H482C469 847 459 858 459 871C459 884 469 894 482 894H502V880H484C478 880 474 876 474 871C474 865 478 861 484 861Z',
-            'M444 875C438 875 434 879 434 885C434 890 438 895 444 895C449 895 454 890 454 885C454 879 449 875 444 875Z',
-            'M402 847C389 847 378 857 378 870C378 883 389 894 402 894H425V847H402ZM410 880H403C398 880 394 876 394 870C394 865 398 861 403 861H410V880Z',
-            'M295 687V660H239V687H251V792H239V819H295V792H283V687H295Z',
-            'M350 847H303V894H318V861H329V894H345V861H350C353 861 356 864 356 867V894H371V868C371 856 362 847 350 847Z',
-            'M215 791L200 760H209L224 745V675L209 660H121V687H132V792H121V819H162V760H166L193 819H227V791H215ZM194 729L190 733H173L164 742H159L162 733V687H190L194 691V729Z',
-            'M269 847C256 847 247 857 247 870C247 883 256 894 269 894H293V847H269ZM277 880H271C265 880 261 876 261 870C261 865 265 861 271 861H277V880Z',
-            'M214 847C201 847 190 857 190 870C190 883 201 894 214 894H224V895C224 900 220 903 215 903H195V918H216C229 918 239 908 239 895V847H214ZM224 880H215C210 880 206 876 206 870C206 865 210 861 215 861H224V880Z',
-            'M106 724V675L91 660H0V687H12V792H0V819H91L106 804V749L89 744V728L106 724ZM73 788L69 792H53L44 801H39L42 792V752H73V788ZM73 725H53L44 734H39L42 725V687H69L73 691V725Z',
-            'M167 847V880H153V847H137V894H167V895C167 900 163 904 157 904H137V918H158C172 918 182 909 182 896V847H167Z',
-            'M104 847C91 847 80 857 80 870C80 883 91 894 104 894H127V847H104ZM112 880H105C100 880 96 876 96 870C96 865 100 861 105 861H112V880Z',
-            'M56 833V894H72V833H56Z',
-            'M25 847H2V908H17V894H25C38 894 49 883 49 870C49 857 38 847 25 847ZM24 880H17V861H24C29 861 33 865 33 870C33 876 29 880 24 880Z',
-            'M0 0V633H633V0H0ZM451 452L443 475H456L480 452H546V537H382L352 507V126L382 96H546V181H458L451 187V452ZM252 96L282 126V507L252 537H88V452H176L183 446V187L176 181H88V96H252Z',
-        ],
-        fillColor: '#aa76ff',
-        strokeColor: '#aa76ff',
-        gradientStops: [
-            { offset: '0.235577', color: '#aa76ff' },
-            { offset: '0.240685', color: 'white' },
-            { offset: '0.659749', color: '#aa76ff' },
-        ],
-    }
-
-    const resolved = showFullLoadingLogo === false ? defaultPreset : fullBridgePreset
-    resolved.gradientWidthMultiplier = 4
-
-    const [, , vbWidthStr, vbHeightStr] = resolved.viewBox.split(/[ ,]+/)
-    const vbWidth = Number(vbWidthStr)
-    const vbHeight = Number(vbHeightStr)
-
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svg.setAttribute('id', 'logo')
-    svg.setAttribute('viewBox', resolved.viewBox)
-    svg.setAttribute('fill', 'none')
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-
-    const defs = document.createElementNS(svg.namespaceURI, 'defs')
-
-    const mask = document.createElementNS(svg.namespaceURI, 'mask')
-    mask.setAttribute('id', 'logo-mask')
-
-    const blackRect = document.createElementNS(svg.namespaceURI, 'rect')
-    blackRect.setAttribute('x', '0')
-    blackRect.setAttribute('y', '0')
-    blackRect.setAttribute('width', '100%')
-    blackRect.setAttribute('height', '100%')
-    blackRect.setAttribute('fill', 'black')
-    mask.appendChild(blackRect)
-
-    resolved.paths.forEach((d) => {
-        const path = document.createElementNS(svg.namespaceURI, 'path')
-        path.setAttribute('d', d)
-        path.setAttribute('fill', 'white')
-        mask.appendChild(path)
-    })
-
-    defs.appendChild(mask)
-
-    const gradient = document.createElementNS(svg.namespaceURI, 'linearGradient')
-    gradient.setAttribute('id', 'shineGradient')
-    gradient.setAttribute('x1', '1233')
-    gradient.setAttribute('y1', '0')
-    gradient.setAttribute('x2', '1866')
-    gradient.setAttribute('y2', '633')
-    gradient.setAttribute('gradientUnits', 'userSpaceOnUse')
-
-    resolved.gradientStops.forEach(({ offset, color }) => {
-        const stop = document.createElementNS(svg.namespaceURI, 'stop')
-        stop.setAttribute('offset', offset)
-        stop.setAttribute('stop-color', color)
-        gradient.appendChild(stop)
-    })
-
-    defs.appendChild(gradient)
-    svg.appendChild(defs)
-
-    const gradGroup = document.createElementNS(svg.namespaceURI, 'g')
-    gradGroup.setAttribute('mask', 'url(#logo-mask)')
-
-    const gradRect = document.createElementNS(svg.namespaceURI, 'rect')
-    gradRect.setAttribute('id', 'gradientMover')
-    gradRect.setAttribute('x', '0')
-    gradRect.setAttribute('y', '0')
-    gradRect.setAttribute('width', String(vbWidth * resolved.gradientWidthMultiplier))
-    gradRect.setAttribute('height', String(vbHeight))
-    gradRect.setAttribute('fill', 'url(#shineGradient)')
-    gradRect.style.transform = 'translateX(0)'
-    gradGroup.appendChild(gradRect)
-    svg.appendChild(gradGroup)
-
-    const fillGroup = document.createElementNS(svg.namespaceURI, 'g')
-    fillGroup.setAttribute('mask', 'url(#logo-mask)')
-
-    const fillRect = document.createElementNS(svg.namespaceURI, 'rect')
-    fillRect.setAttribute('id', 'fillRect')
-    fillRect.setAttribute('class', 'fill-rect')
-    fillRect.setAttribute('x', '0')
-    fillRect.setAttribute('y', '0')
-    fillRect.setAttribute('width', '100%')
-    fillRect.setAttribute('height', String(vbHeight))
-    fillRect.setAttribute('fill', resolved.fillColor)
-    fillGroup.appendChild(fillRect)
-    svg.appendChild(fillGroup)
-
-    resolved.paths.forEach((d) => {
-        const outline = document.createElementNS(svg.namespaceURI, 'path')
-        outline.setAttribute('d', d)
-        outline.setAttribute('stroke', resolved.strokeColor)
-        outline.setAttribute('stroke-width', '3')
-        svg.appendChild(outline)
-    })
-
-    overlay.appendChild(svg)
 }
 
 export const waitFor = function waitFor(...args) {
