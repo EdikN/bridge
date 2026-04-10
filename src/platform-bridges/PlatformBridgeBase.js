@@ -337,6 +337,13 @@ class PlatformBridgeBase {
         })
 
         this._options = configFileModule.getPlatformOptions(this.platformId)
+
+        if (this.platformId === PLATFORM_ID.OK) {
+            const okVkOptions = configFileModule.getPlatformOptions(PLATFORM_ID.OK_VK)
+            if (okVkOptions) {
+                this._options = { ...this._options, ...okVkOptions }
+            }
+        }
     }
 
     initialize() {
@@ -873,7 +880,7 @@ class PlatformBridgeBase {
             analyticsModule.send(`${MODULE_NAME.ADVERTISEMENT}_interstitial_fallback_opened`)
         }
 
-        return showAdFailurePopup().then(() => {
+        return showAdFailurePopup(this.platformId).then(() => {
             if (isRewarded) {
                 analyticsModule.send(`${MODULE_NAME.ADVERTISEMENT}_rewarded_fallback_closed`)
                 this._setRewardedState(REWARDED_STATE.FAILED)

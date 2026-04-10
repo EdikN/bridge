@@ -272,7 +272,7 @@ class PlaygamaBridge {
             platformId = PLATFORM_ID.GAME_DISTRIBUTION
         } else if (__INCLUDE_LAGGED__ && url.hostname.includes('lagged.')) {
             platformId = PLATFORM_ID.LAGGED
-        } else if (__INCLUDE_OK__ && (url.searchParams.get('vk_client') === 'ok' || url.searchParams.has('vk_ok_app_id'))) {
+        } else if (__INCLUDE_OK__ && (url.searchParams.get('vk_client') === 'ok' || url.searchParams.has('vk_ok_app_id') || url.searchParams.get('platform_id') === PLATFORM_ID.OK_VK)) {
             platformId = PLATFORM_ID.OK
         } else if (__INCLUDE_VK__ && ((url.searchParams.has('api_id') && url.searchParams.has('viewer_id') && url.searchParams.has('auth_key')) || url.searchParams.has('vk_app_id'))) {
             platformId = PLATFORM_ID.VK

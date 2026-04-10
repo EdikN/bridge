@@ -15,7 +15,12 @@
  * along with Playgama Bridge. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { BANNER_CONTAINER_ID, BANNER_POSITION, ORIENTATION_OVERLAY_ID } from '../constants'
+import {
+    BANNER_CONTAINER_ID,
+    BANNER_POSITION,
+    ORIENTATION_OVERLAY_ID,
+    PLATFORM_ID,
+} from '../constants'
 
 const POST_METHOD = ['post', 'Message'].join('')
 
@@ -315,7 +320,7 @@ export function showInfoPopup(message) {
     })
 }
 
-export function showAdFailurePopup() {
+export function showAdFailurePopup(platformId) {
     if (!document.getElementById('bridge-ad-failure-popup-fonts')) {
         const preconnect1 = document.createElement('link')
         preconnect1.rel = 'preconnect'
@@ -359,6 +364,7 @@ export function showAdFailurePopup() {
 
             #bridge-ad-failure-popup-logo {
                 height: 32px;
+                display: ${platformId === PLATFORM_ID.OK ? 'none' : 'block'};
             }
 
             #bridge-ad-failure-popup-close {
@@ -382,6 +388,7 @@ export function showAdFailurePopup() {
                 line-height: 110%;
                 align-self: end;
                 margin: 0;
+                font-size: ${platformId === PLATFORM_ID.OK ? '18px' : '21px'};
             }
 
             @media (min-width: 320px) {
@@ -400,7 +407,7 @@ export function showAdFailurePopup() {
                 }
 
                 #bridge-ad-failure-popup-text {
-                    font-size: 25px;
+                    font-size: ${platformId === PLATFORM_ID.OK ? '22px' : '25px'};
                     align-self: center;
                 }
             }
@@ -423,7 +430,7 @@ export function showAdFailurePopup() {
 
                 #bridge-ad-failure-popup-text {
                     width: 50%;
-                    font-size: 33px;
+                    font-size: ${platformId === PLATFORM_ID.OK ? '28px' : '33px'};
                 }
             }
         `

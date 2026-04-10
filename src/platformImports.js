@@ -24,7 +24,7 @@ if (__INCLUDE_VK__) {
     platformImports[PLATFORM_ID.VK] = () => import('./platform-bridges/VkPlatformBridge')
 }
 if (__INCLUDE_OK__) {
-    platformImports[PLATFORM_ID.OK] = () => import('./platform-bridges/OkVkPlatformBridge')
+    platformImports[PLATFORM_ID.OK] = () => import('./platform-bridges/OkPlatformBridge')
 }
 if (__INCLUDE_YANDEX__) {
     platformImports[PLATFORM_ID.YANDEX] = () => import('./platform-bridges/YandexPlatformBridge')

@@ -21,6 +21,7 @@ export const TIMESTAMP_URL = 'https://playgama.com/api/v1/timestamp/now'
 export const PLATFORM_ID = {
     VK: 'vk',
     OK: 'ok',
+    OK_VK: 'ok-vk',
     YANDEX: 'yandex',
     CRAZY_GAMES: 'crazy_games',
     ABSOLUTE_GAMES: 'absolute_games',
