@@ -19,6 +19,7 @@ import EventLite from 'event-lite'
 import ModuleBase from './ModuleBase'
 import { EVENT_NAME, PLATFORM_ID } from '../constants'
 import { createProgressLogo, applySafeAreaStyles } from '../common/utils'
+import customLoader from '../common/CustomLoader'
 
 class GameModule extends ModuleBase {
     get visibilityState() {
@@ -59,35 +60,11 @@ class GameModule extends ModuleBase {
             return
         }
 
-        const fill = document.getElementById('cs-fill')
-        const num = document.getElementById('cs-num')
-        const loadingOverlay = document.getElementById('cookie-splash')
-
-        if (!fill && !num && !loadingOverlay) {
-            return
-        }
-
         this._currentLoadingProgress = percent
-        const progress = Math.max(0, Math.min(100, percent))
+        customLoader.setProgress(percent)
 
-        if (fill) {
-            fill.style.height = `${progress}%`
-            fill.style.borderTop = progress > 0 ? '1px solid rgba(255,255,255,0.4)' : 'none'
-        }
-
-        if (num) {
-            num.textContent = `${Math.round(progress)}%`
-        }
-
-        if (progress === 100) {
+        if (percent === 100) {
             this._loadingProcessCompleted = true
-
-            if (loadingOverlay) {
-                setTimeout(() => {
-                    loadingOverlay.style.opacity = '0'
-                    setTimeout(() => loadingOverlay.remove(), 850)
-                }, 500)
-            }
         }
     }
 }
