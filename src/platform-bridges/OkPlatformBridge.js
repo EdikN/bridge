@@ -29,6 +29,11 @@ class OkPlatformBridge extends VkPlatformBridge {
         return LEADERBOARD_TYPE.NOT_AVAILABLE
     }
 
+    // payments — not supported by OK.ru
+    get isPaymentsSupported() {
+        return false
+    }
+
     // social
     get isShareSupported() {
         return true
