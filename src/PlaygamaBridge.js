@@ -30,6 +30,7 @@ import {
     ERROR,
 } from './constants'
 
+import { applyEventBusMixin } from './common/EventBus'
 import PromiseDecorator from './common/PromiseDecorator'
 import configFileModule from './modules/ConfigFileModule'
 import PlatformModule from './modules/PlatformModule'
@@ -351,4 +352,5 @@ class PlaygamaBridge {
     }
 }
 
+applyEventBusMixin(PlaygamaBridge.prototype)
 export default PlaygamaBridge

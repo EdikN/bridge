@@ -81,3 +81,8 @@ See `docs/playgama-bridge-config.md` for complete configuration options includin
 3. Add platform ID to `PLATFORM_ID` enum in `constants.js`
 4. Add import mapping in `platformImports.js`
 5. Add detection logic in `PlaygamaBridge.js#createPlatformBridge()`
+
+## Upgrading Over Upstream
+
+See [UPSTREAM_MERGE.md](file:///c:/Users/1/Documents/Eduard/Program/bridge/UPSTREAM_MERGE.md) for detailed instructions on how to merge from upstream while preserving our custom features (OK, VK, GameMonetize, CustomLoader).
+
