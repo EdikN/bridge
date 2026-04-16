@@ -421,7 +421,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
 
     // social
     inviteFriends() {
-        return this._sendRequestToVKBridge(ACTION_NAME.INVITE_FRIENDS, 'VKWebAppShowInviteBox', { }, 'success')
+        return this._sendRequestToVKBridge(ACTION_NAME.INVITE_FRIENDS, 'VKWebAppShowInviteBox', {}, 'success')
     }
 
     joinCommunity(options) {
@@ -447,7 +447,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     share(options) {
-        const parameters = { }
+        const parameters = {}
         if (options && options.link) {
             parameters.link = options.link
         }
@@ -517,8 +517,8 @@ class VkPlatformBridge extends PlatformBridgeBase {
                             price: item.price,
                             description: '',
                             imageURI: '',
-                            priceCurrencyCode: 'RUB',
-                            priceValue: parseInt(item.price) || 0,
+                            priceCurrencyCode: '',
+                            priceValue: parseInt(item.price, 10) || 0,
                         }))
 
                         this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, products)
@@ -534,7 +534,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
         return promiseDecorator.promise
     }
 
-    _sendRequestToVKBridge(actionName, vkMethodName, parameters = { }, responseSuccessKey = 'result') {
+    _sendRequestToVKBridge(actionName, vkMethodName, parameters = {}, responseSuccessKey = 'result') {
         let promiseDecorator = this._getPromiseDecorator(actionName)
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(actionName)
