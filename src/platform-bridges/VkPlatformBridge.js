@@ -499,7 +499,39 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     paymentsGetCatalog() {
-        return Promise.resolve(this._paymentsGetProductsPlatformData())
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_CATALOG)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_CATALOG)
+
+            const url = new URL(window.location.href)
+            const appId = url.searchParams.get('vk_app_id') || url.searchParams.get('api_id')
+
+            if (appId) {
+                fetch(`https://storage.choclategames.ru/api/items/vk/${appId}/`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        const items = data && Array.isArray(data.items) ? data.items : []
+                        const products = items.map((item) => ({
+                            id: item.item_id,
+                            title: item.title,
+                            price: item.price,
+                            description: '',
+                            imageURI: '',
+                            priceCurrencyCode: 'RUB',
+                            priceValue: parseInt(item.price) || 0,
+                        }))
+
+                        this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, products)
+                    })
+                    .catch(() => {
+                        this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, this._paymentsGetProductsPlatformData())
+                    })
+            } else {
+                this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, this._paymentsGetProductsPlatformData())
+            }
+        }
+
+        return promiseDecorator.promise
     }
 
     _sendRequestToVKBridge(actionName, vkMethodName, parameters = { }, responseSuccessKey = 'result') {
