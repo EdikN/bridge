@@ -1,0 +1,141 @@
+{
+    "forciblySetPlatformId": "",
+    "disableLoadingLogo": false,
+    "showFullLoadingLogo": false,
+    "sendAnalyticsEvents": true,
+    "game": {
+        "adaptToSafeArea": false
+    },
+    "device": {
+        "useBuiltInOrientationPopup": true,
+        "supportedOrientations": ["landscape", "portrait"]
+    },
+    "platforms": {
+        "vk": {
+            "gameId": ""
+        },
+        "ok": {},
+        "yandex": {
+            "useSignedData": false,
+            "sendAnalyticsEvents": false
+        },
+        "crazy_games": {
+            "xsollaProjectId": "",
+            "isSandbox": false,
+            "useUserToken": false
+        },
+        "game_distribution": {
+            "gameId": ""
+        },
+        "game_monetize": {
+            "gameId": ""
+        },
+        "playgama": {},
+        "playdeck": {},
+        "telegram": {
+            "adsgramBlockId": ""
+        },
+        "y8": {
+            "gameId": "",
+            "adsenseId": "",
+            "channelId": ""
+        },
+        "lagged": {
+            "devId": "",
+            "publisherId": ""
+        },
+        "facebook": {
+            "subscribeForNotificationsOnStart": true,
+            "sendAnalyticsEvents": false
+        },
+        "poki": {},
+        "msn": {
+            "gameId": ""
+        },
+        "microsoft_store": {},
+        "huawei": {
+            "appId": ""
+        },
+        "gamepush": {
+            "projectId": "",
+            "publicToken": ""
+        },
+        "discord": {
+            "appId": ""
+        },
+        "jio_games": {},
+        "youtube": {
+            "sendAnalyticsEvents": false
+        },
+        "portal": {},
+        "reddit": {},
+        "xiaomi": {
+            "adSenseId": "",
+            "hostId": "",
+            "testMode": false
+        },
+        "tiktok": {
+            "clientKey": ""
+        },
+        "dlightek": {},
+        "gamesnacks": {}
+    },
+    "advertisement": {
+        "useBuiltInErrorPopup": true,
+        "useAdvertisementErrorPopup": false,
+        "builtInErrorPopupCooldown": 180,
+        "backfillId": "",
+        "banner": {
+            "disable": false,
+            "placementFallback": "",
+            "placements": []
+        },
+        "interstitial": {
+            "disable": false,
+            "preloadOnStart": true,
+            "placementFallback": "",
+            "minimumDelayBetweenInterstitial": 60,
+            "placements": []
+        },
+        "rewarded": {
+            "disable": false,
+            "preloadOnStart": true,
+            "placementFallback": "",
+            "placements": []
+        },
+        "advancedBanners": {
+            "disable": false
+        }
+    },
+    "social": {
+        "joinCommunity": {
+            "vk": "",
+            "ok": ""
+        }
+    },
+    "leaderboards": [
+        {
+            "_comment": "Пример. id — внутренний ID, используемый в коде игры. Ниже — платформенные ID.",
+            "id": "high_scores",
+            "isMain": true,
+            "playgama": "",
+            "yandex": "",
+            "vk": ""
+        }
+    ],
+    "payments": [
+        {
+            "_comment": "Пример. id — внутренний ID товара. Ниже — платформенные данные.",
+            "id": "coins_100",
+            "vk": {
+                "id": "item_vk_id"
+            },
+            "yandex": {
+                "id": "item_yandex_id"
+            },
+            "crazy_games": {
+                "id": "item_crazygames_id"
+            }
+        }
+    ]
+}

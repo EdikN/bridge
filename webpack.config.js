@@ -8,6 +8,31 @@ const { ALL_PLATFORM_IDS } = require('./scripts/platforms')
 
 const platformDirName = 'platform-bridges'
 
+class CopyToUnityTemplatePlugin {
+    apply(compiler) {
+        compiler.hooks.afterEmit.tap('CopyToUnityTemplatePlugin', () => {
+            const distDir = path.resolve(__dirname, 'dist')
+            const destDir = path.resolve(__dirname, 'UnityTemplate')
+
+            const mainSrc = path.join(distDir, 'playgama-bridge.js')
+            if (fs.existsSync(mainSrc)) {
+                fs.copyFileSync(mainSrc, path.join(destDir, 'playgama-bridge.js'))
+                console.log('Copied playgama-bridge.js → UnityTemplate/')
+            }
+
+            const platformsSrc = path.join(distDir, platformDirName)
+            const platformsDest = path.join(destDir, platformDirName)
+            if (fs.existsSync(platformsSrc)) {
+                if (fs.existsSync(platformsDest)) {
+                    fs.rmSync(platformsDest, { recursive: true })
+                }
+                fs.cpSync(platformsSrc, platformsDest, { recursive: true })
+                console.log(`Copied ${platformDirName}/ → UnityTemplate/`)
+            }
+        })
+    }
+}
+
 class CleanPlatformsPlugin {
     apply(compiler) {
         compiler.hooks.beforeRun.tap('CleanPlatformsPlugin', () => {
@@ -86,6 +111,7 @@ const createConfig = (targetPlatforms = [], { noLint = false } = {}) => ({
     },
     plugins: [
         new CleanPlatformsPlugin(),
+        new CopyToUnityTemplatePlugin(),
         ...noLint ? [] : [new ESLintPlugin()],
         new webpack.DefinePlugin({
             PLUGIN_VERSION: JSON.stringify(packageJson.version),

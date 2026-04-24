@@ -29,11 +29,6 @@ class OkPlatformBridge extends VkPlatformBridge {
         return LEADERBOARD_TYPE.NOT_AVAILABLE
     }
 
-    // payments — not supported by OK.ru
-    get isPaymentsSupported() {
-        return false
-    }
-
     // social
     get isShareSupported() {
         return true
@@ -41,6 +36,41 @@ class OkPlatformBridge extends VkPlatformBridge {
 
     get isAddToFavoritesSupported() {
         return false
+    }
+
+    paymentsGetCatalog() {
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_CATALOG)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_CATALOG)
+
+            const url = new URL(window.location.href)
+            const appId = url.searchParams.get('vk_ok_app_id') || url.searchParams.get('vk_app_id') || url.searchParams.get('api_id')
+
+            if (appId) {
+                fetch(`https://storage.choclategames.ru/api/items/ok/${appId}/`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        const items = data && Array.isArray(data.items) ? data.items : []
+                        const products = items.map((item) => ({
+                            id: item.item_id,
+                            title: item.title,
+                            price: item.price,
+                            description: '',
+                            imageURI: '',
+                            priceCurrencyCode: '',
+                            priceValue: parseInt(item.price, 10) || 0,
+                        }))
+                        this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, products)
+                    })
+                    .catch(() => {
+                        this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, this._paymentsGetProductsPlatformData())
+                    })
+            } else {
+                this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, this._paymentsGetProductsPlatformData())
+            }
+        }
+
+        return promiseDecorator.promise
     }
 
     joinCommunity(options) {
