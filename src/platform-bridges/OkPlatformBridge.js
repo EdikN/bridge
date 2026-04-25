@@ -38,13 +38,36 @@ class OkPlatformBridge extends VkPlatformBridge {
         return false
     }
 
+    #okAppId = null
+
+    initialize() {
+        return super.initialize().then(() => {
+            const url = new URL(window.location.href)
+            const urlAppId = url.searchParams.get('vk_ok_app_id')
+                || url.searchParams.get('vk_app_id')
+                || url.searchParams.get('api_id')
+
+            if (urlAppId) {
+                this.#okAppId = urlAppId
+                return Promise.resolve()
+            }
+
+            return this._platformSdk.send('VKWebAppGetLaunchParams')
+                .then((data) => {
+                    if (data && data.vk_app_id) {
+                        this.#okAppId = String(data.vk_app_id)
+                    }
+                })
+                .catch(() => {})
+        })
+    }
+
     paymentsGetCatalog() {
         let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_CATALOG)
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_CATALOG)
 
-            const url = new URL(window.location.href)
-            const appId = url.searchParams.get('vk_ok_app_id') || url.searchParams.get('vk_app_id') || url.searchParams.get('api_id')
+            const appId = this.#okAppId
 
             if (appId) {
                 fetch(`https://storage.choclategames.ru/api/items/ok/${appId}/`)
