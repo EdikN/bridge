@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Добавлено
+- **Android Platform:** Новая платформа `android` для сборки APK-файлов HTML5-игр через Capacitor.
+  - Автоматическое определение среды Capacitor (`window.Capacitor.isNativePlatform()`)
+  - Интеграция с Yandex Mobile Ads через отдельный Capacitor-плагин `capacitor-plugin-yandex-mobile-ads`
+  - Поддержка interstitial, rewarded и banner рекламы
+  - Ad Unit ID настраиваются через `playgama-bridge-config.json`
+- **capacitor-plugin-yandex-mobile-ads:** Новый Capacitor-плагин (Kotlin) для нативной рекламы Яндекса на Android.
+
 ## [1.30.0] - 2026-04-16
 
 ### Изменено

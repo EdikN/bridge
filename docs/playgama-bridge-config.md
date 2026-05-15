@@ -68,6 +68,41 @@ The `advertisement` object controls ad behavior across all platforms.
 | `advertisement.banner.placementFallback` | string | `undefined` | Fallback placement if none specified in method call |
 | `advertisement.banner.placements` | array | `[]` | Array of placement configuration objects |
 
+### Android (Yandex Mobile Ads)
+
+When building an APK with Capacitor and the `capacitor-plugin-yandex-mobile-ads` plugin, specify Yandex ad unit IDs for each ad type. These are used by `AndroidPlatformBridge` at runtime.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `advertisement.interstitial.adUnitId` | string | `undefined` | Yandex Mobile Ads unit ID for interstitial (Android only) |
+| `advertisement.rewarded.adUnitId` | string | `undefined` | Yandex Mobile Ads unit ID for rewarded video (Android only) |
+| `advertisement.banner.adUnitId` | string | `undefined` | Yandex Mobile Ads unit ID for banner (Android only) |
+| `appMetricaKey` | string | `undefined` | AppMetrica API key for analytics initialization (Android only) |
+
+**Example:**
+```json
+{
+    "appMetricaKey": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "advertisement": {
+        "interstitial": {
+            "adUnitId": "R-M-XXXXXXXX-1"
+        },
+        "rewarded": {
+            "adUnitId": "R-M-XXXXXXXX-2"
+        },
+        "banner": {
+            "adUnitId": "R-M-XXXXXXXX-3"
+        }
+    }
+}
+```
+
+For testing use the demo unit IDs: `demo-interstitial-yandex`, `demo-rewarded-yandex`, `demo-banner-yandex`.
+
+See [Android APK Build Guide](./android.md) for the full setup instructions.
+
+---
+
 ### Advanced Banners
 
 Advanced banners allow you to define banner layouts that automatically show/hide based on platform messages (e.g., `level_paused`, `level_resumed`) and adapt to device type, orientation, and screen size.

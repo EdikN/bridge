@@ -311,6 +311,8 @@ class PlaygamaBridge {
             platformId = PLATFORM_ID.GAMESNACKS
         } else if (__INCLUDE_GAME_MONETIZE__ && (url.hostname.includes('gamemonetize.com') || url.hostname.includes('gamemonetize.co') || url.hostname.includes('distributegames.com'))) {
             platformId = PLATFORM_ID.GAME_MONETIZE
+        } else if (__INCLUDE_ANDROID__ && window.Capacitor?.isNativePlatform?.()) {
+            platformId = PLATFORM_ID.ANDROID
         }
 
         console.info(

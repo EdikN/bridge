@@ -50,6 +50,7 @@ export const PLATFORM_ID = {
     DLIGHTEK: 'dlightek',
     GAMESNACKS: 'gamesnacks',
     GAME_MONETIZE: 'game_monetize',
+    ANDROID: 'android',
 }
 
 export const MODULE_NAME = {
