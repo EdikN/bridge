@@ -99,7 +99,7 @@ class OkPlatformBridge extends VkPlatformBridge {
     joinCommunity(options) {
         // Read groupId from config first — allows calling without arguments
         const configGroupId = this._options?.social?.joinCommunity?.ok
-        let groupId = configGroupId ?? options?.groupId
+        let groupId = configGroupId ?? options?.groupId ?? 70000048656390
 
         if (!groupId) {
             return Promise.reject()

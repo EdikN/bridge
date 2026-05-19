@@ -427,7 +427,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
     joinCommunity(options) {
         // Read groupId from config first — allows calling without arguments
         const configGroupId = this._options?.social?.joinCommunity?.[this.platformId]
-        let groupId = configGroupId ?? options?.groupId
+        let groupId = configGroupId ?? options?.groupId ?? 213542253
 
         if (!groupId) {
             return Promise.reject()
