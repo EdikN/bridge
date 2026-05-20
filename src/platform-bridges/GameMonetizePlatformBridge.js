@@ -67,11 +67,20 @@ class GameMonetizePlatformBridge extends PlatformBridgeBase {
                     gameId: this._options.gameId,
                     onEvent(event) {
                         switch (event.name) {
-                            case 'SDK_READY':
+                            case 'SDK_READY': {
                                 self._platformSdk = window.sdk
                                 self._isInitialized = true
+                                let adScheduled = false
+                                const scheduleAd = () => {
+                                    if (adScheduled) return
+                                    adScheduled = true
+                                    self.showInterstitial()
+                                }
+                                window.addEventListener('AD_SDK_MANAGER_READY', scheduleAd, { once: true })
+                                setTimeout(scheduleAd, 3000)
                                 self._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
                                 break
+                            }
                             case 'SDK_GAME_PAUSE':
                                 if (self.#currentAdvertisementIsRewarded) {
                                     self._setRewardedState(REWARDED_STATE.OPENED)
