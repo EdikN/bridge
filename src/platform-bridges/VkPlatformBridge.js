@@ -80,6 +80,10 @@ class VkPlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    get initialInterstitialDelay() {
+        return 30
+    }
+
     get isRewardedSupported() {
         return true
     }
