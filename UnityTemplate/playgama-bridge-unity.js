@@ -95,6 +95,7 @@ function initializeBridge() {
         .initialize()
         .then(() => {
             bridge.game.setLoadingProgress(0)
+            bridge.platform.sendMessage('in_game_loading_started')
             bridge.advertisement.on('banner_state_changed', state => sendMessageToUnity('OnBannerStateChanged', state))
             bridge.advertisement.on('interstitial_state_changed', state => sendMessageToUnity('OnInterstitialStateChanged', state))
             bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
