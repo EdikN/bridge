@@ -112,7 +112,7 @@ class ConfigFileModule extends ModuleBase {
     }
 
     getPlatformOptions(platformId) {
-        const currentPlatformOptions = this.options.platforms?.[platformId]
+        const currentPlatformOptions = this.options.platforms?.[platformId] ?? this.options[platformId]
         if (currentPlatformOptions) {
             return deepMerge(this.options, currentPlatformOptions)
         }
