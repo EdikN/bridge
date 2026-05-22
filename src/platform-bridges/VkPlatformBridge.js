@@ -111,7 +111,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     get isPlayerAuthorized() {
-        return true
+        return this._isPlayerAuthorized !== false
     }
 
     // social
@@ -167,7 +167,10 @@ class VkPlatformBridge extends PlatformBridgeBase {
                     this._platformSdk
                         .send('VKWebAppInit')
                         .then(() => {
-                            this._platformSdk.send('VKWebAppGetUserInfo')
+                            const appIdRaw = url.searchParams.get('vk_app_id') || url.searchParams.get('api_id')
+                            const appId = appIdRaw ? parseInt(appIdRaw, 10) : null
+
+                            const userInfoPromise = this._platformSdk.send('VKWebAppGetUserInfo')
                                 .then((data) => {
                                     if (data) {
                                         this._playerId = data.id
@@ -186,6 +189,31 @@ class VkPlatformBridge extends PlatformBridgeBase {
                                         }
                                     }
                                 })
+
+                            const authPromise = appId
+                                ? this._platformSdk.send('VKWebAppGetAuthToken', { app_id: appId, scope: '' })
+                                    .then((data) => {
+                                        // eslint-disable-next-line no-console
+                                        console.log('[VK][Auth] token OK, user_id=', data && data.user_id, 'scope=', data && data.scope)
+                                        this._isPlayerAuthorized = true
+                                    })
+                                    .catch((err) => {
+                                        // eslint-disable-next-line no-console
+                                        console.error(
+                                            '[VK][Auth] FAILED:',
+                                            err,
+                                            'json:',
+                                            JSON.stringify(err, Object.getOwnPropertyNames(err || {})),
+                                        )
+                                        this._isPlayerAuthorized = false
+                                    })
+                                : Promise.resolve().then(() => {
+                                    // eslint-disable-next-line no-console
+                                    console.warn('[VK][Auth] no vk_app_id / api_id in URL — skipping VKWebAppGetAuthToken')
+                                    this._isPlayerAuthorized = false
+                                })
+
+                            Promise.allSettled([userInfoPromise, authPromise])
                                 .finally(() => {
                                     this._isInitialized = true
                                     this._defaultStorageType = STORAGE_TYPE.PLATFORM_INTERNAL
@@ -201,7 +229,53 @@ class VkPlatformBridge extends PlatformBridgeBase {
 
     // player
     authorizePlayer() {
-        return Promise.resolve()
+        return this._reAuth()
+    }
+
+    // Re-runs VKWebAppGetAuthToken. Used when a storage call fails — sometimes VK
+    // session needs to be re-validated (esp. for vk_is_app_user=0 contexts, or
+    // when Unity loads slower than JS games and initial auth state goes stale).
+    _reAuth() {
+        if (!this._platformSdk) {
+            return Promise.resolve(false)
+        }
+        const url = new URL(window.location.href)
+        const appIdRaw = url.searchParams.get('vk_app_id') || url.searchParams.get('api_id')
+        const appId = appIdRaw ? parseInt(appIdRaw, 10) : null
+        if (!appId) {
+            return Promise.resolve(false)
+        }
+        return this._platformSdk.send('VKWebAppGetAuthToken', { app_id: appId, scope: '' })
+            .then((data) => {
+                const ok = !!(data && data.user_id)
+                // eslint-disable-next-line no-console
+                console.log('[VK][Auth][reAuth] result user_id=', data && data.user_id, 'scope=', data && data.scope, 'ok=', ok)
+                this._isPlayerAuthorized = ok
+                return ok
+            })
+            .catch((err) => {
+                // eslint-disable-next-line no-console
+                console.error(
+                    '[VK][Auth][reAuth] FAILED:',
+                    err,
+                    'json:',
+                    JSON.stringify(err, Object.getOwnPropertyNames(err || {})),
+                )
+                this._isPlayerAuthorized = false
+                return false
+            })
+    }
+
+    // Wraps a storage operation: on first failure, re-runs auth and retries once.
+    _storageWithAuthRetry(label, operation) {
+        return operation().catch((firstError) => {
+            // eslint-disable-next-line no-console
+            console.warn(
+                `[VK][Storage][${label}] first attempt failed, re-authing and retrying once...`,
+                firstError,
+            )
+            return this._reAuth().then(() => operation())
+        })
     }
 
     // storage
@@ -221,111 +295,141 @@ class VkPlatformBridge extends PlatformBridgeBase {
         return super.isStorageAvailable(storageType)
     }
 
+    _vkStorageGetOnce(key, tryParseJson) {
+        return new Promise((resolve, reject) => {
+            const keys = Array.isArray(key) ? key : [key]
+
+            this._platformSdk
+                .send('VKWebAppStorageGet', { keys })
+                .then((data) => {
+                    if (Array.isArray(key)) {
+                        const values = []
+
+                        keys.forEach((item) => {
+                            const valueIndex = data.keys.findIndex((d) => d.key === item)
+                            if (valueIndex < 0) {
+                                values.push(null)
+                                return
+                            }
+
+                            if (data.keys[valueIndex].value === '') {
+                                values.push(null)
+                                return
+                            }
+
+                            let { value } = data.keys[valueIndex]
+                            if (tryParseJson) {
+                                try {
+                                    value = JSON.parse(data.keys[valueIndex].value)
+                                } catch (e) {
+                                    // keep value as it is
+                                }
+                            }
+
+                            values.push(value)
+                        })
+
+                        resolve(values)
+                        return
+                    }
+
+                    if (data.keys[0].value === '') {
+                        resolve(null)
+                        return
+                    }
+
+                    let { value } = data.keys[0]
+                    if (tryParseJson) {
+                        try {
+                            value = JSON.parse(data.keys[0].value)
+                        } catch (e) {
+                            // keep value as it is
+                        }
+                    }
+
+                    resolve(value)
+                })
+                .catch((error) => {
+                    try {
+                        // eslint-disable-next-line no-console
+                        console.error(
+                            '[VK][Storage][GET] raw VK error:',
+                            error,
+                            'json:',
+                            JSON.stringify(error, Object.getOwnPropertyNames(error || {})),
+                        )
+                    } catch (e) { /* ignore */ }
+                    reject(error || { error_type: '(empty VK rejection)' })
+                })
+        })
+    }
+
     getDataFromStorage(key, storageType, tryParseJson) {
         if (storageType === STORAGE_TYPE.PLATFORM_INTERNAL) {
-            return new Promise((resolve, reject) => {
-                const keys = Array.isArray(key) ? key : [key]
-
-                this._platformSdk
-                    .send('VKWebAppStorageGet', { keys })
-                    .then((data) => {
-                        if (Array.isArray(key)) {
-                            const values = []
-
-                            keys.forEach((item) => {
-                                const valueIndex = data.keys.findIndex((d) => d.key === item)
-                                if (valueIndex < 0) {
-                                    values.push(null)
-                                    return
-                                }
-
-                                if (data.keys[valueIndex].value === '') {
-                                    values.push(null)
-                                    return
-                                }
-
-                                let { value } = data.keys[valueIndex]
-                                if (tryParseJson) {
-                                    try {
-                                        value = JSON.parse(data.keys[valueIndex].value)
-                                    } catch (e) {
-                                        // keep value as it is
-                                    }
-                                }
-
-                                values.push(value)
-                            })
-
-                            resolve(values)
-                            return
-                        }
-
-                        if (data.keys[0].value === '') {
-                            resolve(null)
-                            return
-                        }
-
-                        let { value } = data.keys[0]
-                        if (tryParseJson) {
-                            try {
-                                value = JSON.parse(data.keys[0].value)
-                            } catch (e) {
-                                // keep value as it is
-                            }
-                        }
-
-                        resolve(value)
-                    })
-                    .catch((error) => {
-                        if (error && error.error_data && error.error_data.error_reason) {
-                            reject(error.error_data.error_reason)
-                        } else {
-                            reject()
-                        }
-                    })
-            })
+            return this._storageWithAuthRetry('GET', () => this._vkStorageGetOnce(key, tryParseJson))
         }
 
         return super.getDataFromStorage(key, storageType, tryParseJson)
     }
 
-    setDataToStorage(key, value, storageType) {
-        if (storageType === STORAGE_TYPE.PLATFORM_INTERNAL) {
-            if (Array.isArray(key)) {
-                const promises = []
+    _vkStorageSetOnce(key, value) {
+        if (Array.isArray(key)) {
+            const promises = []
 
-                for (let i = 0; i < key.length; i++) {
-                    const data = { key: key[i], value: value[i] }
+            for (let i = 0; i < key.length; i++) {
+                const data = { key: key[i], value: value[i] }
 
-                    if (typeof value[i] !== 'string') {
-                        data.value = JSON.stringify(value[i])
-                    }
-
-                    promises.push(this._platformSdk.send('VKWebAppStorageSet', data))
+                if (typeof value[i] !== 'string') {
+                    data.value = JSON.stringify(value[i])
                 }
 
-                return Promise.all(promises)
-            }
-            const data = { key, value }
-
-            if (typeof value !== 'string') {
-                data.value = JSON.stringify(value)
+                promises.push(this._platformSdk.send('VKWebAppStorageSet', data))
             }
 
-            return new Promise((resolve, reject) => {
-                this._platformSdk
-                    .send('VKWebAppStorageSet', data)
-                    .then(() => {
-                        resolve()
-                    })
-                    .catch((error) => {
-                        if (error && error.error_data && error.error_data.error_reason) {
-                            reject(error.error_data.error_reason)
-                        } else {
-                            reject()
-                        }
-                    })
+            return Promise.all(promises).catch((error) => {
+                try {
+                    // eslint-disable-next-line no-console
+                    console.error(
+                        '[VK][Storage][SET][bulk] raw VK error:',
+                        error,
+                        'json:',
+                        JSON.stringify(error, Object.getOwnPropertyNames(error || {})),
+                    )
+                } catch (e) { /* ignore */ }
+                throw error || { error_type: '(empty VK rejection)' }
             })
+        }
+
+        const data = { key, value }
+
+        if (typeof value !== 'string') {
+            data.value = JSON.stringify(value)
+        }
+
+        return new Promise((resolve, reject) => {
+            this._platformSdk
+                .send('VKWebAppStorageSet', data)
+                .then(() => {
+                    resolve()
+                })
+                .catch((error) => {
+                    try {
+                        // eslint-disable-next-line no-console
+                        console.error(
+                            '[VK][Storage][SET] raw VK error:',
+                            error,
+                            'json:',
+                            JSON.stringify(error, Object.getOwnPropertyNames(error || {})),
+                        )
+                    } catch (e) { /* ignore */ }
+                    reject(error || { error_type: '(empty VK rejection)' })
+                })
+        })
+    }
+
+    setDataToStorage(key, value, storageType) {
+        if (storageType === STORAGE_TYPE.PLATFORM_INTERNAL) {
+            return this._storageWithAuthRetry('SET', () => this._vkStorageSetOnce(key, value))
         }
 
         return super.setDataToStorage(key, value, storageType)
@@ -431,7 +535,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
     joinCommunity(options) {
         // Read groupId from config first — allows calling without arguments
         const configGroupId = this._options?.social?.joinCommunity?.[this.platformId]
-        let groupId = configGroupId ?? options?.groupId ?? 213542253
+        let groupId = configGroupId || options?.groupId || 213542253
 
         if (!groupId) {
             return Promise.reject()

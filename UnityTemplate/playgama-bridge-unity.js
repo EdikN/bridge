@@ -335,6 +335,7 @@ window.getStorageData = function(key, storageType) {
             }
         })
         .catch(error => {
+            logStorageError('GET', key, storageType, error)
             sendMessageToUnity('OnGetStorageDataFailed', key)
         })
 }
@@ -348,6 +349,7 @@ window.setStorageData = function(key, value, storageType) {
             sendMessageToUnity('OnSetStorageDataSuccess', key)
         })
         .catch(error => {
+            logStorageError('SET', key, storageType, error, { valueByteLength: (value || '').length, keysCount: keys.length })
             sendMessageToUnity('OnSetStorageDataFailed', key)
         })
 }
@@ -360,8 +362,35 @@ window.deleteStorageData = function(key, storageType) {
             sendMessageToUnity('OnDeleteStorageDataSuccess', key)
         })
         .catch(error => {
+            logStorageError('DELETE', key, storageType, error)
             sendMessageToUnity('OnDeleteStorageDataFailed', key)
         })
+}
+
+function logStorageError(op, key, storageType, error, extra) {
+    try {
+        var reason =
+            (error && error.error_data && error.error_data.error_reason) ||
+            (error && error.error_reason) ||
+            (error && error.error_type) ||
+            (typeof error === 'string' ? error : null)
+        var errorString
+        try { errorString = JSON.stringify(error, Object.getOwnPropertyNames(error || {})) } catch (e) { errorString = String(error) }
+        var keys = (key || '').split(STORAGE_KEYS_SEPARATOR)
+        console.error('[Bridge][Storage][' + op + '][FAIL]', {
+            platformId: (bridge && bridge.platform && bridge.platform.id) || 'unknown',
+            storageType: storageType || '(default)',
+            keysCount: keys.length,
+            firstKey: keys[0],
+            lastKey: keys[keys.length - 1],
+            keyMaxLen: keys.reduce(function (m, k) { return Math.max(m, (k || '').length) }, 0),
+            reason: reason || '(no reason)',
+            error: errorString,
+            extra: extra || null
+        })
+    } catch (e) {
+        try { console.error('[Bridge][Storage][' + op + '][FAIL] (log itself failed)', e) } catch (e2) {}
+    }
 }
 
 
