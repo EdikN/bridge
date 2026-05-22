@@ -299,6 +299,9 @@ class VkPlatformBridge extends PlatformBridgeBase {
         return new Promise((resolve, reject) => {
             const keys = Array.isArray(key) ? key : [key]
 
+            // eslint-disable-next-line no-console
+            console.log('[VK][Storage] GET keys:', keys, 'count:', keys.length, 'sample:', keys[0])
+
             this._platformSdk
                 .send('VKWebAppStorageGet', { keys })
                 .then((data) => {
@@ -373,6 +376,9 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     _vkStorageSetOnce(key, value) {
+        // eslint-disable-next-line no-console
+        console.log('[VK][Storage] SET keys:', Array.isArray(key) ? key : [key], 'firstKey:', Array.isArray(key) ? key[0] : key)
+
         if (Array.isArray(key)) {
             const promises = []
 
