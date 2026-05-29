@@ -54,6 +54,10 @@ class GameMonetizePlatformBridge extends PlatformBridgeBase {
     // private
     #currentAdvertisementIsRewarded = false
 
+    // Whether the currently playing rewarded ad has been watched to completion.
+    // The reward is granted only if the ad fires COMPLETE before the game resumes.
+    #rewardedAdCompleted = false
+
     initialize() {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -91,13 +95,34 @@ class GameMonetizePlatformBridge extends PlatformBridgeBase {
                                     self._setInterstitialState(INTERSTITIAL_STATE.OPENED)
                                 }
                                 break
+                            case 'COMPLETE':
+                                // The ad was watched to the end. Remember it so the reward
+                                // can be granted once the game resumes (SDK_GAME_START).
+                                if (self.#currentAdvertisementIsRewarded) {
+                                    self.#rewardedAdCompleted = true
+                                }
+                                break
                             case 'SDK_GAME_START':
                                 if (self.#currentAdvertisementIsRewarded) {
-                                    self._setRewardedState(REWARDED_STATE.REWARDED)
+                                    // Grant the reward only if the ad actually played to completion.
+                                    // Skipped or interrupted ads must not be rewarded.
+                                    if (self.#rewardedAdCompleted) {
+                                        self._setRewardedState(REWARDED_STATE.REWARDED)
+                                    }
                                     self._setRewardedState(REWARDED_STATE.CLOSED)
                                 } else {
                                     self._setInterstitialState(INTERSTITIAL_STATE.CLOSED)
                                 }
+                                self.#rewardedAdCompleted = false
+                                break
+                            case 'SDK_ERROR':
+                            case 'AD_ERROR':
+                                if (self.#currentAdvertisementIsRewarded) {
+                                    self._setRewardedState(REWARDED_STATE.FAILED)
+                                } else {
+                                    self._setInterstitialState(INTERSTITIAL_STATE.FAILED)
+                                }
+                                self.#rewardedAdCompleted = false
                                 break
                             default:
                                 break
@@ -121,6 +146,7 @@ class GameMonetizePlatformBridge extends PlatformBridgeBase {
 
     showRewarded() {
         this.#currentAdvertisementIsRewarded = true
+        this.#rewardedAdCompleted = false
         this.#showAd(true)
     }
 
