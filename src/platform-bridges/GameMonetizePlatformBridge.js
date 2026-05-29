@@ -28,6 +28,10 @@ import {
 
 const SDK_URL = 'https://api.gamemonetize.com/sdk.js'
 
+// Small delay after AD_SDK_MANAGER_READY before showing the launch interstitial,
+// so the game has time to finish initializing before the ad is requested.
+const INITIAL_INTERSTITIAL_DELAY = 500
+
 class GameMonetizePlatformBridge extends PlatformBridgeBase {
     // platform
     get platformId() {
@@ -70,14 +74,13 @@ class GameMonetizePlatformBridge extends PlatformBridgeBase {
                             case 'SDK_READY': {
                                 self._platformSdk = window.sdk
                                 self._isInitialized = true
-                                let adScheduled = false
-                                const scheduleAd = () => {
-                                    if (adScheduled) return
-                                    adScheduled = true
-                                    self.showInterstitial()
-                                }
-                                window.addEventListener('AD_SDK_MANAGER_READY', scheduleAd, { once: true })
-                                setTimeout(scheduleAd, 3000)
+
+                                // Show the launch interstitial after the ad manager is ready, with a
+                                // small delay so the game has time to finish initializing.
+                                window.addEventListener('AD_SDK_MANAGER_READY', () => {
+                                    setTimeout(() => self.showInterstitial(), INITIAL_INTERSTITIAL_DELAY)
+                                }, { once: true })
+
                                 self._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
                                 break
                             }
