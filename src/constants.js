@@ -15,8 +15,8 @@
  * along with Playgama Bridge. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export const SAAS_URL = 'https://playgama.com/api/bridge/v1'
-export const TIMESTAMP_URL = 'https://playgama.com/api/v1/timestamp/now'
+export const SAAS_URL = 'https://api.playgama.com/api/bridge/v1'
+export const TIMESTAMP_URL = 'https://api.playgama.com/api/v1/timestamp/now'
 
 export const PLATFORM_ID = {
     VK: 'vk',
@@ -27,6 +27,7 @@ export const PLATFORM_ID = {
     ABSOLUTE_GAMES: 'absolute_games',
     GAME_DISTRIBUTION: 'game_distribution',
     PLAYGAMA: 'playgama',
+    STANDALONE: 'standalone',
     PLAYDECK: 'playdeck',
     TELEGRAM: 'telegram',
     Y8: 'y8',
@@ -49,6 +50,7 @@ export const PLATFORM_ID = {
     TIKTOK: 'tiktok',
     DLIGHTEK: 'dlightek',
     GAMESNACKS: 'gamesnacks',
+    SAMSUNG: 'samsung',
     GAME_MONETIZE: 'game_monetize',
     ANDROID: 'android',
 }
@@ -69,6 +71,7 @@ export const MODULE_NAME = {
     ACHIEVEMENTS: 'achievements',
     ANALYTICS: 'analytics',
     RECORDER: 'recorder',
+    CROSS_PROMO: 'cross_promo',
 }
 
 export const EVENT_NAME = {
@@ -171,6 +174,10 @@ export const LEADERBOARD_TYPE = {
     IN_GAME: 'in_game',
     NATIVE: 'native',
     NATIVE_POPUP: 'native_popup',
+}
+
+export const LAUNCH_SOURCE = {
+    NOTIFICATION: 'notification',
 }
 
 export const ACTION_NAME = {

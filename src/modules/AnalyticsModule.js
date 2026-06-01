@@ -20,9 +20,9 @@ import packageJson from '../../package.json'
 import { generateRandomId, getGuestUser } from '../common/utils'
 import ModuleBase from './ModuleBase'
 
-const API_URL = 'https://playgama.com/api/events/v3/bridge/analytics'
+const API_URL = 'https://api.playgama.com/api/events/v3/bridge/analytics'
 const DISCORD_API_URL = '/playgama/api/events/v3/bridge/analytics'
-const FLUSH_INTERVAL = 15000
+const FLUSH_INTERVAL = 30000
 const SEND_ATTEMPTS = 2
 
 class AnalyticsModule extends ModuleBase {
@@ -55,7 +55,9 @@ class AnalyticsModule extends ModuleBase {
 
     initialize(platformBridge) {
         this._platformBridge = platformBridge
-        if (this._platformBridge.options?.sendAnalyticsEvents === false) {
+
+        const isPlaygama = this._platformBridge.platformId === PLATFORM_ID.PLAYGAMA
+        if (!isPlaygama && this._platformBridge.options?.sendAnalyticsEvents === false) {
             this.#isDisabled = true
         }
 
@@ -64,7 +66,10 @@ class AnalyticsModule extends ModuleBase {
             this.#isDisabled = true
         }
 
-        this.#fetchTimeDiff()
+        if (!this.#isDisabled) {
+            this.#fetchTimeDiff()
+        }
+
         this.#gameId = this.#extractGameId()
         this.#playerGuestId = getGuestUser().id
 
@@ -121,7 +126,7 @@ class AnalyticsModule extends ModuleBase {
     }
 
     #createMeta() {
-        return {
+        const meta = {
             bridge_version: packageJson.version,
             platform_id: this._platformBridge.platformId,
             game_id: this.#gameId,
@@ -131,7 +136,15 @@ class AnalyticsModule extends ModuleBase {
             device_type: this._platformBridge.deviceType,
             device_os: this._platformBridge.deviceOs,
             clid: this._platformBridge.additionalData?.clid ?? '',
+            launch_source: this._platformBridge.launchSource,
         }
+
+        const publicToken = this._platformBridge.options?.saas?.publicToken
+        if (publicToken) {
+            meta.public_token = publicToken
+        }
+
+        return meta
     }
 
     async #compressData(data) {

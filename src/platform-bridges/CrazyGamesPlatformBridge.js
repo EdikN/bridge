@@ -137,6 +137,11 @@ class CrazyGamesPlatformBridge extends PlatformBridgeBase {
                         this.#isUserAccountAvailable = this._platformSdk.user.isUserAccountAvailable
                         const getPlayerInfoPromise = this.#getPlayer()
 
+                        this._platformSdk.game.addSettingsChangeListener((settings) => {
+                            this._setAudioState(!settings.muteAudio)
+                        })
+                        this._setAudioState(!this._platformSdk.game.settings.muteAudio)
+
                         if (this.options.xsollaProjectId) {
                             this.#ensurePaystationLoaded()
                         }
@@ -543,8 +548,7 @@ class CrazyGamesPlatformBridge extends PlatformBridgeBase {
                     const bySku = new Map((data.items || []).map((it) => [it.sku, it]))
 
                     const mergedProducts = products.map((product) => {
-                        const sku = product.platformProductId || product.id
-                        const x = bySku.get(sku)
+                        const x = bySku.get(product.platformProductId)
 
                         return {
                             id: product.id,

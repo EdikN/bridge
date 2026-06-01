@@ -73,6 +73,10 @@ class PlatformBridgeBase {
         return null
     }
 
+    get launchSource() {
+        return null
+    }
+
     get isPlatformGetAllGamesSupported() {
         return false
     }
@@ -150,7 +154,7 @@ class PlatformBridgeBase {
     }
 
     get initialInterstitialDelay() {
-        return 0
+        return 60
     }
 
     get isRewardedSupported() {
@@ -815,7 +819,7 @@ class PlatformBridgeBase {
                     ...product[this.platformId],
                 }
 
-                mergedProduct.platformProductId = mergedProduct.id
+                mergedProduct.platformProductId = mergedProduct.id ?? product.id
                 mergedProduct.id = product.id
 
                 return mergedProduct
@@ -837,7 +841,7 @@ class PlatformBridgeBase {
             ...product[this.platformId],
         }
 
-        mergedProduct.platformProductId = mergedProduct.id
+        mergedProduct.platformProductId = mergedProduct.id ?? product.id
         mergedProduct.id = product.id
 
         return mergedProduct

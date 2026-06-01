@@ -20,6 +20,7 @@ import {
     MODULE_NAME,
     EVENT_NAME,
     INTERSTITIAL_STATE,
+    LAUNCH_SOURCE,
     REWARDED_STATE,
     BANNER_STATE,
     STORAGE_TYPE,
@@ -32,6 +33,7 @@ import {
 
 import { applyEventBusMixin } from './common/EventBus'
 import PromiseDecorator from './common/PromiseDecorator'
+import { applyBrowserDefaultsProtection } from './common/utils'
 import configFileModule from './modules/ConfigFileModule'
 import PlatformModule from './modules/PlatformModule'
 import PlayerModule from './modules/PlayerModule'
@@ -47,6 +49,7 @@ import RemoteConfigModule from './modules/RemoteConfigModule'
 import ClipboardModule from './modules/ClipboardModule'
 import AchievementsModule from './modules/AchievementsModule'
 import analyticsModule from './modules/AnalyticsModule'
+import crossPromoModule from './modules/CrossPromoModule'
 import { fetchPlatformBridge } from './platformImports'
 
 class PlaygamaBridge {
@@ -118,6 +121,10 @@ class PlaygamaBridge {
         return this.#getModule(MODULE_NAME.ANALYTICS)
     }
 
+    get crossPromo() {
+        return this.#getModule(MODULE_NAME.CROSS_PROMO)
+    }
+
     get engine() {
         return this.#engine
     }
@@ -170,6 +177,10 @@ class PlaygamaBridge {
         return DEVICE_ORIENTATION
     }
 
+    get LAUNCH_SOURCE() {
+        return LAUNCH_SOURCE
+    }
+
     #isInitialized = false
 
     #initializationPromiseDecorator = null
@@ -192,6 +203,8 @@ class PlaygamaBridge {
             const configFilePath = options?.configFilePath
             await configFileModule.load(configFilePath, options)
 
+            applyBrowserDefaultsProtection()
+
             await this.#createPlatformBridge()
 
             this.#platformBridge.engine = this.engine
@@ -211,6 +224,8 @@ class PlaygamaBridge {
             this.#modules[MODULE_NAME.CLIPBOARD] = new ClipboardModule(this.#platformBridge)
             this.#modules[MODULE_NAME.ACHIEVEMENTS] = new AchievementsModule(this.#platformBridge)
             this.#modules[MODULE_NAME.ANALYTICS] = analyticsModule.initialize(this.#platformBridge)
+            crossPromoModule.init(this.#platformBridge.platformId)
+            this.#modules[MODULE_NAME.CROSS_PROMO] = crossPromoModule
 
             this.#platformBridge
                 .initialize()
@@ -218,10 +233,6 @@ class PlaygamaBridge {
                     this.#isInitialized = true
 
                     console.info(`%c PlaygamaBridge v${this.version} initialized. `, 'background: #01A5DA; color: white')
-
-                    const endTime = performance.now()
-                    const timeInSeconds = ((endTime - startTime) / 1000).toFixed(2)
-                    analyticsModule.send(`${MODULE_NAME.CORE}_initialization_completed`, { time_s: timeInSeconds })
 
                     if (this.#initializationPromiseDecorator) {
                         this.#initializationPromiseDecorator.resolve()
@@ -309,6 +320,8 @@ class PlaygamaBridge {
             platformId = PLATFORM_ID.TIKTOK
         } else if (__INCLUDE_GAMESNACKS__ && typeof window.GameSnacks !== 'undefined') {
             platformId = PLATFORM_ID.GAMESNACKS
+        } else if (__INCLUDE_SAMSUNG__ && typeof window.GSInstant !== 'undefined') {
+            platformId = PLATFORM_ID.SAMSUNG
         } else if (__INCLUDE_GAME_MONETIZE__ && (url.hostname.includes('gamemonetize.com') || url.hostname.includes('gamemonetize.co') || url.hostname.includes('distributegames.com'))) {
             platformId = PLATFORM_ID.GAME_MONETIZE
         } else if (__INCLUDE_ANDROID__ && window.Capacitor?.isNativePlatform?.()) {
@@ -346,9 +359,18 @@ class PlaygamaBridge {
     #isSaas(feature) {
         const { options, platformId } = this.#platformBridge
 
+        if (!options.saas?.[feature]) {
+            return false
+        }
+
+        // On Playgama the feature runs through SaaS as soon as a token is set,
+        // without listing the platform explicitly.
+        if (platformId === PLATFORM_ID.PLAYGAMA && options.saas.publicToken) {
+            return true
+        }
+
         return (
-            options.saas?.[feature]
-            && Array.isArray(options.saas[feature].platforms)
+            Array.isArray(options.saas[feature].platforms)
             && options.saas[feature].platforms.includes(platformId)
         )
     }

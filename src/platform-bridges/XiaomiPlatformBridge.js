@@ -44,14 +44,14 @@ class XiaomiPlatformBridge extends PlatformBridgeBase {
     }
 
     get initialInterstitialDelay() {
-        return 10
+        return 30
     }
 
     get isRewardedSupported() {
         return true
     }
 
-    #showAd = () => {}
+    #showAd = null
 
     initialize() {
         if (this._isInitialized) {
@@ -83,16 +83,11 @@ class XiaomiPlatformBridge extends PlatformBridgeBase {
                     testMode: !!this._options.testMode,
                 }).then((showAd) => {
                     this.#showAd = showAd
-
+                }).finally(() => {
                     this._playerApplyGuestData()
 
                     this._isInitialized = true
                     this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
-                }).catch((error) => {
-                    this._rejectPromiseDecorator(
-                        ACTION_NAME.INITIALIZE,
-                        error,
-                    )
                 })
             }
         }

@@ -41,6 +41,9 @@ if (__INCLUDE_GAME_DISTRIBUTION__) {
 if (__INCLUDE_PLAYGAMA__) {
     platformImports[PLATFORM_ID.PLAYGAMA] = () => import('./platform-bridges/PlaygamaPlatformBridge')
 }
+if (__INCLUDE_STANDALONE__) {
+    platformImports[PLATFORM_ID.STANDALONE] = () => import('./platform-bridges/StandalonePlatformBridge')
+}
 if (__INCLUDE_PLAYDECK__) {
     platformImports[PLATFORM_ID.PLAYDECK] = () => import('./platform-bridges/PlayDeckPlatformBridge')
 }
@@ -103,6 +106,9 @@ if (__INCLUDE_DLIGHTEK__) {
 }
 if (__INCLUDE_GAMESNACKS__) {
     platformImports[PLATFORM_ID.GAMESNACKS] = () => import('./platform-bridges/GameSnacksPlatformBridge')
+}
+if (__INCLUDE_SAMSUNG__) {
+    platformImports[PLATFORM_ID.SAMSUNG] = () => import('./platform-bridges/SamsungPlatformBridge')
 }
 if (__INCLUDE_GAME_MONETIZE__) {
     platformImports[PLATFORM_ID.GAME_MONETIZE] = () => import('./platform-bridges/GameMonetizePlatformBridge')
