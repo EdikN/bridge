@@ -1,0 +1,12 @@
+{
+    "targets": [
+        {
+            "path": "C:\\Users\\1\\Documents\\Eduard\\Program\\Phone\\pixi-chess\\public",
+            "description": "pixi-chess"
+        },
+        {
+            "path": "C:\\Users\\1\\Documents\\Eduard\\packages\\com.ChoclateGames.HyperSDK\\UnityTemplate",
+            "description": "HyperSDK UnityTemplate"
+        }
+    ]
+}

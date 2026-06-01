@@ -81,3 +81,21 @@ See `docs/playgama-bridge-config.md` for complete configuration options includin
 3. Add platform ID to `PLATFORM_ID` enum in `constants.js`
 4. Add import mapping in `platformImports.js`
 5. Add detection logic in `PlaygamaBridge.js#createPlatformBridge()`
+
+## Deploy Build
+
+Run `npm run build:deploy` to build in dynamic mode and copy the output to all configured targets.
+
+Targets are listed in `bridge-deploy.config.json` at the project root:
+
+```json
+{
+    "targets": [
+        { "path": "/absolute/path/to/game/public", "description": "my-game" }
+    ]
+}
+```
+
+- Copies `dist/playgama-bridge.js` and `dist/platform-bridges/` to each target's `path`.
+- If a path does not exist on disk the target is skipped (`[SKIP]` in output).
+- Add new targets directly to `bridge-deploy.config.json`; no code changes needed.
