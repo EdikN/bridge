@@ -7,6 +7,14 @@
         {
             "path": "C:\\Users\\1\\Documents\\Eduard\\packages\\com.ChoclateGames.HyperSDK\\UnityTemplate",
             "description": "HyperSDK UnityTemplate"
+        },
+        {
+            "path": "C:\\Users\\1\\Documents\\Eduard\\Web\\Water\\public",
+            "description": "Water (public)"
+        },
+        {
+            "path": "C:\\Users\\1\\Documents\\Eduard\\Web\\idle\\public",
+            "description": "idle (public)"
         }
     ]
 }
