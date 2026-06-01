@@ -38,6 +38,10 @@ class OkPlatformBridge extends VkPlatformBridge {
         return false
     }
 
+    get isJoinCommunitySupported() {
+        return true
+    }
+
     #okAppId = null
 
     initialize() {
@@ -112,10 +116,10 @@ class OkPlatformBridge extends VkPlatformBridge {
             }
         }
 
-        // В ОК VKWebAppJoinGroup может выдавать ошибку или не работать корректно во фрейме,
-        // поэтому мы просто напрямую открываем вкладку группы (как и ожидается на платформе).
-        window.open(`https://ok.ru/group/${groupId}`)
-        return Promise.resolve()
+        // OK supports the native subscribe dialog via VK Bridge (VKWebAppJoinGroup) on
+        // Android/iOS/web — show it instead of navigating to ok.ru/group, which loads a guest
+        // page inside the game frame.
+        return this._sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
     }
 
     share(options) {

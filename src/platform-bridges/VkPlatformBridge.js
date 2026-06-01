@@ -380,10 +380,9 @@ class VkPlatformBridge extends PlatformBridgeBase {
             }
         }
 
+        // Only the native VK join dialog — do not open the community page afterwards, as
+        // window.open navigates the game's own frame inside the VK Android app.
         return this._sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
-            .then(() => {
-                window.open(`https://vk.com/public${groupId}`)
-            })
     }
 
     share(options) {
