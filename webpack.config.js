@@ -157,7 +157,7 @@ module.exports = (env = {}, argv = {}) => {
         name: 'dynamic',
         output: {
             ...baseConfig.output,
-            publicPath: isDevelopment ? 'auto' : CDN_BASE_URL,
+            publicPath: 'auto',
         },
         plugins: [
             ...baseConfig.plugins,
