@@ -572,6 +572,10 @@ class PlatformBridgeBase {
         return Promise.reject()
     }
 
+    isMemberOfCommunity() {
+        return Promise.reject()
+    }
+
     share() {
         return Promise.reject()
     }

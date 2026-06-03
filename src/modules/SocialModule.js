@@ -80,6 +80,17 @@ class SocialModule extends ModuleBase {
         return this._platformBridge.joinCommunity(options)
     }
 
+    isMemberOfCommunity(options) {
+        if (options) {
+            const platformDependedOptions = options[this._platformBridge.platformId]
+            if (platformDependedOptions) {
+                return this.isMemberOfCommunity(platformDependedOptions)
+            }
+        }
+
+        return this._platformBridge.isMemberOfCommunity(options)
+    }
+
     share(options) {
         if (options) {
             const platformDependedOptions = options[this._platformBridge.platformId]

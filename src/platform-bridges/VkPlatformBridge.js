@@ -365,24 +365,42 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     joinCommunity(options) {
-        // Read groupId from config first — allows calling without arguments
-        const configGroupId = this._options?.social?.joinCommunity?.[this.platformId]
-        let groupId = configGroupId || options?.groupId || 213542253
-
+        // VKWebAppJoinGroup требует именно integer (иначе client_error code 5
+        // "Param group_id should be a number")
+        const groupId = this._resolveCommunityGroupId(options)
         if (!groupId) {
-            return Promise.reject()
+            return Promise.reject(new Error('joinCommunity: invalid groupId'))
         }
 
-        if (typeof groupId === 'string') {
-            groupId = parseInt(groupId, 10)
-            if (Number.isNaN(groupId)) {
-                return Promise.reject()
-            }
+        // Сначала проверяем членство. Если пользователь уже в группе — диалог вступления
+        // ничего не покажет, поэтому просто открываем страницу сообщества.
+        return this._platformSdk
+            .send('VKWebAppGetGroupInfo', { group_id: groupId })
+            .then(
+                (data) => data?.is_member === 1,
+                () => false, // инфо недоступно → считаем «не состоит», покажем диалог
+            )
+            .then((isMember) => {
+                if (isMember) {
+                    this._openCommunityPage(groupId)
+                    return { result: true, alreadyMember: true }
+                }
+
+                return this._platformSdk.send('VKWebAppJoinGroup', { group_id: groupId })
+            })
+    }
+
+    isMemberOfCommunity(options) {
+        const groupId = this._resolveCommunityGroupId(options)
+        if (!groupId) {
+            return Promise.reject(new Error('isMemberOfCommunity: invalid groupId'))
         }
 
-        // Only the native VK join dialog — do not open the community page afterwards, as
-        // window.open navigates the game's own frame inside the VK Android app.
-        return this._sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
+        // VKWebAppGetGroupInfo отдаёт is_member: 1 — состоит, 0 — нет.
+        // Поле отсутствует у закрытых сообществ → трактуем как false.
+        return this._platformSdk
+            .send('VKWebAppGetGroupInfo', { group_id: groupId })
+            .then((data) => data?.is_member === 1)
     }
 
     share(options) {
@@ -470,6 +488,51 @@ class VkPlatformBridge extends PlatformBridgeBase {
         }
 
         return promiseDecorator.promise
+    }
+
+    get _defaultJoinCommunityGroupId() {
+        return 213542253
+    }
+
+    _resolveCommunityGroupId(options) {
+        // Достаём числовой ID из любой обёртки: число, строка, { groupId } или
+        // { vk } / { ok } — на любой глубине вложенности.
+        const extractGroupId = (value) => {
+            if (value === null || value === undefined) {
+                return null
+            }
+            if (typeof value === 'object') {
+                return extractGroupId(value.groupId ?? value[this.platformId])
+            }
+            return value
+        }
+
+        // ID берётся из конфига (если задан), иначе — из аргумента, иначе хардкод-дефолт.
+        // Конфиг прописывать НЕ обязательно — дефолта достаточно.
+        // || (не ??): пустая строка из конфига и null проваливаются на дефолт,
+        // а валидный group id всегда положительный (0/'' невозможны).
+        const rawGroupId = extractGroupId(this._options?.social?.joinCommunity?.[this.platformId])
+            || extractGroupId(options)
+            || this._defaultJoinCommunityGroupId
+
+        const groupId = Number(rawGroupId)
+        return Number.isFinite(groupId) && groupId > 0 ? groupId : null
+    }
+
+    _getCommunityUrl(groupId) {
+        return `https://vk.com/club${groupId}`
+    }
+
+    _openCommunityPage(groupId) {
+        // Открываем через клик по временному <a target="_blank">, а не window.open:
+        // в Android-приложении VK голый window.open навигирует фрейм самой игры.
+        const link = document.createElement('a')
+        link.href = this._getCommunityUrl(groupId)
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
     }
 
     _reAuth() {
