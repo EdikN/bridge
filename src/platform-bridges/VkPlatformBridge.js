@@ -147,6 +147,11 @@ class VkPlatformBridge extends PlatformBridgeBase {
 
     #platform
 
+    // Кэш членства в сообществах (groupId → boolean). Прогревается при инициализации,
+    // чтобы при клике открыть страницу сообщества СИНХРОННО (мобильный WebView блокирует
+    // открытие после await).
+    #communityMembership = new Map()
+
     initialize() {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -217,6 +222,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
                                 .finally(() => {
                                     this._isInitialized = true
                                     this._defaultStorageType = STORAGE_TYPE.PLATFORM_INTERNAL
+                                    this._prefetchCommunityMembership()
                                     this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
                                 })
                         })
@@ -372,21 +378,21 @@ class VkPlatformBridge extends PlatformBridgeBase {
             return Promise.reject(new Error('joinCommunity: invalid groupId'))
         }
 
-        // Сначала проверяем членство. Если пользователь уже в группе — диалог вступления
-        // ничего не покажет, поэтому просто открываем страницу сообщества.
-        return this._platformSdk
-            .send('VKWebAppGetGroupInfo', { group_id: groupId })
-            .then(
-                (data) => data?.is_member === 1,
-                () => false, // инфо недоступно → считаем «не состоит», покажем диалог
-            )
-            .then((isMember) => {
-                if (isMember) {
-                    this._openCommunityPage(groupId)
-                    return { result: true, alreadyMember: true }
-                }
+        // Если заранее (из прогретого кэша) знаем, что пользователь уже в группе — диалог
+        // вступления ничего не покажет, поэтому открываем страницу сообщества. Делаем это
+        // СИНХРОННО, в рамках клика: мобильный WebView блокирует открытие после await.
+        if (this.#communityMembership.get(groupId) === true) {
+            this._openCommunityPage(groupId)
+            return Promise.resolve({ result: true, alreadyMember: true })
+        }
 
-                return this._platformSdk.send('VKWebAppJoinGroup', { group_id: groupId })
+        // Членство неизвестно или пользователь не в группе — показываем нативный диалог.
+        // VKWebAppJoinGroup при уже-членстве просто резолвится без диалога.
+        return this._platformSdk
+            .send('VKWebAppJoinGroup', { group_id: groupId })
+            .then((data) => {
+                this.#communityMembership.set(groupId, true)
+                return data
             })
     }
 
@@ -400,7 +406,11 @@ class VkPlatformBridge extends PlatformBridgeBase {
         // Поле отсутствует у закрытых сообществ → трактуем как false.
         return this._platformSdk
             .send('VKWebAppGetGroupInfo', { group_id: groupId })
-            .then((data) => data?.is_member === 1)
+            .then((data) => {
+                const isMember = data?.is_member === 1
+                this.#communityMembership.set(groupId, isMember)
+                return isMember
+            })
     }
 
     share(options) {
@@ -517,6 +527,20 @@ class VkPlatformBridge extends PlatformBridgeBase {
 
         const groupId = Number(rawGroupId)
         return Number.isFinite(groupId) && groupId > 0 ? groupId : null
+    }
+
+    _prefetchCommunityMembership() {
+        const groupId = this._resolveCommunityGroupId()
+        if (!groupId || !this._platformSdk) {
+            return
+        }
+
+        this._platformSdk
+            .send('VKWebAppGetGroupInfo', { group_id: groupId })
+            .then((data) => {
+                this.#communityMembership.set(groupId, data?.is_member === 1)
+            })
+            .catch(() => {})
     }
 
     _getCommunityUrl(groupId) {
