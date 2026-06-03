@@ -19,6 +19,10 @@
         {
             "path": "C:\\Users\\1\\Documents\\Eduard\\Web\\falloutClicker\\public",
             "description": "falloutClicker"
+        },
+        {
+            "path": "C:\\Users\\1\\Documents\\Eduard\\Program\\bridge\\UnityTemplate",
+            "description": "HyperSDK UnityTemplate"
         }
     ]
 }

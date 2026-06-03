@@ -100,6 +100,23 @@ class OkPlatformBridge extends VkPlatformBridge {
         return promiseDecorator.promise
     }
 
+    paymentsPurchase(id) {
+        const product = this._paymentsGetProductPlatformData(id)
+        let platformProductId = product ? product.id : id
+
+        if (typeof platformProductId === 'number') {
+            platformProductId = platformProductId.toString()
+        }
+
+        return this._platformSdk
+            .send('VKWebAppShowOrderBox', { type: 'item', item: platformProductId })
+            .then((data) => {
+                const purchase = { id, platformProductId, ...data }
+                this._paymentsPurchases.push(purchase)
+                return purchase
+            })
+    }
+
     joinCommunity(options) {
         // Read groupId from config first — allows calling without arguments
         const configGroupId = this._options?.social?.joinCommunity?.ok
