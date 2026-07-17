@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import path from 'path'
 import fs from 'fs'
 import webpack, { Configuration, Compiler } from 'webpack'
@@ -15,6 +16,35 @@ class CleanPlatformsPlugin {
             const platformsDir = path.resolve(__dirname, `dist/${platformDirName}`)
             if (fs.existsSync(platformsDir)) {
                 fs.rmSync(platformsDir, { recursive: true })
+            }
+        })
+    }
+}
+
+// Fork: mirror build artifacts into UnityTemplate/ so the Unity WebGL template
+// always ships the freshly built bridge.
+class CopyToUnityTemplatePlugin {
+    apply(compiler: Compiler): void {
+        compiler.hooks.afterEmit.tap('CopyToUnityTemplatePlugin', () => {
+            const distDir = path.resolve(__dirname, 'dist')
+            const destDir = path.resolve(__dirname, 'UnityTemplate')
+
+            const mainSrc = path.join(distDir, 'playgama-bridge.js')
+            if (fs.existsSync(mainSrc)) {
+                fs.copyFileSync(mainSrc, path.join(destDir, 'playgama-bridge.js'))
+                // eslint-disable-next-line no-console
+                console.log('Copied playgama-bridge.js → UnityTemplate/')
+            }
+
+            const platformsSrc = path.join(distDir, platformDirName)
+            const platformsDest = path.join(destDir, platformDirName)
+            if (fs.existsSync(platformsSrc)) {
+                if (fs.existsSync(platformsDest)) {
+                    fs.rmSync(platformsDest, { recursive: true })
+                }
+                fs.cpSync(platformsSrc, platformsDest, { recursive: true })
+                // eslint-disable-next-line no-console
+                console.log(`Copied ${platformDirName}/ → UnityTemplate/`)
             }
         })
     }
@@ -105,6 +135,7 @@ const createConfig = (targetPlatforms: string[] = [], { noLint = false }: Create
     },
     plugins: [
         new CleanPlatformsPlugin(),
+        new CopyToUnityTemplatePlugin(),
         ...noLint ? [] : [new ESLintPlugin({ extensions: ['js', 'ts', 'tsx'] })],
         new webpack.DefinePlugin({
             PLUGIN_VERSION: JSON.stringify(packageJson.version),

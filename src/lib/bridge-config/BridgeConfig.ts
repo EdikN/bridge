@@ -131,10 +131,23 @@ class BridgeConfig {
     // config stays decoupled from platform-detection logic. Must run after load();
     // afterwards getValues() returns the platform-resolved values.
     initialize(platformId: string): void {
+        // Fork: overrides may also live in a top-level `<platformId>` block
+        // (legacy config layout), not only under `platforms.<platformId>`.
         const platformOverrides = this.#rawValues.platforms?.[platformId]
+            ?? this.#rawValues[platformId] as AnyRecord | undefined
         this.#values = platformOverrides
             ? deepMerge(this.#rawValues, platformOverrides) as ConfigFileOptions
             : this.#rawValues
+
+        // Fork: OK games launched through VK Bridge can carry extra overrides
+        // in an `ok-vk` block; merge them on top of the OK values.
+        if (platformId === 'ok') {
+            const okVkOverrides = this.#rawValues.platforms?.['ok-vk']
+                ?? this.#rawValues['ok-vk'] as AnyRecord | undefined
+            if (okVkOverrides) {
+                this.#values = deepMerge(this.#values, okVkOverrides) as ConfigFileOptions
+            }
+        }
     }
 
     // Config resolved for the active platform. Mirrors the raw values until initialize() runs.

@@ -51,6 +51,11 @@ export const PLATFORM_DETECTORS: PlatformDetector[] = [
         platformId: PLATFORM_ID.LAGGED,
         predicate: ({ hostname }: PlatformDetectorContext) => hostname.includes('lagged.'),
     }] : []),
+    // OK-through-VK-Bridge launches carry VK-style params, so this check must run before the VK one.
+    ...(__INCLUDE_OK__ ? [{
+        platformId: PLATFORM_ID.OK,
+        predicate: ({ searchParams }: PlatformDetectorContext) => searchParams.get('vk_client') === 'ok' || searchParams.has('vk_ok_app_id'),
+    }] : []),
     ...(__INCLUDE_VK__ ? [{
         platformId: PLATFORM_ID.VK,
         predicate: ({ searchParams }: PlatformDetectorContext) => (searchParams.has('api_id') && searchParams.has('viewer_id') && searchParams.has('auth_key')) || searchParams.has('vk_app_id'),
@@ -115,10 +120,23 @@ export const PLATFORM_DETECTORS: PlatformDetector[] = [
         platformId: PLATFORM_ID.SAMSUNG,
         predicate: ({ win }: PlatformDetectorContext) => typeof win.GSInstant !== 'undefined',
     }] : []),
+    ...(__INCLUDE_GAME_MONETIZE__ ? [{
+        platformId: PLATFORM_ID.GAME_MONETIZE,
+        predicate: ({ hostname }: PlatformDetectorContext) => hostname.includes('gamemonetize.com') || hostname.includes('gamemonetize.co') || hostname.includes('distributegames.com'),
+    }] : []),
+    ...(__INCLUDE_ANDROID__ ? [{
+        platformId: PLATFORM_ID.ANDROID,
+        predicate: ({ win }: PlatformDetectorContext) => Boolean(win.Capacitor?.isNativePlatform?.()),
+    }] : []),
 ]
 
 // Returns the value only if it is a known platform id, otherwise the mock fallback.
 function normalizePlatformId(value: string): PlatformId {
+    // The ok-vk alias is only a launch marker — the actual bridge is the OK one.
+    if (value === PLATFORM_ID.OK_VK) {
+        return PLATFORM_ID.OK
+    }
+
     return (Object.values(PLATFORM_ID) as string[]).includes(value)
         ? value as PlatformId
         : PLATFORM_ID.MOCK

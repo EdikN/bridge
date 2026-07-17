@@ -18,6 +18,8 @@
 export const PLATFORM_ID = {
     VK: 'vk',
     OK: 'ok',
+    // Alias platform id used by the fork: OK games launched through the VK Bridge runtime.
+    OK_VK: 'ok-vk',
     YANDEX: 'yandex',
     CRAZY_GAMES: 'crazy_games',
     GAME_DISTRIBUTION: 'game_distribution',
@@ -45,6 +47,8 @@ export const PLATFORM_ID = {
     DLIGHTEK: 'dlightek',
     GAMESNACKS: 'gamesnacks',
     SAMSUNG: 'samsung',
+    GAME_MONETIZE: 'game_monetize',
+    ANDROID: 'android',
 } as const
 export type PlatformId = typeof PLATFORM_ID[keyof typeof PLATFORM_ID]
 

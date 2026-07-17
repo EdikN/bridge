@@ -208,7 +208,10 @@ export function showInfoPopup(message: string): Promise<void> {
     })
 }
 
-export function showAdFailurePopup(): Promise<void> {
+// Fork: platformId tweaks the popup for OK — the Playgama logo is hidden and
+// the message font is reduced to fit the OK game frame.
+export function showAdFailurePopup(platformId?: string): Promise<void> {
+    const isOk = platformId === 'ok'
     if (!document.getElementById('bridge-ad-failure-popup-fonts')) {
         const preconnect1 = document.createElement('link')
         preconnect1.rel = 'preconnect'
@@ -252,6 +255,7 @@ export function showAdFailurePopup(): Promise<void> {
 
             #bridge-ad-failure-popup-logo {
                 height: 32px;
+                display: ${isOk ? 'none' : 'block'};
             }
 
             #bridge-ad-failure-popup-close {
@@ -269,7 +273,7 @@ export function showAdFailurePopup(): Promise<void> {
 
             #bridge-ad-failure-popup-text {
                 grid-column: span 2;
-                font-size: 21px;
+                font-size: ${isOk ? '18px' : '21px'};
                 font-style: normal;
                 font-weight: 400;
                 line-height: 110%;
@@ -293,7 +297,7 @@ export function showAdFailurePopup(): Promise<void> {
                 }
 
                 #bridge-ad-failure-popup-text {
-                    font-size: 25px;
+                    font-size: ${isOk ? '22px' : '25px'};
                     align-self: center;
                 }
             }
@@ -316,7 +320,7 @@ export function showAdFailurePopup(): Promise<void> {
 
                 #bridge-ad-failure-popup-text {
                     width: 50%;
-                    font-size: 33px;
+                    font-size: ${isOk ? '28px' : '33px'};
                 }
             }
         `

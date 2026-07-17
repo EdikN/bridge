@@ -33,8 +33,14 @@ declare global {
     const __INCLUDE_DLIGHTEK__: boolean
     const __INCLUDE_GAMESNACKS__: boolean
     const __INCLUDE_SAMSUNG__: boolean
+    const __INCLUDE_GAME_MONETIZE__: boolean
+    const __INCLUDE_ANDROID__: boolean
 
     interface Window {
+        Capacitor?: {
+            isNativePlatform?: () => boolean
+            Plugins?: Record<string, unknown>
+        }
         bridge?: unknown
         playgamaBridge?: unknown
         adsbygoogle?: unknown[] & { push?: (config: Record<string, unknown>) => unknown }

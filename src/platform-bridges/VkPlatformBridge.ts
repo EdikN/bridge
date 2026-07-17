@@ -94,6 +94,10 @@ class VkPlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    get initialInterstitialDelay(): number {
+        return 30
+    }
+
     get isRewardedSupported(): boolean {
         return true
     }
@@ -121,7 +125,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     get isPlayerAuthorized(): boolean {
-        return true
+        return this._isPlayerAuthorized
     }
 
     // social
@@ -142,6 +146,11 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     get isAddToFavoritesSupported(): boolean {
+        return true
+    }
+
+    // payments
+    get isPaymentsSupported(): boolean {
         return true
     }
 
@@ -169,7 +178,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
                     (this._platformSdk as VkBridge)
                         .send('VKWebAppInit')
                         .then(() => {
-                            (this._platformSdk as VkBridge).send('VKWebAppGetUserInfo')
+                            const userInfoPromise = (this._platformSdk as VkBridge).send('VKWebAppGetUserInfo')
                                 .then((data) => {
                                     if (data) {
                                         this._playerId = data.id as string
@@ -188,6 +197,12 @@ class VkPlatformBridge extends PlatformBridgeBase {
                                         }
                                     }
                                 })
+
+                            // Explicitly validate the VK session via VKWebAppGetAuthToken —
+                            // isPlayerAuthorized must reflect the real auth state, not assume true.
+                            const authPromise = this._reAuth()
+
+                            Promise.allSettled([userInfoPromise, authPromise])
                                 .finally(() => {
                                     this._isInitialized = true
                                     this._setPlatformStorageAvailable(true)
@@ -203,40 +218,47 @@ class VkPlatformBridge extends PlatformBridgeBase {
 
     // player
     authorizePlayer(): Promise<unknown> {
-        return Promise.resolve()
+        return this._reAuth()
     }
 
-    // storage — VK stores values per key.
-    async getDataFromStorage(keys: string[]): Promise<Record<string, unknown>> {
-        const sdk = this._platformSdk as VkBridge
-        const valuesResult = await sdk.send('VKWebAppStorageGet', { keys }) as unknown as VkStorageGetResponse
-        const data: Record<string, unknown> = {}
-        valuesResult.keys.forEach((entry) => {
-            if (entry.value !== '') {
-                data[entry.key] = entry.value
-            }
+    // storage — VK stores values per key. Each operation retries once after a re-auth,
+    // since a stale VK session sometimes rejects storage calls until it is re-validated.
+    getDataFromStorage(keys: string[]): Promise<Record<string, unknown>> {
+        return this._storageWithAuthRetry(async () => {
+            const sdk = this._platformSdk as VkBridge
+            const valuesResult = await sdk.send('VKWebAppStorageGet', { keys }) as unknown as VkStorageGetResponse
+            const data: Record<string, unknown> = {}
+            valuesResult.keys.forEach((entry) => {
+                if (entry.value !== '') {
+                    data[entry.key] = entry.value
+                }
+            })
+            return data
         })
-        return data
     }
 
     setDataToStorage(data: Record<string, unknown>): Promise<void> {
-        const sdk = this._platformSdk as VkBridge
-        return Promise.all(
-            Object.keys(data).map((key) => sdk.send('VKWebAppStorageSet', {
-                key,
-                value: data[key] as string,
-            })),
-        ).then(() => undefined)
+        return this._storageWithAuthRetry(() => {
+            const sdk = this._platformSdk as VkBridge
+            return Promise.all(
+                Object.keys(data).map((key) => sdk.send('VKWebAppStorageSet', {
+                    key,
+                    value: data[key] as string,
+                })),
+            ).then(() => undefined)
+        })
     }
 
     deleteDataFromStorage(keys: string[]): Promise<void> {
-        const sdk = this._platformSdk as VkBridge
-        return Promise.all(
-            keys.map((key) => sdk.send('VKWebAppStorageSet', {
-                key,
-                value: '',
-            })),
-        ).then(() => undefined)
+        return this._storageWithAuthRetry(() => {
+            const sdk = this._platformSdk as VkBridge
+            return Promise.all(
+                keys.map((key) => sdk.send('VKWebAppStorageSet', {
+                    key,
+                    value: '',
+                })),
+            ).then(() => undefined)
+        })
     }
 
     // advertisement
@@ -316,16 +338,17 @@ class VkPlatformBridge extends PlatformBridgeBase {
 
     // social
     inviteFriends(): Promise<unknown> {
-        return this.#sendRequestToVKBridge(ACTION_NAME.INVITE_FRIENDS, 'VKWebAppShowInviteBox', { }, 'success')
+        return this._sendRequestToVKBridge(ACTION_NAME.INVITE_FRIENDS, 'VKWebAppShowInviteBox', { }, 'success')
     }
 
     joinCommunity(options?: AnyRecord & { groupId?: string | number }): Promise<unknown> {
-        if (!options || !options.groupId) {
-            return Promise.reject()
-        }
-
-        const { groupId: rawGroupId, ...rest } = options
-        let groupId = rawGroupId
+        // groupId can come from runtime options or the merged social config block;
+        // keep the fork's hardcoded fallback so the call works without arguments.
+        const configGroupId = (this._options?.social as AnyRecord | undefined)
+            ?.joinCommunity as AnyRecord | undefined
+        let groupId = options?.groupId
+            ?? configGroupId?.[this.platformId] as string | number | undefined
+            ?? 213542253
 
         if (typeof groupId === 'string') {
             groupId = parseInt(groupId, 10)
@@ -334,37 +357,135 @@ class VkPlatformBridge extends PlatformBridgeBase {
             }
         }
 
-        return this.#sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { ...rest, group_id: groupId })
-            .then(() => {
-                window.open(`https://vk.com/public${groupId}`)
-            })
+        // Only the native VK join dialog — do not open the community page afterwards, as
+        // window.open navigates the game's own frame inside the VK Android app.
+        return this._sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
     }
 
-    share(options?: AnyRecord & { url?: string }): Promise<unknown> {
-        const { url, ...rest } = options ?? {}
+    share(options?: AnyRecord & { url?: string, link?: string }): Promise<unknown> {
+        const { url, link, ...rest } = options ?? {}
         const parameters: AnyRecord = { ...rest }
-        if (url) {
-            parameters.link = url
+        if (url || link) {
+            parameters.link = url ?? link
         }
 
-        return this.#sendRequestToVKBridge(ACTION_NAME.SHARE, 'VKWebAppShare', parameters, 'type')
+        return this._sendRequestToVKBridge(ACTION_NAME.SHARE, 'VKWebAppShare', parameters, 'type')
     }
 
     addToHomeScreen(): Promise<unknown> {
-        return this.#sendRequestToVKBridge(ACTION_NAME.ADD_TO_HOME_SCREEN, 'VKWebAppAddToHomeScreen')
+        return this._sendRequestToVKBridge(ACTION_NAME.ADD_TO_HOME_SCREEN, 'VKWebAppAddToHomeScreen')
     }
 
     addToFavorites(): Promise<unknown> {
-        return this.#sendRequestToVKBridge(ACTION_NAME.ADD_TO_FAVORITES, 'VKWebAppAddToFavorites')
+        return this._sendRequestToVKBridge(ACTION_NAME.ADD_TO_FAVORITES, 'VKWebAppAddToFavorites')
     }
 
     // clipboard
     clipboardWrite(text: string): Promise<void> {
-        return this.#sendRequestToVKBridge(ACTION_NAME.CLIPBOARD_WRITE, 'VKWebAppCopyText', { text })
+        return this._sendRequestToVKBridge(ACTION_NAME.CLIPBOARD_WRITE, 'VKWebAppCopyText', { text })
             .then(() => undefined)
     }
 
-    #sendRequestToVKBridge(actionName: string, vkMethodName: string, parameters: AnyRecord = { }, responseSuccessKey = 'result'): Promise<unknown> {
+    // payments — orders go through the native VK order box; the catalog is served
+    // by the fork's external storage service keyed by the app id.
+    paymentsPurchase(id: string): Promise<unknown> {
+        const product = this._paymentsGetProductPlatformData(id)
+        let platformProductId: string | number = (product?.id as string | number) ?? id
+
+        if (typeof platformProductId === 'number') {
+            platformProductId = platformProductId.toString()
+        }
+
+        return this._sendRequestToVKBridge(
+            ACTION_NAME.PURCHASE,
+            'VKWebAppShowOrderBox',
+            { type: 'item', item: platformProductId },
+            'order_id',
+        ).then((data) => {
+            const purchase = { id, ...(data as AnyRecord ?? {}) }
+            this._paymentsPurchases.push(purchase)
+            return purchase
+        })
+    }
+
+    paymentsGetPurchases(): Promise<unknown> {
+        return Promise.resolve(this._paymentsPurchases)
+    }
+
+    paymentsGetCatalog(): Promise<unknown> {
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_CATALOG)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_CATALOG)
+
+            const url = new URL(window.location.href)
+            const appId = url.searchParams.get('vk_app_id') || url.searchParams.get('api_id')
+
+            if (appId) {
+                this._fetchExternalCatalog('vk', appId)
+                    .then((products) => {
+                        this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, products)
+                    })
+                    .catch(() => {
+                        this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, this._paymentsGetProductsPlatformData())
+                    })
+            } else {
+                this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, this._paymentsGetProductsPlatformData())
+            }
+        }
+
+        return promiseDecorator.promise
+    }
+
+    // Re-runs VKWebAppGetAuthToken. Used on initialize and when a storage call fails —
+    // sometimes the VK session needs to be re-validated (esp. vk_is_app_user=0 contexts).
+    protected _reAuth(): Promise<boolean> {
+        if (!this._platformSdk) {
+            return Promise.resolve(false)
+        }
+
+        const url = new URL(window.location.href)
+        const appIdRaw = url.searchParams.get('vk_app_id') || url.searchParams.get('api_id')
+        const appId = appIdRaw ? parseInt(appIdRaw, 10) : null
+        if (!appId) {
+            this._isPlayerAuthorized = false
+            return Promise.resolve(false)
+        }
+
+        return (this._platformSdk as VkBridge).send('VKWebAppGetAuthToken', { app_id: appId, scope: '' })
+            .then((data) => {
+                const ok = Boolean(data && data.user_id)
+                this._isPlayerAuthorized = ok
+                return ok
+            })
+            .catch(() => {
+                this._isPlayerAuthorized = false
+                return false
+            })
+    }
+
+    // Wraps a storage operation: on first failure, re-runs auth and retries once.
+    protected _storageWithAuthRetry<T>(operation: () => Promise<T>): Promise<T> {
+        return operation().catch(() => this._reAuth().then(() => operation()))
+    }
+
+    protected _fetchExternalCatalog(platformKey: string, appId: string): Promise<AnyRecord[]> {
+        return fetch(`https://storage.choclategames.ru/api/items/${platformKey}/${appId}/`)
+            .then((response) => response.json())
+            .then((data) => {
+                const items = data && Array.isArray(data.items) ? data.items as AnyRecord[] : []
+                return items.map((item) => ({
+                    id: item.item_id,
+                    title: item.title,
+                    price: item.price,
+                    description: '',
+                    imageURI: '',
+                    priceCurrencyCode: '',
+                    priceValue: parseInt(item.price as string, 10) || 0,
+                }))
+            })
+    }
+
+    protected _sendRequestToVKBridge(actionName: string, vkMethodName: string, parameters: AnyRecord = { }, responseSuccessKey = 'result'): Promise<unknown> {
         let promiseDecorator = this._getPromiseDecorator(actionName)
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(actionName);

@@ -1,5 +1,8 @@
 # Upgrading Over Upstream (Merge Skill)
 
+> **Status:** synced with upstream **v2.0.1** (TypeScript rewrite) on 2026-07-17.
+> The codebase is now TypeScript; all custom features below live in `.ts` files.
+
 When updating the bridge library from the official upstream (`Playgama/bridge`), strictly adhere to the following steps to preserve our custom features:
 
 ## 1. Fetch & Merge Upstream
@@ -10,27 +13,34 @@ git merge upstream/main --no-ff
 
 ## 2. Conflict Resolution Rules
 
-### `src/common/utils.js`
-**DO NOT** replace our `customLoader` with the default Playgama SVG logo. 
-- Ensure `createProgressLogo` remains as:
-  ```javascript
-  export function createProgressLogo() { 
-      customLoader.init() 
-  }
-  ```
-- Ensure `import customLoader from './CustomLoader'` is preserved.
+### Loading screen (`src/lib/loading-screen/LoadingScreen.ts`)
+**DO NOT** replace our cookie-splash loader with the default Playgama SVG logo.
+The class keeps upstream's public API (`show`, `setProgress(percent, isFallback)`),
+but renders the fork's `#cookie-splash` overlay.
 
 ### Custom Platforms
 Never remove or overwrite our exclusive integrations:
-- **VK** (`VkPlatformBridge`, specific payment catalog hooks)
-- **OK** (`OkPlatformBridge`, disabled payments constraint)
-- **GameMonetize** (`GameMonetizePlatformBridge`, added explicitly by us)
+- **VK** (`VkPlatformBridge.ts`: `VKWebAppGetAuthToken` auth, storage retry-after-reauth, payments + external catalog `storage.choclategames.ru`, joinCommunity from config, `initialInterstitialDelay = 30`)
+- **OK** (`OkPlatformBridge.ts` **extends VkPlatformBridge** — OK runs through VK Bridge; `ok-vk` params, no leaderboards, OK share fallback link)
+- **GameMonetize** (`GameMonetizePlatformBridge.ts`, reward only on ad COMPLETE, launch interstitial after `AD_SDK_MANAGER_READY` + 500ms)
+- **Android** (`AndroidPlatformBridge.ts`, Capacitor + YandexMobileAds)
 
 ### Detection Logic
-Ensure detection logic in `src/PlaygamaBridge.js` retains:
-- `PLATFORM_ID.OK`
-- `PLATFORM_ID.VK`
-- `PLATFORM_ID.GAME_MONETIZE`
+Ensure `src/platformDetectors.ts` retains:
+- OK detector (`vk_client=ok` / `vk_ok_app_id`) **before** the VK detector
+- GameMonetize detector (gamemonetize.com/.co, distributegames.com)
+- Android detector (`window.Capacitor.isNativePlatform()`)
+- `ok-vk` → `ok` normalization in `normalizePlatformId`
+
+And `src/modules/platform/constants.ts` retains `OK_VK`, `GAME_MONETIZE`, `ANDROID` in `PLATFORM_ID`,
+`src/platformImports.ts` retains the GameMonetize/Android imports, and `src/globals.d.ts` the
+`__INCLUDE_GAME_MONETIZE__` / `__INCLUDE_ANDROID__` flags.
+
+### Other fork points
+- `src/lib/bridge-config/BridgeConfig.ts` — top-level `<platformId>` config fallback + `ok-vk` merge for OK
+- `src/modules/advertisement/dom.ts` — `showAdFailurePopup(platformId)` OK styling
+- `src/PlaygamaBridge.ts` — `[Bridge] Platform detected` console.info
+- `webpack.config.ts` — `CopyToUnityTemplatePlugin` (dist → UnityTemplate/)
 
 ## 3. Post-Merge QA
 1. **Install dependencies**: `npm install` (in case `package.json` changed).

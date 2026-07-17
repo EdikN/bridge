@@ -684,7 +684,7 @@ class PlatformBridgeBase {
             )
         }
 
-        return showAdFailurePopup().then(() => {
+        return showAdFailurePopup(this.platformId).then(() => {
             if (isRewarded) {
                 internalAnalytics.send(
                     `${MODULE_NAME.ADVERTISEMENT}_rewarded_fallback_closed`,

@@ -107,6 +107,12 @@ if (__INCLUDE_GAMESNACKS__) {
 if (__INCLUDE_SAMSUNG__) {
     platformImports[PLATFORM_ID.SAMSUNG] = () => import('./platform-bridges/SamsungPlatformBridge')
 }
+if (__INCLUDE_GAME_MONETIZE__) {
+    platformImports[PLATFORM_ID.GAME_MONETIZE] = () => import('./platform-bridges/GameMonetizePlatformBridge')
+}
+if (__INCLUDE_ANDROID__) {
+    platformImports[PLATFORM_ID.ANDROID] = () => import('./platform-bridges/AndroidPlatformBridge')
+}
 
 export async function fetchPlatformBridge(platformId: PlatformId): Promise<PlatformBridgeConstructor> {
     const importPlatform = platformImports[platformId]

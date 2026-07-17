@@ -15,17 +15,14 @@
  * along with Playgama Bridge. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    LOADING_SCREEN_DEFAULT_PRESET,
-    LOADING_SCREEN_FULL_BRIDGE_PRESET,
-    LOADING_SCREEN_HINTS,
-    LOADING_SCREEN_OVERLAY_ID,
-    LOADING_SCREEN_LOGO_ID,
-    LOADING_SCREEN_FILL_RECT_ID,
-    LOADING_SCREEN_GRADIENT_MOVER_ID,
-    LOADING_SCREEN_HINT_ID,
-    type ProgressLogoPreset,
-} from './constants'
+// Fork note: the stock Playgama SVG-logo loading screen is replaced with the
+// fork's custom "cookie splash" loader. The class keeps the upstream public
+// API (show / setProgress with fallback semantics) so PlaygamaBridge is unchanged.
+
+const OVERLAY_ID = 'cookie-splash'
+const STYLES_ID = 'cookie-splash-styles'
+const FILL_ID = 'cs-fill'
+const NUM_ID = 'cs-num'
 
 export interface LoadingScreenOptions {
     showFullLogo?: boolean
@@ -37,15 +34,34 @@ class LoadingScreen {
 
     #completed = false
 
-    show({ showFullLogo = false, showLoadingText = false }: LoadingScreenOptions = {}): void {
-        this.#injectStyles()
-        const overlay = this.#createOverlay()
-        const preset = showFullLogo ? LOADING_SCREEN_FULL_BRIDGE_PRESET : LOADING_SCREEN_DEFAULT_PRESET
-        overlay.appendChild(this.#createSvg(preset))
-
-        if (showLoadingText) {
-            this.#attachHints(overlay)
+    show(_options: LoadingScreenOptions = {}): void {
+        if (document.getElementById(OVERLAY_ID)) {
+            return
         }
+
+        this.#injectStyles()
+
+        const overlay = document.createElement('div')
+        overlay.id = OVERLAY_ID
+
+        overlay.innerHTML = `
+            <div class="cs-cookie-container">
+                <div class="cs-cookie-bg">
+                    <div id="${FILL_ID}" class="cs-cookie-fill">
+                        <div class="cs-cookie-chips-wrapper">
+                            <div class="cs-chip"></div>
+                            <div class="cs-chip"></div>
+                            <div class="cs-chip"></div>
+                            <div class="cs-chip"></div>
+                            <div class="cs-chip"></div>
+                            <div class="cs-chip"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="${NUM_ID}" class="cs-percent">0%</div>
+        `
+        document.body.appendChild(overlay)
     }
 
     setProgress(percent: number, isFallback = false): void {
@@ -57,263 +73,116 @@ class LoadingScreen {
             return
         }
 
-        const fill = document.getElementById(LOADING_SCREEN_FILL_RECT_ID)
-        const gradientMover = document.getElementById(LOADING_SCREEN_GRADIENT_MOVER_ID)
-        const logo = document.getElementById(LOADING_SCREEN_LOGO_ID)
-        const overlay = document.getElementById(LOADING_SCREEN_OVERLAY_ID)
-
-        if (!fill || !gradientMover || !logo || !overlay) {
-            return
-        }
-
         this.#currentProgress = percent
 
         const progress = Math.max(0, Math.min(100, percent))
-        const translateY = 100 - progress
-        fill.style.transform = `translateY(${translateY}%)`
+        const fill = document.getElementById(FILL_ID)
+        const num = document.getElementById(NUM_ID)
+
+        if (fill) {
+            fill.style.height = `${progress}%`
+            fill.style.borderTop = progress > 0 ? '1px solid rgba(255,255,255,0.4)' : 'none'
+        }
+
+        if (num) {
+            num.textContent = `${Math.round(progress)}%`
+        }
 
         if (progress === 100) {
             this.#completed = true
+            this.#hide()
+        }
+    }
 
+    #hide(): void {
+        const loadingOverlay = document.getElementById(OVERLAY_ID)
+        if (loadingOverlay) {
             setTimeout(() => {
-                fill.style.display = 'none'
-                gradientMover.style.display = 'block'
-                gradientMover.classList.add('gradient-mover')
-            }, 400)
-            setTimeout(() => logo.classList.add('logo-fade-out'), 900)
-            setTimeout(() => overlay.remove(), 1400)
-        } else {
-            gradientMover.classList.remove('gradient-mover')
+                loadingOverlay.style.opacity = '0'
+                setTimeout(() => loadingOverlay.remove(), 850)
+            }, 500)
         }
     }
 
     #injectStyles(): void {
+        if (document.getElementById(STYLES_ID)) {
+            return
+        }
+
         const style = document.createElement('style')
+        style.id = STYLES_ID
         style.textContent = `
-            .fullscreen {
-                background: #242424;
-                width: 100vw;
-                height: 100vh;
-                position: absolute;
-                top: 0px;
-                left: 0px;
+            #${OVERLAY_ID} {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: #050505; color: white; z-index: 999999;
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+                transition: opacity 0.8s ease-in-out;
+                user-select: none;
             }
 
-            #${LOADING_SCREEN_OVERLAY_ID} {
-                font-size: 20px;
-                z-index: 9999999;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
+            .cs-cookie-container {
+                position: relative; width: 180px; height: 180px; margin-bottom: 24px;
+                border-radius: 50%;
+                animation: cs-float 3s ease-in-out infinite;
+                filter: drop-shadow(0 20px 40px rgba(210,105,30,0.2));
             }
 
-            #${LOADING_SCREEN_LOGO_ID} {
-                width: 10%;
-                max-width: 300px;
-                min-width: 120px;
-                overflow: visible;
+            @keyframes cs-float {
+                0%, 100% { transform: translateY(0); filter: drop-shadow(0 20px 40px rgba(210,105,30,0.2)); }
+                50% { transform: translateY(-8px); filter: drop-shadow(0 20px 60px rgba(210,105,30,0.35)); }
             }
 
-            #${LOADING_SCREEN_HINT_ID} {
-                width: 8%;
-                max-width: 240px;
-                min-width: 96px;
-                margin-top: clamp(17px, 1.7vw, 33px);
-                text-align: center;
-                color: #aa76ff;
-                font-size: clamp(11px, 1.3vw, 16px);
-                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-                letter-spacing: 0.04em;
-                white-space: nowrap;
+            .cs-cookie-bg {
+                position: absolute; inset: 0;
+                background: #1A0F08; border-radius: 50%;
+                box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+                border: 3px dashed rgba(62,36,19,0.5);
                 overflow: hidden;
-                text-overflow: ellipsis;
-                transition: opacity 0.4s ease;
+                display: flex; align-items: flex-end; justify-content: center;
             }
 
-            .fill-rect {
-                transform: translateY(100%);
-                transition: transform 0.3s ease-out;
+            .cs-cookie-fill {
+                position: absolute; bottom: 0; left: 0; right: 0;
+                background: radial-gradient(circle at 30% 30%, #E6AB73, #D48E53, #A66332);
+                height: 0%;
+                overflow: hidden;
+                transition: height 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
+                border-top: 1px solid rgba(255,255,255,0.3);
+                box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3);
             }
 
-            #${LOADING_SCREEN_GRADIENT_MOVER_ID} {
-                display: none;
+            .cs-cookie-texture {
+                position: absolute; inset: 0; opacity: 0.15;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+                mix-blend-mode: multiply;
             }
 
-            .gradient-mover {
-                animation: moveGradient 0.4s linear;
+            .cs-cookie-chips-wrapper {
+                position: absolute; bottom: 0; left: 0; width: 180px; height: 180px;
             }
 
-            @keyframes moveGradient {
-                0% { transform: translateX(0); }
-                100% { transform: translateX(-250%); }
+            .cs-chip {
+                position: absolute;
+                background: #2D1606;
+                border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+                box-shadow: inset -2px -2px 4px rgba(0,0,0,0.8), inset 1px 1px 3px rgba(255,255,255,0.15), 2px 2px 5px rgba(0,0,0,0.4);
             }
 
-            .logo-fade-out {
-                animation: logoFadeOut 1s linear;
-            }
+            .cs-chip:nth-child(1) { width: 22px; height: 18px; top: 18%; left: 22%; transform: rotate(15deg); }
+            .cs-chip:nth-child(2) { width: 16px; height: 16px; top: 25%; left: 68%; transform: rotate(-35deg); border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            .cs-chip:nth-child(3) { width: 26px; height: 22px; top: 52%; left: 42%; transform: rotate(75deg); }
+            .cs-chip:nth-child(4) { width: 18px; height: 20px; top: 48%; left: 12%; transform: rotate(-15deg); border-radius: 50%; }
+            .cs-chip:nth-child(5) { width: 17px; height: 17px; top: 78%; left: 28%; transform: rotate(45deg); }
+            .cs-chip:nth-child(6) { width: 24px; height: 20px; top: 68%; left: 68%; transform: rotate(-10deg); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
 
-            .logo-fade-out path {
-                fill: white;
-                stroke: white;
-            }
-
-            @keyframes logoFadeOut {
-                0% { opacity: 1; }
-                50% { opacity: 0; }
-                100% { opacity: 0; }
+            .cs-percent {
+                font-size: 32px; font-weight: 900; font-style: italic; letter-spacing: -1px;
+                color: #E6AB73; margin-top: 8px;
+                text-shadow: 0 4px 10px rgba(210,105,30,0.2);
             }
         `
         document.head.appendChild(style)
-    }
-
-    #createOverlay(): HTMLDivElement {
-        const overlay = document.createElement('div')
-        overlay.id = LOADING_SCREEN_OVERLAY_ID
-        overlay.className = 'fullscreen'
-        document.body.appendChild(overlay)
-        return overlay
-    }
-
-    #createSvg(preset: ProgressLogoPreset): SVGSVGElement {
-        const gradientWidthMultiplier = preset.gradientWidthMultiplier ?? 4
-        const [, , vbWidthStr, vbHeightStr] = preset.viewBox.split(/[ ,]+/)
-        const vbWidth = Number(vbWidthStr)
-        const vbHeight = Number(vbHeightStr)
-
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-        svg.setAttribute('id', LOADING_SCREEN_LOGO_ID)
-        svg.setAttribute('viewBox', preset.viewBox)
-        svg.setAttribute('fill', 'none')
-        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-
-        const defs = document.createElementNS(svg.namespaceURI, 'defs')
-
-        const mask = document.createElementNS(svg.namespaceURI, 'mask')
-        mask.setAttribute('id', 'logo-mask')
-
-        const blackRect = document.createElementNS(svg.namespaceURI, 'rect')
-        blackRect.setAttribute('x', '0')
-        blackRect.setAttribute('y', '0')
-        blackRect.setAttribute('width', '100%')
-        blackRect.setAttribute('height', '100%')
-        blackRect.setAttribute('fill', 'black')
-        mask.appendChild(blackRect)
-
-        preset.paths.forEach((item) => {
-            const path = document.createElementNS(svg.namespaceURI, 'path')
-            path.setAttribute('d', typeof item === 'string' ? item : item.d)
-            path.setAttribute('fill', (typeof item === 'object' && item.maskFill) ? item.maskFill : 'white')
-            if (typeof item === 'object' && item.fillRule) {
-                path.setAttribute('fill-rule', item.fillRule)
-            }
-            mask.appendChild(path)
-        })
-
-        defs.appendChild(mask)
-
-        const gradient = document.createElementNS(svg.namespaceURI, 'linearGradient')
-        gradient.setAttribute('id', 'shineGradient')
-        gradient.setAttribute('x1', String(vbWidth * 2))
-        gradient.setAttribute('y1', '0')
-        gradient.setAttribute('x2', String(vbWidth * 3))
-        gradient.setAttribute('y2', String(vbHeight))
-        gradient.setAttribute('gradientUnits', 'userSpaceOnUse')
-
-        preset.gradientStops.forEach(({ offset, color }) => {
-            const stop = document.createElementNS(svg.namespaceURI, 'stop')
-            stop.setAttribute('offset', offset)
-            stop.setAttribute('stop-color', color)
-            gradient.appendChild(stop)
-        })
-
-        defs.appendChild(gradient)
-        svg.appendChild(defs)
-
-        const gradGroup = document.createElementNS(svg.namespaceURI, 'g')
-        gradGroup.setAttribute('mask', 'url(#logo-mask)')
-
-        const gradRect = document.createElementNS(svg.namespaceURI, 'rect') as SVGRectElement
-        gradRect.setAttribute('id', LOADING_SCREEN_GRADIENT_MOVER_ID)
-        gradRect.setAttribute('x', '0')
-        gradRect.setAttribute('y', '0')
-        gradRect.setAttribute('width', String(vbWidth * gradientWidthMultiplier))
-        gradRect.setAttribute('height', String(vbHeight))
-        gradRect.setAttribute('fill', 'url(#shineGradient)')
-        gradRect.style.transform = 'translateX(0)'
-        gradGroup.appendChild(gradRect)
-        svg.appendChild(gradGroup)
-
-        const fillGroup = document.createElementNS(svg.namespaceURI, 'g')
-        fillGroup.setAttribute('mask', 'url(#logo-mask)')
-
-        const fillRect = document.createElementNS(svg.namespaceURI, 'rect')
-        fillRect.setAttribute('id', LOADING_SCREEN_FILL_RECT_ID)
-        fillRect.setAttribute('class', 'fill-rect')
-        fillRect.setAttribute('x', '0')
-        fillRect.setAttribute('y', '0')
-        fillRect.setAttribute('width', '100%')
-        fillRect.setAttribute('height', String(vbHeight))
-        fillRect.setAttribute('fill', preset.fillColor)
-        fillGroup.appendChild(fillRect)
-        svg.appendChild(fillGroup)
-
-        const strokeWidth = String(Math.round((3 * vbWidth) / 633))
-        preset.paths.forEach((item) => {
-            if (typeof item === 'object' && item.maskFill === 'black') return
-            const outline = document.createElementNS(svg.namespaceURI, 'path')
-            outline.setAttribute('d', typeof item === 'string' ? item : item.d)
-            outline.setAttribute('stroke', preset.strokeColor)
-            outline.setAttribute('stroke-width', strokeWidth)
-            if (typeof item === 'object' && item.fillRule) {
-                outline.setAttribute('fill-rule', item.fillRule)
-            }
-            svg.appendChild(outline)
-        })
-
-        return svg as SVGSVGElement
-    }
-
-    #attachHints(overlay: HTMLDivElement): void {
-        const hint = document.createElement('div')
-        hint.id = LOADING_SCREEN_HINT_ID
-        hint.style.opacity = '0'
-
-        let hintIndex = Math.floor(Math.random() * LOADING_SCREEN_HINTS.length)
-        hint.textContent = LOADING_SCREEN_HINTS[hintIndex]
-        overlay.appendChild(hint)
-
-        const randomDelay = (): number => (2 + Math.random()) * 1000
-
-        let hintTimeout: ReturnType<typeof setTimeout> | null = null
-        const scheduleNextHint = (): void => {
-            hintTimeout = setTimeout(() => {
-                hint.style.opacity = '0'
-                setTimeout(() => {
-                    hintIndex = (hintIndex + 1) % LOADING_SCREEN_HINTS.length
-                    hint.textContent = LOADING_SCREEN_HINTS[hintIndex]
-                    hint.style.opacity = '1'
-                    scheduleNextHint()
-                }, 400)
-            }, randomDelay())
-        }
-
-        hintTimeout = setTimeout(() => {
-            hint.style.opacity = '1'
-            scheduleNextHint()
-        }, randomDelay())
-
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.removedNodes.forEach((node) => {
-                    if (node === overlay) {
-                        if (hintTimeout) clearTimeout(hintTimeout)
-                        observer.disconnect()
-                    }
-                })
-            })
-        })
-        observer.observe(document.body, { childList: true })
     }
 }
 
