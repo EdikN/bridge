@@ -39,7 +39,7 @@ function onUnityLoadingProgressChanged(progress) {
             clearInterval(progressBarFillingInterval)
             progressBarFillingInterval = null
         }
-        bridge.game.setLoadingProgress(100)
+        bridge.setGameLoadingProgress(100)
         return
     }
 
@@ -53,7 +53,7 @@ function onUnityLoadingProgressChanged(progress) {
         return
     }
 
-    bridge.game.setLoadingProgress(progress * 100)
+    bridge.setGameLoadingProgress(progress * 100)
 }
 
 function completeProgressBarFilling() {
@@ -62,14 +62,14 @@ function completeProgressBarFilling() {
     }
 
     let currentPercent = 90
-    bridge.game.setLoadingProgress(currentPercent)
+    bridge.setGameLoadingProgress(currentPercent)
     progressBarFillingInterval = setInterval(() => {
         currentPercent++
         if (currentPercent > 99) {
             currentPercent = 99
         }
 
-        bridge.game.setLoadingProgress(currentPercent)
+        bridge.setGameLoadingProgress(currentPercent)
 
         if (currentPercent >= 99) {
             clearInterval(progressBarFillingInterval)
@@ -94,12 +94,14 @@ function initializeBridge() {
     bridge
         .initialize()
         .then(() => {
-            bridge.game.setLoadingProgress(0)
+            bridge.setGameLoadingProgress(0)
             bridge.platform.sendMessage('in_game_loading_started')
             bridge.advertisement.on('banner_state_changed', state => sendMessageToUnity('OnBannerStateChanged', state))
             bridge.advertisement.on('interstitial_state_changed', state => sendMessageToUnity('OnInterstitialStateChanged', state))
             bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
-            bridge.game.on('visibility_state_changed', state => sendMessageToUnity('OnVisibilityStateChanged', state))
+            // v2: bridge.game and visibility_state_changed are gone — emulate the old
+            // visibility event from the platform pause state for the Unity side.
+            bridge.platform.on('pause_state_changed', isPaused => sendMessageToUnity('OnVisibilityStateChanged', isPaused ? 'hidden' : 'visible'))
             bridge.platform.on('audio_state_changed', isEnabled => sendMessageToUnity('OnAudioStateChanged', isEnabled.toString()))
             bridge.platform.on('pause_state_changed', isPaused => sendMessageToUnity('OnPauseStateChanged', isPaused.toString()))
 
@@ -172,11 +174,12 @@ window.getIsPlatformAudioEnabled = function() {
 }
 
 window.getIsPlatformGetAllGamesSupported = function() {
-    return bridge.platform.isGetAllGamesSupported.toString()
+    // v2: the games-catalog API was removed from the platform module
+    return 'false'
 }
 
 window.getIsPlatformGetGameByIdSupported = function() {
-    return bridge.platform.isGetGameByIdSupported.toString()
+    return 'false'
 }
 
 window.sendMessageToPlatform = function(message) {
@@ -194,29 +197,12 @@ window.getServerTime = function() {
 }
 
 window.getAllGames = function() {
-    bridge.platform.getAllGames()
-        .then(result => {
-            sendMessageToUnity('OnGetAllGamesCompletedSuccess', JSON.stringify(result))
-        })
-        .catch(error => {
-            sendMessageToUnity('OnGetAllGamesCompletedFailed')
-        })
+    // v2: removed — report failure so the game falls back gracefully
+    sendMessageToUnity('OnGetAllGamesCompletedFailed')
 }
 
 window.getGameById = function(options) {
-    if (options) {
-        options = JSON.parse(options)
-    } else {
-        options = {}
-    }
-
-    bridge.platform.getGameById(options)
-        .then(result => {
-            sendMessageToUnity('OnGetGameByIdCompletedSuccess', JSON.stringify(result))
-        })
-        .catch(error => {
-            sendMessageToUnity('OnGetGameByIdCompletedFailed')
-        })
+    sendMessageToUnity('OnGetGameByIdCompletedFailed')
 }
 
 // device
@@ -283,27 +269,30 @@ window.authorizePlayer = function(options) {
 
 // game
 window.getVisibilityState = function() {
-    return bridge.game.visibilityState
+    // v2: bridge.game is gone — derive visibility from the platform pause state
+    return bridge.platform.isPaused ? 'hidden' : 'visible'
 }
 
 
 // storage
+// v2: storage types are gone — the bridge picks cloud or local storage itself.
+// The old getters stay for C# compatibility and return static values.
 window.getStorageDefaultType = function() {
-    return bridge.storage.defaultType
+    return 'platform_internal'
 }
 
 window.getIsStorageSupported = function(storageType) {
-    return bridge.storage.isSupported(storageType).toString()
+    return 'true'
 }
 
 window.getIsStorageAvailable = function(storageType) {
-    return bridge.storage.isAvailable(storageType).toString()
+    return 'true'
 }
 
 window.getStorageData = function(key, storageType) {
     let keys = key.split(STORAGE_KEYS_SEPARATOR)
 
-    bridge.storage.get(keys, storageType, false)
+    bridge.storage.get(keys, false)
         .then(data => {
             if (keys.length > 1) {
                 let values = []
@@ -344,7 +333,7 @@ window.setStorageData = function(key, value, storageType) {
     let keys = key.split(STORAGE_KEYS_SEPARATOR)
     let values = value.split(STORAGE_VALUES_SEPARATOR)
 
-    bridge.storage.set(keys, values, storageType)
+    bridge.storage.set(keys, values)
         .then(() => {
             sendMessageToUnity('OnSetStorageDataSuccess', key)
         })
@@ -357,7 +346,7 @@ window.setStorageData = function(key, value, storageType) {
 window.deleteStorageData = function(key, storageType) {
     let keys = key.split(STORAGE_KEYS_SEPARATOR)
 
-    bridge.storage.delete(keys, storageType)
+    bridge.storage.delete(keys)
         .then(() => {
             sendMessageToUnity('OnDeleteStorageDataSuccess', key)
         })
@@ -488,7 +477,8 @@ window.getIsRateSupported = function() {
 }
 
 window.getIsExternalLinksAllowed = function() {
-    return bridge.social.isExternalLinksAllowed.toString()
+    // v2: moved from social to platform
+    return bridge.platform.isExternalLinksAllowed.toString()
 }
 
 window.share = function(options) {
@@ -703,11 +693,13 @@ window.getIsRemoteConfigSupported = function() {
 }
 
 window.remoteConfigGet = function(options) {
+    // v2: get() takes no arguments; segmentation parameters go through setContext()
     if (options) {
         options = JSON.parse(options)
+        bridge.remoteConfig.setContext(options)
     }
 
-    bridge.remoteConfig.get(options)
+    bridge.remoteConfig.get()
         .then(data => {
             if (typeof data !== 'string') {
                 data = JSON.stringify(data)
@@ -720,24 +712,35 @@ window.remoteConfigGet = function(options) {
         })
 }
 
+// v2: achievements work on every platform (local tracking fallback); support
+// checks and the native popup were removed from the API.
 window.getIsAchievementsSupported = function() {
-    return bridge.achievements.isSupported.toString()
+    return 'true'
 }
 
 window.getIsGetAchievementsListSupported = function() {
-    return bridge.achievements.isGetListSupported.toString()
+    return 'true'
 }
 
 window.getIsAchievementsNativePopupSupported = function() {
-    return bridge.achievements.isNativePopupSupported.toString()
+    return 'false'
 }
 
 window.achievementsUnlock = function(options) {
+    let id = options
     if (options) {
-        options = JSON.parse(options)
+        try {
+            const parsed = JSON.parse(options)
+            // v2 unlock() takes a flat achievement id; accept the old options object too
+            id = parsed && typeof parsed === 'object'
+                ? (parsed.id ?? parsed.achievement ?? parsed.name ?? '')
+                : parsed
+        } catch (e) {
+            id = options
+        }
     }
 
-    bridge.achievements.unlock(options)
+    bridge.achievements.unlock(id)
         .then(() => {
             sendMessageToUnity('OnAchievementsUnlockCompleted', 'true')
         })
@@ -747,25 +750,12 @@ window.achievementsUnlock = function(options) {
 }
 
 window.achievementsShowNativePopup = function(options) {
-    if (options) {
-        options = JSON.parse(options)
-    }
-
-    bridge.achievements.showNativePopup(options)
-        .then(() => {
-            sendMessageToUnity('OnAchievementsShowNativePopupCompleted', 'true')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnAchievementsShowNativePopupCompleted', 'false')
-        })
+    // v2: native popup was removed
+    sendMessageToUnity('OnAchievementsShowNativePopupCompleted', 'false')
 }
 
 window.achievementsGetList = function(options) {
-    if (options) {
-        options = JSON.parse(options)
-    }
-
-    bridge.achievements.getList(options)
+    bridge.achievements.getAchievements()
         .then(data => {
             if (data) {
                 if (typeof data !== 'string') {
