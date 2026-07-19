@@ -84,55 +84,24 @@ window.addEventListener('pointerdown', () => {
     CANVAS.focus()
 })
 
-let bridgeScript = null
-let bridgeTimeout = null
-let bridgeLoaded = false
-
-function addLocalBridge() {
-    if (bridgeLoaded) return
-    bridgeLoaded = true
-    clearTimeout(bridgeTimeout)
-
-    if (bridgeScript && bridgeScript.parentNode) {
-        bridgeScript.onload = null
-        bridgeScript.onerror = null
-        bridgeScript.parentNode.removeChild(bridgeScript)
-    }
-
-    window.bridge = null
-    window.playgamaBridge = null
-
-    const scriptElement = document.createElement('script')
-    scriptElement.src = './playgama-bridge.js'
-    scriptElement.onload = function() {
-        initializeBridge()
-    }
-    document.body.appendChild(scriptElement)
-}
-
-bridgeScript = document.createElement('script')
-bridgeScript.src = 'https://bridge.playgama.com/v2/stable/playgama-bridge.js'
+const bridgeScript = document.createElement('script')
+bridgeScript.src = './playgama-bridge.js'
 bridgeScript.onload = initializeBridge
-bridgeScript.onerror = addLocalBridge
-
-bridgeTimeout = setTimeout(() => {
-    console.warn('CDN bridge failed to load within 2 seconds, loading local bridge')
-    addLocalBridge()
-}, 2000)
-
 document.head.appendChild(bridgeScript)
 
 function initializeBridge() {
-    clearTimeout(bridgeTimeout)
     bridge.engine = 'unity'
     bridge
         .initialize()
         .then(() => {
             bridge.setGameLoadingProgress(0)
+            bridge.platform.sendMessage('in_game_loading_started')
             bridge.advertisement.on('banner_state_changed', state => sendMessageToUnity('OnBannerStateChanged', state))
             bridge.advertisement.on('interstitial_state_changed', state => sendMessageToUnity('OnInterstitialStateChanged', state))
             bridge.advertisement.on('rewarded_state_changed', state => sendMessageToUnity('OnRewardedStateChanged', state))
-            bridge.advertisement.on('advanced_banners_state_changed', state => sendMessageToUnity('OnAdvancedBannersStateChanged', state))
+            // v2: bridge.game and visibility_state_changed are gone — emulate the old
+            // visibility event from the platform pause state for the Unity side.
+            bridge.platform.on('pause_state_changed', isPaused => sendMessageToUnity('OnVisibilityStateChanged', isPaused ? 'hidden' : 'visible'))
             bridge.platform.on('audio_state_changed', isEnabled => sendMessageToUnity('OnAudioStateChanged', isEnabled.toString()))
             bridge.platform.on('pause_state_changed', isPaused => sendMessageToUnity('OnPauseStateChanged', isPaused.toString()))
 
@@ -204,28 +173,17 @@ window.getIsPlatformAudioEnabled = function() {
     return bridge.platform.isAudioEnabled.toString()
 }
 
-window.getIsPlatformExternalCallsSupported = function() {
-    return bridge.platform.isExternalCallsSupported.toString()
+window.getIsPlatformGetAllGamesSupported = function() {
+    // v2: the games-catalog API was removed from the platform module
+    return 'false'
 }
 
-window.getIsPlatformExternalLinksAllowed = function() {
-    return bridge.platform.isExternalLinksAllowed.toString()
+window.getIsPlatformGetGameByIdSupported = function() {
+    return 'false'
 }
 
-window.sendMessageToPlatform = function(message, options) {
-    if (options) {
-        options = JSON.parse(options)
-    }
-
-    bridge.platform.sendMessage(message, options)
-}
-
-window.sendCustomMessageToPlatform = function(id, options) {
-    if (options) {
-        options = JSON.parse(options)
-    }
-
-    bridge.platform.sendCustomMessage(id, options)
+window.sendMessageToPlatform = function(message) {
+    bridge.platform.sendMessage(message)
 }
 
 window.getServerTime = function() {
@@ -238,36 +196,18 @@ window.getServerTime = function() {
         })
 }
 
-// cross promo
-window.crossPromoGetGamesList = function() {
-    bridge.crossPromo.getGames()
-        .then(result => {
-            sendMessageToUnity('OnCrossPromoGetGamesListCompletedSuccess', JSON.stringify(result))
-        })
-        .catch(error => {
-            sendMessageToUnity('OnCrossPromoGetGamesListCompletedFailed')
-        })
+window.getAllGames = function() {
+    // v2: removed — report failure so the game falls back gracefully
+    sendMessageToUnity('OnGetAllGamesCompletedFailed')
 }
 
-window.crossPromoShow = function() {
-    bridge.crossPromo.show()
-}
-
-window.crossPromoHide = function() {
-    bridge.crossPromo.hide()
-}
-
-window.getIsCrossPromoVisible = function() {
-    return bridge.crossPromo.isVisible.toString()
+window.getGameById = function(options) {
+    sendMessageToUnity('OnGetGameByIdCompletedFailed')
 }
 
 // device
 window.getDeviceType = function() {
     return bridge.device.type
-}
-
-window.getSafeArea = function() {
-    return JSON.stringify(bridge.device.safeArea)
 }
 
 
@@ -278,10 +218,6 @@ window.getIsPlayerAuthorizationSupported = function() {
 
 window.getIsPlayerAuthorized = function() {
     return bridge.player.isAuthorized.toString()
-}
-
-window.getIsPlayerGuest = function() {
-    return bridge.player.isGuest.toString()
 }
 
 window.getPlayerId = function() {
@@ -331,8 +267,29 @@ window.authorizePlayer = function(options) {
 }
 
 
+// game
+window.getVisibilityState = function() {
+    // v2: bridge.game is gone — derive visibility from the platform pause state
+    return bridge.platform.isPaused ? 'hidden' : 'visible'
+}
+
+
 // storage
-window.getStorageData = function(key) {
+// v2: storage types are gone — the bridge picks cloud or local storage itself.
+// The old getters stay for C# compatibility and return static values.
+window.getStorageDefaultType = function() {
+    return 'platform_internal'
+}
+
+window.getIsStorageSupported = function(storageType) {
+    return 'true'
+}
+
+window.getIsStorageAvailable = function(storageType) {
+    return 'true'
+}
+
+window.getStorageData = function(key, storageType) {
     let keys = key.split(STORAGE_KEYS_SEPARATOR)
 
     bridge.storage.get(keys, false)
@@ -367,11 +324,12 @@ window.getStorageData = function(key) {
             }
         })
         .catch(error => {
+            logStorageError('GET', key, storageType, error)
             sendMessageToUnity('OnGetStorageDataFailed', key)
         })
 }
 
-window.setStorageData = function(key, value) {
+window.setStorageData = function(key, value, storageType) {
     let keys = key.split(STORAGE_KEYS_SEPARATOR)
     let values = value.split(STORAGE_VALUES_SEPARATOR)
 
@@ -380,11 +338,12 @@ window.setStorageData = function(key, value) {
             sendMessageToUnity('OnSetStorageDataSuccess', key)
         })
         .catch(error => {
+            logStorageError('SET', key, storageType, error, { valueByteLength: (value || '').length, keysCount: keys.length })
             sendMessageToUnity('OnSetStorageDataFailed', key)
         })
 }
 
-window.deleteStorageData = function(key) {
+window.deleteStorageData = function(key, storageType) {
     let keys = key.split(STORAGE_KEYS_SEPARATOR)
 
     bridge.storage.delete(keys)
@@ -392,8 +351,35 @@ window.deleteStorageData = function(key) {
             sendMessageToUnity('OnDeleteStorageDataSuccess', key)
         })
         .catch(error => {
+            logStorageError('DELETE', key, storageType, error)
             sendMessageToUnity('OnDeleteStorageDataFailed', key)
         })
+}
+
+function logStorageError(op, key, storageType, error, extra) {
+    try {
+        var reason =
+            (error && error.error_data && error.error_data.error_reason) ||
+            (error && error.error_reason) ||
+            (error && error.error_type) ||
+            (typeof error === 'string' ? error : null)
+        var errorString
+        try { errorString = JSON.stringify(error, Object.getOwnPropertyNames(error || {})) } catch (e) { errorString = String(error) }
+        var keys = (key || '').split(STORAGE_KEYS_SEPARATOR)
+        console.error('[Bridge][Storage][' + op + '][FAIL]', {
+            platformId: (bridge && bridge.platform && bridge.platform.id) || 'unknown',
+            storageType: storageType || '(default)',
+            keysCount: keys.length,
+            firstKey: keys[0],
+            lastKey: keys[keys.length - 1],
+            keyMaxLen: keys.reduce(function (m, k) { return Math.max(m, (k || '').length) }, 0),
+            reason: reason || '(no reason)',
+            error: errorString,
+            extra: extra || null
+        })
+    } catch (e) {
+        try { console.error('[Bridge][Storage][' + op + '][FAIL] (log itself failed)', e) } catch (e2) {}
+    }
 }
 
 
@@ -450,26 +436,6 @@ window.showRewarded = function(placement) {
     bridge.advertisement.showRewarded(placement)
 }
 
-window.getIsAdvancedBannersSupported = function() {
-    return bridge.advertisement.isAdvancedBannersSupported.toString()
-}
-
-window.getAdvancedBannersState = function() {
-    if (bridge.advertisement.advancedBannersState) {
-        return bridge.advertisement.advancedBannersState
-    } else {
-        return ''
-    }
-}
-
-window.showAdvancedBanners = function(placement) {
-    bridge.advertisement.showAdvancedBanners(placement)
-}
-
-window.hideAdvancedBanners = function() {
-    bridge.advertisement.hideAdvancedBanners()
-}
-
 window.checkAdBlock = function() {
     bridge.advertisement.checkAdBlock()
         .then(result => {
@@ -502,20 +468,17 @@ window.getIsAddToHomeScreenSupported = function() {
     return bridge.social.isAddToHomeScreenSupported.toString()
 }
 
-window.getIsAddToHomeScreenRewardSupported = function() {
-    return bridge.social.isAddToHomeScreenRewardSupported.toString()
-}
-
 window.getIsAddToFavoritesSupported = function() {
     return bridge.social.isAddToFavoritesSupported.toString()
 }
 
-window.getIsAddToFavoritesRewardSupported = function() {
-    return bridge.social.isAddToFavoritesRewardSupported.toString()
-}
-
 window.getIsRateSupported = function() {
     return bridge.social.isRateSupported.toString()
+}
+
+window.getIsExternalLinksAllowed = function() {
+    // v2: moved from social to platform
+    return bridge.platform.isExternalLinksAllowed.toString()
 }
 
 window.share = function(options) {
@@ -601,26 +564,6 @@ window.rate = function() {
         })
         .catch(error => {
             sendMessageToUnity('OnRateCompleted', 'false')
-        })
-}
-
-window.getAddToHomeScreenReward = function() {
-    bridge.social.getAddToHomeScreenReward()
-        .then(() => {
-            sendMessageToUnity('OnGetAddToHomeScreenRewardCompleted', 'true')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnGetAddToHomeScreenRewardCompleted', 'false')
-        })
-}
-
-window.getAddToFavoritesReward = function() {
-    bridge.social.getAddToFavoritesReward()
-        .then(() => {
-            sendMessageToUnity('OnGetAddToFavoritesRewardCompleted', 'true')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnGetAddToFavoritesRewardCompleted', 'false')
         })
 }
 
@@ -749,15 +692,13 @@ window.getIsRemoteConfigSupported = function() {
     return bridge.remoteConfig.isSupported.toString()
 }
 
-window.remoteConfigSetContext = function(parameters) {
-    if (parameters) {
-        parameters = JSON.parse(parameters)
+window.remoteConfigGet = function(options) {
+    // v2: get() takes no arguments; segmentation parameters go through setContext()
+    if (options) {
+        options = JSON.parse(options)
+        bridge.remoteConfig.setContext(options)
     }
 
-    bridge.remoteConfig.setContext(parameters)
-}
-
-window.remoteConfigGet = function() {
     bridge.remoteConfig.get()
         .then(data => {
             if (typeof data !== 'string') {
@@ -771,7 +712,34 @@ window.remoteConfigGet = function() {
         })
 }
 
-window.achievementsUnlock = function(id) {
+// v2: achievements work on every platform (local tracking fallback); support
+// checks and the native popup were removed from the API.
+window.getIsAchievementsSupported = function() {
+    return 'true'
+}
+
+window.getIsGetAchievementsListSupported = function() {
+    return 'true'
+}
+
+window.getIsAchievementsNativePopupSupported = function() {
+    return 'false'
+}
+
+window.achievementsUnlock = function(options) {
+    let id = options
+    if (options) {
+        try {
+            const parsed = JSON.parse(options)
+            // v2 unlock() takes a flat achievement id; accept the old options object too
+            id = parsed && typeof parsed === 'object'
+                ? (parsed.id ?? parsed.achievement ?? parsed.name ?? '')
+                : parsed
+        } catch (e) {
+            id = options
+        }
+    }
+
     bridge.achievements.unlock(id)
         .then(() => {
             sendMessageToUnity('OnAchievementsUnlockCompleted', 'true')
@@ -781,92 +749,25 @@ window.achievementsUnlock = function(id) {
         })
 }
 
-window.achievementsGetAchievements = function() {
+window.achievementsShowNativePopup = function(options) {
+    // v2: native popup was removed
+    sendMessageToUnity('OnAchievementsShowNativePopupCompleted', 'false')
+}
+
+window.achievementsGetList = function(options) {
     bridge.achievements.getAchievements()
         .then(data => {
             if (data) {
-                sendMessageToUnity('OnAchievementsGetAchievementsCompletedSuccess', JSON.stringify(data))
+                if (typeof data !== 'string') {
+                    data = JSON.stringify(data)
+                }
+
+                sendMessageToUnity('OnAchievementsGetListCompletedSuccess', data)
             } else {
-                sendMessageToUnity('OnAchievementsGetAchievementsCompletedSuccess', '')
+                sendMessageToUnity('OnAchievementsGetListCompletedSuccess', '')
             }
         })
         .catch(error => {
-            sendMessageToUnity('OnAchievementsGetAchievementsCompletedFailed', 'false')
-        })
-}
-
-// tasks
-window.tasksGetTasks = function() {
-    bridge.tasks.getTasks()
-        .then(data => {
-            sendMessageToUnity('OnTasksGetTasksCompletedSuccess', data ? JSON.stringify(data) : '[]')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnTasksGetTasksCompletedFailed', 'false')
-        })
-}
-
-window.tasksAddProgress = function(options) {
-    options = JSON.parse(options)
-
-    bridge.tasks.addProgress(options.metric, options.amount)
-        .then(() => {
-            sendMessageToUnity('OnTasksAddProgressCompletedSuccess', '')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnTasksAddProgressCompletedFailed', 'false')
-        })
-}
-
-window.tasksClaimReward = function(options) {
-    options = JSON.parse(options)
-
-    bridge.tasks.claimReward(options.id)
-        .then(claimed => {
-            sendMessageToUnity('OnTasksClaimRewardCompletedSuccess', claimed ? 'true' : 'false')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnTasksClaimRewardCompletedFailed', 'false')
-        })
-}
-
-// daily rewards
-window.dailyRewardsGetRewards = function() {
-    bridge.dailyRewards.getRewards()
-        .then(data => {
-            sendMessageToUnity('OnDailyRewardsGetRewardsCompletedSuccess', data ? JSON.stringify(data) : '[]')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnDailyRewardsGetRewardsCompletedFailed', 'false')
-        })
-}
-
-window.dailyRewardsGetCurrentDay = function() {
-    bridge.dailyRewards.getCurrentDay()
-        .then(day => {
-            sendMessageToUnity('OnDailyRewardsGetCurrentDayCompletedSuccess', day.toString())
-        })
-        .catch(error => {
-            sendMessageToUnity('OnDailyRewardsGetCurrentDayCompletedFailed', 'false')
-        })
-}
-
-window.dailyRewardsGetCurrentReward = function() {
-    bridge.dailyRewards.getCurrentReward()
-        .then(reward => {
-            sendMessageToUnity('OnDailyRewardsGetCurrentRewardCompletedSuccess', reward ? reward.toString() : '')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnDailyRewardsGetCurrentRewardCompletedFailed', 'false')
-        })
-}
-
-window.dailyRewardsClaimCurrentReward = function() {
-    bridge.dailyRewards.claimCurrentReward()
-        .then(claimed => {
-            sendMessageToUnity('OnDailyRewardsClaimCurrentRewardCompletedSuccess', claimed ? 'true' : 'false')
-        })
-        .catch(error => {
-            sendMessageToUnity('OnDailyRewardsClaimCurrentRewardCompletedFailed', 'false')
+            sendMessageToUnity('OnAchievementsGetListCompletedFailed', 'false')
         })
 }

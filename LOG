@@ -1,0 +1,1716 @@
+playgama-bridge.js:1  [Bridge] Platform detected: yandex 
+190747?draft=true&lang=ru:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
+190747?draft=true&lang=ru:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+v2.9dd6b8af111e94af4bd9.js:1 SDK Init. Version: v2. Is loader: true.
+playgama-bridge.js:1  PlaygamaBridge v1.31.0 initialized. 
+t2.loader.js:1 You can reduce startup time if you configure your web server to add "Content-Encoding: br" response header when serving "Build/t2.framework.js.unityweb" file.
+t2.loader.js:1 You can reduce startup time if you configure your web server to add "Content-Encoding: br" response header when serving "Build/t2.data.unityweb" file.
+t2.loader.js:1 [UnityCache] 'https://app-190747.games.s3.yandex.net/190747/6yqqihgwbaummkqiuaz9aqmil1f8j6z2/Build/t2.data.unityweb' successfully downloaded and stored in the indexedDB cache
+t2.loader.js:1 You can reduce startup time if you configure your web server to add "Content-Encoding: br" response header when serving "Build/t2.wasm.unityweb" file.
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 navigator.mediaDevices support available
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 [UnityMemory] Configuration Parameters - Can be set up in boot.config
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-allocator-temp-initial-block-size-main=262144"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-allocator-temp-initial-block-size-worker=262144"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-temp-allocator-size-audio-worker=65536"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-bucket-allocator-granularity=16"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-bucket-allocator-bucket-count=8"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-bucket-allocator-block-size=4194304"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-bucket-allocator-block-count=1"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-main-allocator-block-size=16777216"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-thread-allocator-block-size=16777216"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-gfx-main-allocator-block-size=16777216"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-gfx-thread-allocator-block-size=16777216"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-cache-allocator-block-size=4194304"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-typetree-allocator-block-size=2097152"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-profiler-bucket-allocator-granularity=16"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-profiler-bucket-allocator-bucket-count=8"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-profiler-bucket-allocator-block-size=4194304"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-profiler-bucket-allocator-block-count=1"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-profiler-allocator-block-size=16777216"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-profiler-editor-allocator-block-size=1048576"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-temp-allocator-size-main=4194304"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-job-temp-allocator-block-size=2097152"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-job-temp-allocator-block-size-background=1048576"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10     "memorysetup-temp-allocator-size-background-worker=32768"
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 [PhysX] Initialized SinglethreadedTaskDispatcher.
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Loading player data from data.unity3d
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Initialize engine version: 2022.3.62f3 (96770f904ca7)
+
+t2.loader.js:1 Creating WebGL 2.0 context.
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Renderer: WebKit WebGL
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Vendor:   WebKit
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Version:  OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium))
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 GLES:     3
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10  EXT_clip_control EXT_color_buffer_float EXT_color_buffer_half_float EXT_conservative_depth EXT_depth_clamp EXT_disjoint_timer_query_webgl2 EXT_float_blend EXT_polygon_offset_clamp EXT_render_snorm EXT_texture_compression_bptc EXT_texture_compression_rgtc EXT_texture_filter_anisotropic EXT_texture_mirror_clamp_to_edge EXT_texture_norm16 KHR_parallel_shader_compile NV_shader_noperspective_interpolation OES_draw_buffers_indexed OES_sample_variables OES_shader_multisample_interpolation OES_texture_float_linear OVR_multiview2 WEBGL_blend_func_extended WEBGL_clip_cull_distance WEBGL_compressed_texture_s3tc WEBGL_compressed_texture_s3tc_srgb WEBGL_debug_renderer_info WEBGL_debug_shaders WEBGL_lose_context WEBGL_multi_draw WEBGL_polygon_mode WEBGL_provoking_vertex WEBGL_stencil_texturing GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_conservative_depth GL_EXT_depth_clamp GL_EXT_disjoint_timer_query_webgl2 GL_EXT_float_blend GL_EXT_polygon_offset_clamp GL_EXT_render_snorm GL_EXT_
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 texture_compression_bptc GL_EXT_texture_compression_rgtc GL_EXT_texture_filter_anisotropic GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_KHR_parallel_shader_compile GL_NV_shader_noperspective_interpolation GL_OES_draw_buffers_indexed GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_texture_float_linear GL_OVR_multiview2 GL_WEBGL_blend_func_extended GL_WEBGL_clip_cull_distance GL_WEBGL_compressed_texture_s3tc GL_WEBGL_compressed_texture_s3tc_srgb GL_WEBGL_debug_renderer_info GL_WEBGL_debug_shaders GL_WEBGL_lose_context GL_WEBGL_multi_draw GL_WEBGL_polygon_mode GL_WEBGL_provoking_vertex GL_WEBGL_stencil_texturing
+
+WebGL: INVALID_ENUM: getInternalformatParameter: invalid internalformat
+WebGL: INVALID_ENUM: getInternalformatParameter: invalid internalformat
+WebGL: INVALID_ENUM: getInternalformatParameter: invalid internalformat
+WebGL: INVALID_ENUM: getInternalformatParameter: invalid internalformat
+WebGL: INVALID_ENUM: getInternalformatParameter: invalid internalformat
+WebGL: INVALID_ENUM: getInternalformatParameter: invalid internalformat
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 OPENGL LOG: Creating OpenGL ES 3.0 graphics device ; Context level  <OpenGL ES 3.0> ; Context handle 1
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Input Manager initialize...
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object 'ColorSelecter') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 WARNING: RGBA Compressed ASTC6X6 UNorm format is not supported, decompressing texture
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 [PhysX] Initialized SinglethreadedTaskDispatcher.
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 UnloadTime: 4.400000 ms
+
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. <URL>
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 [SaveS] Cache built: 64 fields
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 [SaveS] Using cached 64 fields
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Banner: Hiding (Premium/NoAds active)
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 [SaveS] Data loaded
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1939') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1941Closed') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1944Closed') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1942Closed') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1939Closed') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1943Closed') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1941open') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1942open') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1945open') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1943open') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1945Closed') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 The referenced script on this Behaviour (Game Object '1944open') is missing!
+
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 Uncaught TypeError: window.tasksAddProgress is not a function Object
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+t2.loader.js:1 Invoking error handler due to
+TypeError: window.tasksAddProgress is not a function
+at _PlaygamaBridgeTasksAddProgress (blob:https://app-190747.games.s3.yandex.net/acbfd725-da45-47a5-818e-4dde1989f7f7:10:89879)
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at invoke_iiii (blob:https://app-190747.games.s3.yandex.net/acbfd725-da45-47a5-818e-4dde1989f7f7:10:385005)
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at wasm://wasm/041c2716
+    at browserIterationFunc (blob:https://app-190747.games.s3.yandex.net/acbfd725-da45-47a5-818e-4dde1989f7f7:10:230059)
+    at callUserCallback (blob:https://app-190747.games.s3.yandex.net/acbfd725-da45-47a5-818e-4dde1989f7f7:10:183540)
+    at Object.runIter (blob:https://app-190747.games.s3.yandex.net/acbfd725-da45-47a5-818e-4dde1989f7f7:10:184780)
+    at Browser_mainLoop_runner (blob:https://app-190747.games.s3.yandex.net/acbfd725-da45-47a5-818e-4dde1989f7f7:10:183076)
+    at v2.9dd6b8af111e94af4bd9.js:1:74257
+    at Array.forEach (<anonymous>)
+    at e (v2.9dd6b8af111e94af4bd9.js:1:74233)
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Uncaught TypeError: window.tasksAddProgress is not a function
+    at _PlaygamaBridgeTasksAddProgress (acbfd725-da45-47a5-818e-4dde1989f7f7:10:89879)
+    at 041c2716:0x5fd271
+    at 041c2716:0x310762
+    at 041c2716:0x65b21
+    at 041c2716:0x98d3c8
+    at 041c2716:0x94eb5c
+    at 041c2716:0x22367f
+    at 041c2716:0x9391e0
+    at invoke_iiii (acbfd725-da45-47a5-818e-4dde1989f7f7:10:385005)
+    at 041c2716:0x68393
+    at 041c2716:0x49e16b
+    at 041c2716:0xbdd48
+    at 041c2716:0x4cfbd
+    at 041c2716:0x1923ff
+    at 041c2716:0x3a3ab6
+    at 041c2716:0xcc94dc
+    at 041c2716:0x6b894e
+    at 041c2716:0xcbacbb
+    at 041c2716:0x75e0c6
+    at 041c2716:0x75e135
+    at 041c2716:0xb9c94a
+    at 041c2716:0x939186
+    at browserIterationFunc (acbfd725-da45-47a5-818e-4dde1989f7f7:10:230059)
+    at callUserCallback (acbfd725-da45-47a5-818e-4dde1989f7f7:10:183540)
+    at Object.runIter (acbfd725-da45-47a5-818e-4dde1989f7f7:10:184780)
+    at Browser_mainLoop_runner (acbfd725-da45-47a5-818e-4dde1989f7f7:10:183076)
+    at v2.9dd6b8af111e94af4bd9.js:1:74257
+    at Array.forEach (<anonymous>)
+    at e (v2.9dd6b8af111e94af4bd9.js:1:74233)
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 [PaymentsCatalogCache] Resolved: success=True, count=9
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 SendMessage: object PlaygamaBridge does not have receiver for function OnVisibilityStateChanged!
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 [PaymentsPurchasesCache] Resolved: success=True, count=0
+
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 SendMessage: object PlaygamaBridge does not have receiver for function OnVisibilityStateChanged!
+
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 Audio context resumed after 10.864 seconds.
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 SendMessage: object PlaygamaBridge does not have receiver for function OnVisibilityStateChanged!
+
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+acbfd725-da45-47a5-818e-4dde1989f7f7:10 SendMessage: object PlaygamaBridge does not have receiver for function OnVisibilityStateChanged!
+
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+v2.9dd6b8af111e94af4bd9.js:1 An abnormal situation has occurred: the PlayerLoop internal function has been called recursively. Please contact Customer Support with a sample project so that we can reproduce the problem and troubleshoot it.
+
+console.error @ v2.9dd6b8af111e94af4bd9.js:1
+_JS_Log_Dump @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func33607 @ 041c2716:0x6d47b4
+$func10117 @ 041c2716:0x187845
+$func56745 @ 041c2716:0xb9ec2c
+$func33601 @ 041c2716:0x6d45eb
+$func10116 @ 041c2716:0x187656
+$func618 @ 041c2716:0x3b417
+$func56666 @ 041c2716:0xb9b9ff
+$cj @ 041c2716:0x939186
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+_JS_CallAsLongAsNoExceptionsSeen @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+$func56663 @ 041c2716:0xb8eb26
+$Zi @ 041c2716:0x9391d2
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+callUserCallback @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
+(anonymous) @ acbfd725-da45-47a5-818e-4dde1989f7f7:10
