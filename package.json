@@ -10,6 +10,7 @@
         "build:nolint": "webpack --config-name bundled --env noLint",
         "build:platform": "ts-node scripts/build-platform.ts",
         "build:dist": "ts-node scripts/build-dist.ts",
+        "build:deploy": "npm run build:dynamic && node scripts/deploy.js",
         "develop": "webpack --mode=development",
         "dev": "webpack serve --mode=development --config-name dynamic",
         "test": "vitest run",

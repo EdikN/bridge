@@ -1,0 +1,19 @@
+# Enforce LF line endings for all text files in the working tree, so the
+# eslint `linebreak-style: unix` rule passes on Windows checkouts too.
+* text=auto eol=lf
+
+# Binary files — never touch line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.mp3 binary
+*.wav binary
+*.zip binary
