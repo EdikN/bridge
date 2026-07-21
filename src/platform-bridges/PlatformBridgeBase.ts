@@ -268,6 +268,12 @@ class PlatformBridgeBase {
         return DEVICE_OS.OTHER
     }
 
+    // Fork: vibration support. 1.31 had this as a bridge-level stub that never reached the
+    // public API; here it is wired through DeviceModule with a real navigator.vibrate impl.
+    get isVibrationSupported(): boolean {
+        return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
+    }
+
     // payments
     get isPaymentsSupported(): boolean {
         return false
@@ -484,6 +490,15 @@ class PlatformBridgeBase {
 
     paymentsGetPurchases(): Promise<unknown> {
         return Promise.resolve(this._paymentsPurchases)
+    }
+
+    // device
+    vibrate(duration: number | number[] = 100): Promise<unknown> {
+        if (!this.isVibrationSupported) {
+            return Promise.reject()
+        }
+
+        return navigator.vibrate(duration) ? Promise.resolve() : Promise.reject()
     }
 
     // clipboard

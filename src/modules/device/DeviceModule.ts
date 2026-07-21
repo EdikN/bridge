@@ -47,6 +47,8 @@ export interface DeviceBridgeContract extends PlatformBridgeLike {
     deviceOs: DeviceOs
     safeArea?: SafeAreaInsets | null
     options: DeviceBridgeOptions
+    isVibrationSupported: boolean
+    vibrate(duration?: number | number[]): Promise<unknown>
 }
 
 interface DeviceModule extends EventEmitter {}
@@ -68,6 +70,10 @@ class DeviceModule extends ModuleBase<DeviceBridgeContract> {
         return this._platformBridge.safeArea ?? SafeArea.getInsets()
     }
 
+    get isVibrationSupported(): boolean {
+        return this._platformBridge.isVibrationSupported
+    }
+
     #currentOrientation: DeviceOrientation | null = null
 
     #overlayElement: HTMLDivElement | null = null
@@ -87,6 +93,14 @@ class DeviceModule extends ModuleBase<DeviceBridgeContract> {
         this.#initializeOrientationTracking()
         this.#initializeScreenSizeTracking()
         return this
+    }
+
+    vibrate(duration?: number | number[]): Promise<unknown> {
+        if (!this._platformBridge.isVibrationSupported) {
+            return Promise.reject()
+        }
+
+        return this._platformBridge.vibrate(duration)
     }
 
     #initializeOrientationTracking(): void {

@@ -73,6 +73,14 @@ class SocialModule extends ModuleBase<SocialBridgeContract> {
         return this._platformBridge.joinCommunity(this.#resolve('joinCommunity', options))
     }
 
+    isMemberOfCommunity(options?: SocialOptions): Promise<boolean> {
+        if (!this._platformBridge.isJoinCommunitySupported) {
+            return Promise.reject()
+        }
+
+        return this._platformBridge.isMemberOfCommunity(this.#resolve('joinCommunity', options))
+    }
+
     share(options?: SocialOptions): Promise<unknown> {
         if (!this._platformBridge.isShareSupported) {
             return Promise.reject()

@@ -99,28 +99,8 @@ class OkPlatformBridge extends VkPlatformBridge {
         return promiseDecorator.promise
     }
 
-    joinCommunity(options?: AnyRecord & { groupId?: string | number }): Promise<unknown> {
-        // groupId comes from runtime options or the merged social config block; keep the
-        // fork's hardcoded fallback so the call works without arguments.
-        const configGroupId = (this._options?.social as AnyRecord | undefined)
-            ?.joinCommunity as AnyRecord | undefined
-        let groupId = options?.groupId
-            ?? configGroupId?.[this.platformId] as string | number | undefined
-            ?? 70000048656390
-
-        if (typeof groupId === 'string') {
-            groupId = parseInt(groupId, 10)
-            if (Number.isNaN(groupId)) {
-                return Promise.reject()
-            }
-        }
-
-        // OK supports the native subscribe dialog via VK Bridge (VKWebAppJoinGroup) on
-        // Android/iOS/web — show it instead of navigating to ok.ru/group, which loads a guest
-        // page inside the game frame.
-        return this._sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
-    }
-
+    // joinCommunity / isMemberOfCommunity наследуются от VkPlatformBridge (с кэшем членства).
+    // Дефолтный group id и URL страницы сообщества для OK переопределены ниже.
     share(options?: AnyRecord & { url?: string, link?: string }): Promise<unknown> {
         let link = options?.url ?? options?.link
 
@@ -143,6 +123,14 @@ class OkPlatformBridge extends VkPlatformBridge {
 
         // Если сформировать ссылку не удалось, просто предлагаем поделиться через WallPost
         return this._sendRequestToVKBridge(ACTION_NAME.SHARE, 'VKWebAppShowWallPostBox', { message: '' }, 'type')
+    }
+
+    protected get _defaultJoinCommunityGroupId(): number {
+        return 70000048656390
+    }
+
+    protected _getCommunityUrl(groupId: number): string {
+        return `https://ok.ru/group/${groupId}`
     }
 }
 

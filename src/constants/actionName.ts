@@ -37,6 +37,7 @@ export const ACTION_NAME = {
     SET_STORAGE_DATA: 'set_storage_data',
     DELETE_STORAGE_DATA: 'delete_storage_data',
     CLIPBOARD_WRITE: 'clipboard_write',
+    VIBRATE: 'vibrate',
     ADBLOCK_DETECT: 'adblock_detect',
     SET_INTERSTITIAL_STATE: 'set_interstitial_state',
     SET_REWARDED_STATE: 'set_rewarded_state',

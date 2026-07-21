@@ -67,6 +67,7 @@ export interface SocialBridgeContract extends PlatformBridgeLike {
     isRateSupported: boolean
     inviteFriends(data?: AnyRecord): Promise<unknown>
     joinCommunity(data?: AnyRecord): Promise<unknown>
+    isMemberOfCommunity(data?: AnyRecord): Promise<boolean>
     share(data?: AnyRecord): Promise<unknown>
     createPost(data?: AnyRecord): Promise<unknown>
     addToHomeScreen(): Promise<unknown>

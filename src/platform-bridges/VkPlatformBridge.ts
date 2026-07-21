@@ -158,6 +158,11 @@ class VkPlatformBridge extends PlatformBridgeBase {
 
     #platform: string | null = null
 
+    // Кэш членства в сообществах (groupId → boolean). Прогревается при инициализации,
+    // чтобы при клике открыть страницу сообщества СИНХРОННО (мобильный WebView блокирует
+    // открытие после await).
+    #communityMembership = new Map<number, boolean>()
+
     initialize(): Promise<unknown> {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -206,6 +211,7 @@ class VkPlatformBridge extends PlatformBridgeBase {
                                 .finally(() => {
                                     this._isInitialized = true
                                     this._setPlatformStorageAvailable(true)
+                                    this._prefetchCommunityMembership()
                                     this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
                                 })
                         })
@@ -342,24 +348,46 @@ class VkPlatformBridge extends PlatformBridgeBase {
     }
 
     joinCommunity(options?: AnyRecord & { groupId?: string | number }): Promise<unknown> {
-        // groupId can come from runtime options or the merged social config block;
-        // keep the fork's hardcoded fallback so the call works without arguments.
-        const configGroupId = (this._options?.social as AnyRecord | undefined)
-            ?.joinCommunity as AnyRecord | undefined
-        let groupId = options?.groupId
-            ?? configGroupId?.[this.platformId] as string | number | undefined
-            ?? 213542253
-
-        if (typeof groupId === 'string') {
-            groupId = parseInt(groupId, 10)
-            if (Number.isNaN(groupId)) {
-                return Promise.reject()
-            }
+        // VKWebAppJoinGroup требует именно integer (иначе client_error code 5
+        // "Param group_id should be a number")
+        const groupId = this._resolveCommunityGroupId(options)
+        if (!groupId) {
+            return Promise.reject(new Error('joinCommunity: invalid groupId'))
         }
 
-        // Only the native VK join dialog — do not open the community page afterwards, as
-        // window.open navigates the game's own frame inside the VK Android app.
-        return this._sendRequestToVKBridge(ACTION_NAME.JOIN_COMMUNITY, 'VKWebAppJoinGroup', { group_id: groupId })
+        // Если заранее (из прогретого кэша) знаем, что пользователь уже в группе — диалог
+        // вступления ничего не покажет, поэтому открываем страницу сообщества. Делаем это
+        // СИНХРОННО, в рамках клика: мобильный WebView блокирует открытие после await.
+        if (this.#communityMembership.get(groupId) === true) {
+            this._openCommunityPage(groupId)
+            return Promise.resolve({ result: true, alreadyMember: true })
+        }
+
+        // Членство неизвестно или пользователь не в группе — показываем нативный диалог.
+        // VKWebAppJoinGroup при уже-членстве просто резолвится без диалога.
+        return (this._platformSdk as VkBridge)
+            .send('VKWebAppJoinGroup', { group_id: groupId })
+            .then((data) => {
+                this.#communityMembership.set(groupId, true)
+                return data
+            })
+    }
+
+    isMemberOfCommunity(options?: AnyRecord & { groupId?: string | number }): Promise<boolean> {
+        const groupId = this._resolveCommunityGroupId(options)
+        if (!groupId) {
+            return Promise.reject(new Error('isMemberOfCommunity: invalid groupId'))
+        }
+
+        // VKWebAppGetGroupInfo отдаёт is_member: 1 — состоит, 0 — нет.
+        // Поле отсутствует у закрытых сообществ → трактуем как false.
+        return (this._platformSdk as VkBridge)
+            .send('VKWebAppGetGroupInfo', { group_id: groupId })
+            .then((data) => {
+                const isMember = data?.is_member === 1
+                this.#communityMembership.set(groupId, isMember)
+                return isMember
+            })
     }
 
     share(options?: AnyRecord & { url?: string, link?: string }): Promise<unknown> {
@@ -483,6 +511,68 @@ class VkPlatformBridge extends PlatformBridgeBase {
                     priceValue: parseInt(item.price as string, 10) || 0,
                 }))
             })
+    }
+
+    protected get _defaultJoinCommunityGroupId(): number {
+        return 213542253
+    }
+
+    protected _resolveCommunityGroupId(options?: AnyRecord & { groupId?: string | number }): number | null {
+        // Достаём числовой ID из любой обёртки: число, строка, { groupId } или
+        // { vk } / { ok } — на любой глубине вложенности.
+        const extractGroupId = (value: unknown): unknown => {
+            if (value === null || value === undefined) {
+                return null
+            }
+            if (typeof value === 'object') {
+                const record = value as AnyRecord
+                return extractGroupId(record.groupId ?? record[this.platformId])
+            }
+            return value
+        }
+
+        const configGroupId = (this._options?.social as AnyRecord | undefined)
+            ?.joinCommunity as AnyRecord | undefined
+
+        // ID берётся из конфига (если задан), иначе — из аргумента, иначе хардкод-дефолт.
+        // || (не ??): пустая строка из конфига и null проваливаются на дефолт,
+        // а валидный group id всегда положительный (0/'' невозможны).
+        const rawGroupId = extractGroupId(configGroupId?.[this.platformId])
+            || extractGroupId(options)
+            || this._defaultJoinCommunityGroupId
+
+        const groupId = Number(rawGroupId)
+        return Number.isFinite(groupId) && groupId > 0 ? groupId : null
+    }
+
+    protected _getCommunityUrl(groupId: number): string {
+        return `https://vk.com/club${groupId}`
+    }
+
+    protected _openCommunityPage(groupId: number): void {
+        // Открываем через клик по временному <a target="_blank">, а не window.open:
+        // в Android-приложении VK голый window.open навигирует фрейм самой игры.
+        const link = document.createElement('a')
+        link.href = this._getCommunityUrl(groupId)
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    }
+
+    protected _prefetchCommunityMembership(): void {
+        const groupId = this._resolveCommunityGroupId()
+        if (!groupId || !this._platformSdk) {
+            return
+        }
+
+        (this._platformSdk as VkBridge)
+            .send('VKWebAppGetGroupInfo', { group_id: groupId })
+            .then((data) => {
+                this.#communityMembership.set(groupId, data?.is_member === 1)
+            })
+            .catch(() => {})
     }
 
     protected _sendRequestToVKBridge(actionName: string, vkMethodName: string, parameters: AnyRecord = { }, responseSuccessKey = 'result'): Promise<unknown> {
