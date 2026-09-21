@@ -4,3 +4,5 @@
 node_modules
 dist
 *.tgz
+.deploy-state.json
+.deploy-sync.log
