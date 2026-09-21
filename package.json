@@ -45,6 +45,8 @@
         "build:types": "tsc -p tsconfig.types.json",
         "build:package": "npm run build && npm run build:npm && npm run build:types",
         "build:deploy": "npm run build:dynamic && node scripts/deploy.js",
+        "sync:release": "node scripts/sync-release.js",
+        "sync:release:task": "powershell -ExecutionPolicy Bypass -File scripts/install-sync-task.ps1",
         "develop": "webpack --mode=development",
         "dev": "webpack serve --mode=development --config-name dynamic",
         "test": "vitest run",

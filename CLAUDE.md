@@ -21,6 +21,10 @@ npx vitest tests/path/to/test.spec.ts  # Run single test file
 
 Builds also mirror `dist/` into `UnityTemplate/` (fork-only `CopyToUnityTemplatePlugin` in `webpack.config.ts`).
 
+Local projects listed in `bridge-deploy.config.json` get the bridge two ways:
+- `npm run build:deploy` — copies the current local dynamic build (manual, for testing unreleased changes);
+- `npm run sync:release` (`scripts/sync-release.js`) — downloads `playgama-bridge.js` from the latest GitHub release and copies it into every project still on an older release. State lives in `.deploy-state.json`, log in `.deploy-sync.log` (both gitignored). `npm run sync:release:task` registers a Windows scheduled task running it at logon and every 30 minutes, so a new release reaches all projects without manual steps.
+
 ## Architecture (v2)
 
 ### Initialization Flow
