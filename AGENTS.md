@@ -2,6 +2,21 @@
 
 Playgama Bridge is a unified cross-platform SDK for publishing HTML5 games to many gaming platforms. It provides a single API interface that abstracts platform-specific differences, enabling developers to integrate their games once and deploy across multiple platforms (Playgama, Crazy Games, Facebook, Telegram, Discord, Poki, etc.).
 
+## Git remotes: push to EdikN/bridge only
+
+This repository is **EdikN's fork**. Every push, branch, PR, issue and release goes to
+**`EdikN/bridge`** (remote `origin`). **Never** push to, or open PRs/issues against,
+**`Playgama/bridge`** (remote `upstream`) — it is someone else's public repository, and
+anything opened there is visible to Playgama.
+
+- `upstream` is read-only for us: only `git fetch upstream` when syncing (see `UPSTREAM_MERGE.md`).
+- Push with an explicit remote: `git push origin <branch>`.
+- **`gh` defaults to the parent repo of a fork**, i.e. `Playgama/bridge`. Always pass
+  `-R EdikN/bridge` (`gh pr create -R EdikN/bridge --base main ...`, `gh pr merge -R EdikN/bridge ...`,
+  `gh release ... -R EdikN/bridge`), or run `gh repo set-default EdikN/bridge` once in the clone.
+- PRs target `main` of `EdikN/bridge`. A PR that was opened against `Playgama/bridge` by
+  mistake must be closed immediately and reported to the user (it happened once: #253).
+
 ## Build Commands
 
 ```bash
