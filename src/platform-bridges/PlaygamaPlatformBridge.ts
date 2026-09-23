@@ -54,6 +54,17 @@ interface PlaygamaProductData extends AnyRecord {
     bridgeId?: string
 }
 
+interface PlaygamaCatalogProduct {
+    id: string
+    // charge terms the platform expects back on purchase (fiat in minor units)
+    amount?: number
+    currency?: string
+    price: string
+    priceValue: number
+    priceCurrencyCode: string
+    priceCurrencyImage?: string
+}
+
 interface PlaygamaSdk {
     platformService: {
         getLanguage(): string
@@ -85,6 +96,7 @@ interface PlaygamaSdk {
     }
     inGamePaymentsApi: {
         purchase(product: PlaygamaProductData): Promise<PlaygamaPurchase>
+        getCatalog?: (products: PlaygamaProductData[]) => Promise<PlaygamaCatalogProduct[]>
         getPurchases?: () => Promise<Array<AnyRecord & { id: string; bridgeId?: string }>>
         consumePurchase?: (orderId: string | undefined, externalId: string | undefined) => Promise<unknown>
         confirmDelivery?: (params: { orderId?: string; externalId?: string }) => Promise<unknown>
@@ -169,6 +181,9 @@ class PlaygamaPlatformBridge extends PlatformBridgeBase {
 
     #isAddToHomeScreenSupported = false
 
+    // Catalog entries accepted from the platform supply the displayed purchase terms.
+    #paymentsPlatformCatalog = new Map<string, PlaygamaCatalogProduct>()
+
     initialize(): Promise<unknown> {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -240,7 +255,7 @@ class PlaygamaPlatformBridge extends PlatformBridgeBase {
                             this.#resolveSupportedFeatures()
 
                             if (sdk.platformService?.getAdditionalParams) {
-                                this._additionalData = sdk.platformService.getAdditionalParams() || {}
+                                this._data = sdk.platformService.getAdditionalParams() || {}
                             }
 
                             return this.#getPlayer()
@@ -381,12 +396,17 @@ class PlaygamaPlatformBridge extends PlatformBridgeBase {
 
         product.bridgeId = id
 
+        const accepted = this.#paymentsPlatformCatalog.get(id)
+        const request = typeof accepted?.amount === 'number' && accepted.currency
+            ? { ...product, amount: accepted.amount, currency: accepted.currency }
+            : product
+
         let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.PURCHASE)
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.PURCHASE)
 
             const sdk = this._platformSdk as PlaygamaSdk
-            sdk.inGamePaymentsApi.purchase(product)
+            sdk.inGamePaymentsApi.purchase(request)
                 .then((purchase) => {
                     if (purchase.status === 'PAID') {
                         const mergedPurchase: AnyRecord & { id: string } = { id, ...purchase }
@@ -461,21 +481,30 @@ class PlaygamaPlatformBridge extends PlatformBridgeBase {
         return super.paymentsConsumePurchase(id)
     }
 
-    paymentsGetCatalog(): Promise<unknown> {
-        const products = this._paymentsGetProductsPlatformData()
+    async paymentsGetCatalog(): Promise<unknown> {
+        const products = this._paymentsGetProductsPlatformData() as PlaygamaProductData[]
         if (!products) {
             return Promise.reject()
         }
 
-        const updatedProducts = products.map((product) => ({
-            id: product.id,
-            price: `${product.amount} Gam`,
-            priceCurrencyCode: 'Gam',
-            priceCurrencyImage: 'https://games.playgama.com/assets/gold-fennec-coin-large.webp',
-            priceValue: product.amount,
-        }))
+        const platformCatalog = await this.#paymentsGetPlatformCatalog(products)
+        if (platformCatalog !== null) {
+            this.#paymentsPlatformCatalog = new Map(platformCatalog.map((product) => [product.id, product]))
+        }
 
-        return Promise.resolve(updatedProducts)
+        return products.map((product) => {
+            const platformProduct = this.#paymentsPlatformCatalog.get(product.id)
+            return platformProduct
+                ? {
+                    id: product.id,
+                    price: platformProduct.price,
+                    priceValue: platformProduct.priceValue,
+                    priceCurrencyCode: platformProduct.priceCurrencyCode,
+                    ...(platformProduct.priceCurrencyImage === undefined
+                        ? {} : { priceCurrencyImage: platformProduct.priceCurrencyImage }),
+                }
+                : this.#paymentsGetFallbackCatalogProduct(product)
+        })
     }
 
     // social
@@ -523,6 +552,33 @@ class PlaygamaPlatformBridge extends PlatformBridgeBase {
         return promiseDecorator.promise
     }
 
+    // Rejected SDK calls keep the last displayed prices and their charge terms.
+    // An empty response (including portal quote failures) replaces them with GAM fallback prices.
+    async #paymentsGetPlatformCatalog(products: PlaygamaProductData[]): Promise<PlaygamaCatalogProduct[] | null> {
+        const paymentsApi = (this._platformSdk as PlaygamaSdk | null)?.inGamePaymentsApi
+        if (typeof paymentsApi?.getCatalog !== 'function') {
+            return null
+        }
+
+        try {
+            const catalog = await paymentsApi.getCatalog(products)
+            return Array.isArray(catalog) ? catalog.filter((product) => typeof product?.id === 'string') : null
+        } catch {
+            return null
+        }
+    }
+
+    #paymentsGetFallbackCatalogProduct(product: PlaygamaProductData): PlaygamaCatalogProduct {
+        const amount = product.amount as number
+        return {
+            id: product.id,
+            price: `${amount} Gam`,
+            priceCurrencyCode: 'Gam',
+            priceCurrencyImage: 'https://games.playgama.com/assets/gold-fennec-coin-large.webp',
+            priceValue: amount,
+        }
+    }
+
     #getPlayer(_options?: unknown): Promise<void> {
         const sdk = this._platformSdk as PlaygamaSdk
         if (typeof sdk.userService?.getUser !== 'function') {
@@ -566,11 +622,7 @@ class PlaygamaPlatformBridge extends PlatformBridgeBase {
             this.#isCloudSaveSupported = sdk.platformService.getIsCloudSaveSupported()
         }
 
-        // Guests get cloud storage upfront only when anonymous cloud save is enabled;
-        // otherwise it becomes available once the player authorizes.
-        if (this.#isAnonymousCloudSaveEnabled) {
-            this._setPlatformStorageAvailable(this.#isCloudSaveSupported)
-        }
+        this._setPlatformStorageAvailable(this.#isCloudSaveSupported)
 
         if (sdk.platformService?.getIsPaymentsSupported) {
             this.#isPaymentsSupported = sdk.platformService.getIsPaymentsSupported()
@@ -581,12 +633,8 @@ class PlaygamaPlatformBridge extends PlatformBridgeBase {
         this.#isAddToHomeScreenSupported = socialService?.getIsAddToHomeScreenSupported?.() ?? false
     }
 
-    get #isAnonymousCloudSaveEnabled(): boolean {
-        return this._options.storage?.allowAnonymousCloudSave === true
-    }
-
     #ensureStorageReady(): Promise<void> {
-        if (!this.#isCloudSaveSupported || (!this.#isAnonymousCloudSaveEnabled && !this._isPlayerAuthorized)) {
+        if (!this.#isCloudSaveSupported) {
             return Promise.reject()
         }
         return Promise.resolve()

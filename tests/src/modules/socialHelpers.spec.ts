@@ -1,6 +1,8 @@
 import { describe, test, expect } from 'vitest'
-import { getSocialPlatformData } from '../../../src/modules/social/helpers'
-import type { SocialConfig } from '../../../src/modules/social/types'
+import {
+    getSocialPlatformData, getSocialContent, getPostPlatformData, getPostRewards,
+} from '../../../src/modules/social/helpers'
+import type { SocialConfig, PostMapping } from '../../../src/modules/social/types'
 
 // The config loader resolves `social[method]` for the active platform before the
 // module reads it (common `social` block merged with `platforms[id].social`), so
@@ -58,5 +60,102 @@ describe('getSocialPlatformData', () => {
             attachments: 'photo2',
             myField: 'x',
         })
+    })
+})
+
+// Posts are declared once for every platform: common content, a block named
+// after a platform for its own fields, and any other key for the game itself.
+const POSTS: PostMapping[] = [
+    {
+        id: 'gift',
+        text: 'I am sharing coins!',
+        image: 'gift.png',
+        rewards: [
+            { id: 'coins', amount: 100 },
+            { id: 'coins', amount: 50, type: 'author' },
+        ],
+        rewardCooldown: 14400,
+        ok: { status: true },
+        reddit: { text: '🎁 Free coins inside' },
+    },
+]
+
+describe('getSocialContent', () => {
+    test('returns the content fields with the platform block over them', () => {
+        expect(getSocialContent(POSTS, 'reddit', 'gift')).toEqual({
+            text: '🎁 Free coins inside',
+            image: 'gift.png',
+        })
+    })
+
+    test('leaves out the id, the rewards and the blocks of other platforms', () => {
+        expect(getSocialContent(POSTS, 'ok', 'gift')).toEqual({
+            text: 'I am sharing coins!',
+            image: 'gift.png',
+            status: true,
+        })
+    })
+
+    test('returns null for an id that is not declared', () => {
+        expect(getSocialContent(POSTS, 'reddit', 'unknown')).toBeNull()
+        expect(getSocialContent(undefined, 'reddit', 'gift')).toBeNull()
+    })
+})
+
+describe('getPostPlatformData', () => {
+    test('takes the rewards and the cooldown from the common fields', () => {
+        const post = getPostPlatformData(POSTS, 'ok', 'gift')
+
+        expect(post?.rewards).toEqual([
+            { id: 'coins', amount: 100 },
+            { id: 'coins', amount: 50, type: 'author' },
+        ])
+        expect(post?.rewardCooldown).toBe(14400)
+    })
+
+    test('lets the platform block replace the rewards and the cooldown', () => {
+        const posts: PostMapping[] = [{
+            id: 'gift',
+            rewards: [{ id: 'coins', amount: 100 }],
+            rewardCooldown: 14400,
+            reddit: { rewards: [{ id: 'gems', amount: 5 }], rewardCooldown: 60 },
+        }]
+        const post = getPostPlatformData(posts, 'reddit', 'gift')
+
+        // The array is replaced as a whole, not merged index by index into an object.
+        expect(post?.rewards).toEqual([{ id: 'gems', amount: 5 }])
+        expect(post?.rewardCooldown).toBe(60)
+        expect(getPostRewards(post, 'visit', 1)).toEqual([{ id: 'gems', amount: 5, type: 'visit' }])
+    })
+
+    test('merges nested objects of the platform block field by field', () => {
+        const posts: PostMapping[] = [{
+            id: 'gift',
+            card: { title: '+100 COINS', button: 'OPEN GIFT' },
+            reddit: { card: { title: '+200 COINS' } },
+        }]
+
+        expect(getPostPlatformData(posts, 'reddit', 'gift')?.card).toEqual({ title: '+200 COINS', button: 'OPEN GIFT' })
+    })
+
+    test('returns null for an id that is not declared', () => {
+        expect(getPostPlatformData(POSTS, 'reddit', 'unknown')).toBeNull()
+        expect(getPostPlatformData(undefined, 'reddit', 'gift')).toBeNull()
+    })
+})
+
+describe('getPostRewards', () => {
+    const post = getPostPlatformData(POSTS, 'reddit', 'gift')
+
+    test('returns the rewards of the player who came through the post', () => {
+        expect(getPostRewards(post, 'visit', 1)).toEqual([{ id: 'coins', amount: 100, type: 'visit' }])
+    })
+
+    test('multiplies the author rewards by the players counted', () => {
+        expect(getPostRewards(post, 'author', 3)).toEqual([{ id: 'coins', amount: 150, type: 'author' }])
+    })
+
+    test('returns nothing for a post that declares no rewards', () => {
+        expect(getPostRewards(null, 'visit', 1)).toEqual([])
     })
 })

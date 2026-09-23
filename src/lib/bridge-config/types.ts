@@ -22,9 +22,9 @@ import type { TasksConfig } from '../../modules/tasks/types'
 import type { AchievementMapping } from '../../modules/achievements/types'
 import type { CrossPromoConfig } from '../../modules/cross-promo/types'
 import type { LeaderboardMapping } from '../../modules/leaderboards'
+import type { SocialConfig } from '../../modules/social/types'
 import type { NotificationMapping } from '../../modules/notifications/types'
 import type { DeviceConfig } from '../../modules/device'
-import type { StorageConfig } from '../../modules/storage/types'
 
 export interface SaasFeatureConfig {
     platforms?: string[]
@@ -78,10 +78,10 @@ export interface ConfigFileOptions extends AnyRecord {
     tasks?: TasksConfig
     achievements?: AchievementMapping[]
     leaderboards?: LeaderboardMapping[]
+    social?: SocialConfig
     notifications?: NotificationMapping[]
     disableAutoNotifications?: boolean
     device?: DeviceConfig
-    storage?: StorageConfig
     crossPromo?: CrossPromoConfig
     saas?: SaasConfig
     payments?: Array<AnyRecord & { id: string }>
