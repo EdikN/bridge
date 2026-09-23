@@ -15,10 +15,13 @@
  * along with Playgama Bridge. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export const LAUNCH_SOURCE = {
-    NOTIFICATION: 'notification',
-    // Opened from a post the game created with social.createPost(); the id of
-    // the post's config entry is platform.data.postId.
-    POST: 'post',
-} as const
-export type LaunchSource = typeof LAUNCH_SOURCE[keyof typeof LAUNCH_SOURCE]
+import StandalonePlatformBridge from './StandalonePlatformBridge'
+import { PLATFORM_ID, type PlatformId } from '../modules/platform/constants'
+
+class PlaygamaSandboxPlatformBridge extends StandalonePlatformBridge {
+    get platformId(): PlatformId {
+        return PLATFORM_ID.PLAYGAMA_SANDBOX
+    }
+}
+
+export default PlaygamaSandboxPlatformBridge

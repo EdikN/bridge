@@ -16,8 +16,12 @@
  */
 
 import PlatformBridgeBase from './PlatformBridgeBase'
-import { ACTION_NAME } from '../constants'
+import ServerTimeCache from '../lib/ServerTimeCache'
+import { ACTION_NAME, LAUNCH_SOURCE, type LaunchSource } from '../constants'
 import { PLATFORM_ID, type PlatformId } from '../modules/platform/constants'
+import { LEADERBOARD_TYPE, type LeaderboardType } from '../modules/leaderboards/constants'
+import type { LeaderboardEntry } from '../modules/leaderboards/types'
+import type { PostLaunchOptions } from '../modules/social/types'
 import type { AnyRecord } from '../utils'
 
 declare global {
@@ -33,6 +37,19 @@ interface InitializePayload {
     playerId?: string
     playerName?: string
     playerPhoto?: string
+    // Set when the game runs in a post created with createPost(): the id of the
+    // config `posts` entry it was created from and the payload string the game
+    // attached to this one post.
+    post?: { id?: string; payload?: string }
+}
+
+// Raw entry from the server; numeric fields may arrive as strings.
+interface RedditLeaderboardEntry {
+    id?: string | number
+    name?: string
+    score?: number | string
+    rank?: number | string
+    photo?: string | null
 }
 
 interface FetchJsonOptions {
@@ -46,6 +63,16 @@ class RedditPlatformBridge extends PlatformBridgeBase {
         return PLATFORM_ID.REDDIT
     }
 
+    // The game runs in a post it created itself; which post is platform.data.
+    get launchSource(): LaunchSource | null {
+        return this._launchPostId ? LAUNCH_SOURCE.POST : super.launchSource
+    }
+
+    // The string the post was created with, for the game to read back.
+    get platformPayload(): string | null {
+        return this.#platformPayload ?? super.platformPayload
+    }
+
     get isPlatformExternalCallsSupported(): boolean {
         return false
     }
@@ -55,14 +82,32 @@ class RedditPlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    // On Reddit sharing means leaving a comment under the post the game runs in.
+    get isShareSupported(): boolean {
+        return true
+    }
+
     get isCreatePostSupported(): boolean {
         return true
+    }
+
+    get isPostRewardSupported(): boolean {
+        return true
+    }
+
+    // leaderboards
+    get leaderboardsType(): LeaderboardType {
+        return LEADERBOARD_TYPE.IN_GAME
     }
 
     // payments
     get isPaymentsSupported(): boolean {
         return true
     }
+
+    #platformPayload: string | null = null
+
+    #serverTimeCache = new ServerTimeCache(() => this.#fetchServerTime())
 
     initialize(): Promise<unknown> {
         if (this._isInitialized) {
@@ -87,6 +132,9 @@ class RedditPlatformBridge extends PlatformBridgeBase {
                         this._setPlatformStorageAvailable(true)
                     }
 
+                    this._launchPostId = payload.post?.id ?? null
+                    this.#platformPayload = payload.post?.payload ?? null
+
                     this._isInitialized = true
                     this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
                 })
@@ -96,6 +144,11 @@ class RedditPlatformBridge extends PlatformBridgeBase {
         }
 
         return promiseDecorator.promise
+    }
+
+    // platform
+    getServerTime(): Promise<number> {
+        return this.#serverTimeCache.getServerTime()
     }
 
     async getDataFromStorage(keys: string[]): Promise<Record<string, unknown>> {
@@ -203,14 +256,59 @@ class RedditPlatformBridge extends PlatformBridgeBase {
         return promiseDecorator.promise
     }
 
-    createPost(options: unknown = {}): Promise<unknown> {
+    // social
+    share(options?: unknown): Promise<unknown> {
+        const { text, ...rest } = (options ?? {}) as AnyRecord & { text?: string }
+        if (!text) {
+            return Promise.reject()
+        }
+
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.SHARE)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.SHARE)
+
+            this.#fetchJson('/api/share', { method: 'POST', body: { options: { ...rest, text } } })
+                .then(() => {
+                    this._resolvePromiseDecorator(ACTION_NAME.SHARE)
+                })
+                .catch((error) => {
+                    this._rejectPromiseDecorator(ACTION_NAME.SHARE, error)
+                })
+        }
+
+        return promiseDecorator.promise
+    }
+
+    // Creates a post running this app. The canonical `text` becomes the post
+    // title, and `postId`, the id of the config entry it was created from, is
+    // remembered by the server so it can be handed back at launch. Resolves
+    // with the link to the created post.
+    createPost(options?: unknown, post?: PostLaunchOptions): Promise<unknown> {
+        const content: AnyRecord = { ...((options ?? {}) as AnyRecord) }
+        const title = content.title ?? content.text
+        // A Devvit post carries a title only, so the other canonical content
+        // fields are dropped instead of travelling as unknown post options.
+        delete content.text
+        delete content.image
+        delete content.url
+
         let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.CREATE_POST)
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.CREATE_POST)
 
-            this.#fetchJson('/api/create-post', { method: 'POST', body: { options } })
-                .then(() => {
-                    this._resolvePromiseDecorator(ACTION_NAME.CREATE_POST)
+            this.#fetchJson('/api/create-post', {
+                method: 'POST',
+                body: {
+                    options: { ...content, title },
+                    ...(post?.id ? { id: post.id } : {}),
+                    ...(post?.payload === undefined ? {} : { payload: post.payload }),
+                },
+            })
+                .then((data) => {
+                    const result = (data ?? {}) as AnyRecord
+                    this._resolvePromiseDecorator(ACTION_NAME.CREATE_POST, {
+                        url: typeof result.postUrl === 'string' ? result.postUrl : null,
+                    })
                 })
                 .catch((error) => {
                     this._rejectPromiseDecorator(ACTION_NAME.CREATE_POST, error)
@@ -235,6 +333,128 @@ class RedditPlatformBridge extends PlatformBridgeBase {
         }
 
         return promiseDecorator.promise
+    }
+
+    // Reward for the player who opened the post the game runs in. The server
+    // verifies the player, the author and the wait between rewards.
+    getPostVisitReward(cooldown?: number): Promise<unknown> {
+        if (!this._isPlayerAuthorized || !this._launchPostId) {
+            return Promise.reject()
+        }
+
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_POST_VISIT_REWARD)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_POST_VISIT_REWARD)
+
+            this.#fetchJson('/api/post-visit-reward', { method: 'POST', body: { cooldown: cooldown ?? 0 } })
+                .then((data) => {
+                    if ((data as AnyRecord | null)?.granted) {
+                        this._resolvePromiseDecorator(ACTION_NAME.GET_POST_VISIT_REWARD)
+                    } else {
+                        this._rejectPromiseDecorator(ACTION_NAME.GET_POST_VISIT_REWARD)
+                    }
+                })
+                .catch((error) => {
+                    this._rejectPromiseDecorator(ACTION_NAME.GET_POST_VISIT_REWARD, error)
+                })
+        }
+
+        return promiseDecorator.promise
+    }
+
+    // Players who came to the game through the current player's posts since the
+    // previous call, keyed by the config entry id of the post; the server resets
+    // the counters once they are handed out.
+    getPostAuthorReward(): Promise<Record<string, number>> {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_POST_AUTHOR_REWARD)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_POST_AUTHOR_REWARD)
+
+            this.#fetchJson('/api/post-author-reward', { method: 'POST' })
+                .then((data) => {
+                    const counts = ((data as AnyRecord | null)?.counts ?? {}) as AnyRecord
+                    const result: Record<string, number> = {}
+                    Object.keys(counts).forEach((postId) => {
+                        const count = Number(counts[postId]) || 0
+                        if (count > 0) {
+                            result[postId] = count
+                        }
+                    })
+
+                    this._resolvePromiseDecorator(ACTION_NAME.GET_POST_AUTHOR_REWARD, result)
+                })
+                .catch((error) => {
+                    this._rejectPromiseDecorator(ACTION_NAME.GET_POST_AUTHOR_REWARD, error)
+                })
+        }
+
+        return promiseDecorator.promise as Promise<Record<string, number>>
+    }
+
+    // leaderboards
+    leaderboardsSetScore(id: string, score: number, isMain: boolean): Promise<unknown> {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.LEADERBOARDS_SET_SCORE)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.LEADERBOARDS_SET_SCORE)
+
+            this.#fetchJson('/api/leaderboards/set-score', { method: 'POST', body: { id, score, isMain } })
+                .then(() => {
+                    this._resolvePromiseDecorator(ACTION_NAME.LEADERBOARDS_SET_SCORE)
+                })
+                .catch((error) => {
+                    this._rejectPromiseDecorator(ACTION_NAME.LEADERBOARDS_SET_SCORE, error)
+                })
+        }
+
+        return promiseDecorator.promise
+    }
+
+    leaderboardsGetEntries(id: string): Promise<unknown> {
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.LEADERBOARDS_GET_ENTRIES)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.LEADERBOARDS_GET_ENTRIES)
+
+            this.#fetchJson(`/api/leaderboards/entries?id=${encodeURIComponent(id)}`)
+                .then((data) => {
+                    const entries: LeaderboardEntry[] = this.#extractList(data).map((entry) => {
+                        const {
+                            id: entryId, name, score, rank, photo,
+                        } = (entry ?? {}) as RedditLeaderboardEntry
+                        return {
+                            id: String(entryId ?? ''),
+                            name: name ?? '',
+                            score: Number(score ?? 0),
+                            rank: Number(rank ?? 0),
+                            photo: photo ?? null,
+                        }
+                    })
+
+                    this._resolvePromiseDecorator(ACTION_NAME.LEADERBOARDS_GET_ENTRIES, entries)
+                })
+                .catch((error) => {
+                    this._rejectPromiseDecorator(ACTION_NAME.LEADERBOARDS_GET_ENTRIES, error)
+                })
+        }
+
+        return promiseDecorator.promise
+    }
+
+    #fetchServerTime(): Promise<number> {
+        return this.#fetchJson('/api/server-time').then((data) => {
+            const time = Number((data as AnyRecord | null)?.serverTime)
+            if (!Number.isFinite(time)) {
+                throw new Error('Invalid server time')
+            }
+            return time
+        })
     }
 
     #ensureStorageReady(): Promise<void> {
