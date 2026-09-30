@@ -26,6 +26,7 @@ import {
     ACTION_NAME,
     BridgeError,
     ERROR_CODE,
+    EVENT_NAME,
 } from '../constants'
 import {
     PLATFORM_ID,
@@ -59,6 +60,41 @@ type AdPhase = 'idle' | 'requested' | 'opened' | 'rewarded'
 
 const LEADERBOARD_TOP = 20
 const LEADERBOARD_AROUND = 3
+
+// The Yandex SDK emulator of the portal keeps `player.setData` keys as `ya:<key>` (GWHP §6a).
+const YANDEX_KEY_PREFIX = 'ya:'
+
+// Every game on the portal is served from the same origin, so local storage is shared between
+// them: the local fallback of this platform lives under a per-game prefix.
+const LOCAL_KEY_PREFIX = 'gw:'
+const PLAY_PATH_REGEX = /\/play\/([^/]+)\//
+
+// Host values are strings (the host coerces anything else with JSON.stringify); an older host or
+// runtime may still pass a raw value, which is coerced the same way.
+function toStoredString(value: unknown): string | null {
+    if (value === undefined || value === null || value === '') {
+        return null
+    }
+
+    return typeof value === 'string' ? value : JSON.stringify(value)
+}
+
+// The emulator stores `ya:<key>` as JSON.stringify of the value the game handed to
+// `player.setData` and parses it back in `getData`. Decoding it once gives the value an old
+// bridge got from Yandex storage — for a 1.x bridge the raw game value, for a 2.x bridge the
+// string its StorageModule had serialized (so a double-encoded value is unwrapped once) — which
+// is then stored the way this platform stores it.
+function fromYandexValue(raw: unknown): string | null {
+    if (typeof raw !== 'string') {
+        return toStoredString(raw)
+    }
+
+    try {
+        return toStoredString(JSON.parse(raw))
+    } catch {
+        return toStoredString(raw)
+    }
+}
 
 class GamesWebPlatformBridge extends PlatformBridgeBase {
     // platform
@@ -169,6 +205,21 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     // config
     get isRemoteConfigSupported(): boolean {
         return this.#isOnline && this.#features.remoteConfig === true
+    }
+
+    // storage — StorageModule keeps its local fallback under this prefix: `gw:<slug>:` where the
+    // slug comes from the `/play/<slug>/` path of the game, or the page path otherwise.
+    get localStorageKeyPrefix(): string {
+        let path = ''
+        try {
+            path = window.location.pathname || ''
+        } catch {
+            // no location — fall back to the bare prefix
+        }
+
+        const match = PLAY_PATH_REGEX.exec(path)
+        const slug = match ? match[1] : path.replace(/\/index\.html?$/i, '/')
+        return `${LOCAL_KEY_PREFIX}${slug}:`
     }
 
     #client: GwClient | null = null
@@ -288,21 +339,40 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     }
 
     // storage — the host keeps one save per player and game; values travel as strings.
+    // A key the game has not saved natively yet falls back to what the Yandex SDK emulator saved
+    // for it (`ya:<key>`, a game rebuilt from an old bridge) and is re-saved as `<key>`; the `ya:`
+    // copy is left in place (GWHP §6a).
     getDataFromStorage(keys: string[]): Promise<Record<string, unknown>> {
         if (!this.#isOnline) {
             return Promise.reject(new BridgeError(ERROR_CODE.STORAGE_NOT_AVAILABLE))
         }
 
-        return this.#call('storage.get', { keys }).then((result) => {
+        const yandexKeys = keys.map((key) => `${YANDEX_KEY_PREFIX}${key}`)
+        return this.#call('storage.get', { keys: [...keys, ...yandexKeys] }).then((result) => {
             const data = ((result as AnyRecord | null)?.data ?? {}) as AnyRecord
-            const values: Record<string, unknown> = {}
-            keys.forEach((key) => {
-                const value = data[key]
-                if (value !== undefined && value !== null && value !== '') {
+            const values: Record<string, string> = {}
+            const migrated: Record<string, string> = {}
+            keys.forEach((key, index) => {
+                const value = toStoredString(data[key])
+                if (value !== null) {
                     values[key] = value
+                    return
+                }
+
+                const yandexValue = fromYandexValue(data[yandexKeys[index]])
+                if (yandexValue !== null) {
+                    values[key] = yandexValue
+                    migrated[key] = yandexValue
                 }
             })
-            return values
+
+            if (Object.keys(migrated).length === 0) {
+                return values
+            }
+
+            // Best effort: a failed re-save is retried on the next read, the value is returned anyway.
+            return this.#call('storage.set', { data: migrated })
+                .then(() => values, () => values)
         })
     }
 
@@ -325,7 +395,9 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
             return Promise.reject(new BridgeError(ERROR_CODE.STORAGE_NOT_AVAILABLE))
         }
 
-        return this.#call('storage.delete', { keys }).then(() => undefined)
+        // The `ya:` copy goes too, or the next read would bring the deleted value back.
+        const yandexKeys = keys.map((key) => `${YANDEX_KEY_PREFIX}${key}`)
+        return this.#call('storage.delete', { keys: [...keys, ...yandexKeys] }).then(() => undefined)
     }
 
     // advertisement
@@ -367,6 +439,11 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
             return
         }
 
+        if (this.#interstitialPhase !== 'idle') {
+            this.#rejectConcurrentAd(false)
+            return
+        }
+
         this.#interstitialRequest += 1
         const request = this.#interstitialRequest
         this.#interstitialPhase = 'requested'
@@ -387,6 +464,11 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     showRewarded(placement?: unknown): void {
         if (!this.isRewardedSupported) {
             this._showAdFailurePopup(true)
+            return
+        }
+
+        if (this.#rewardedPhase !== 'idle') {
+            this.#rejectConcurrentAd(true)
             return
         }
 
@@ -746,6 +828,17 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
         }
 
         this.#failAd(true, error)
+    }
+
+    // A second show while an ad is still in flight (e.g. a double tap) fails on its own: no popup,
+    // and the pause / audio hold of the ad on screen stays, so only the listeners hear `failed`.
+    // The ad in flight keeps its events and response, and the reward is still granted.
+    #rejectConcurrentAd(isRewarded: boolean): void {
+        if (isRewarded) {
+            this.emit(EVENT_NAME.REWARDED_STATE_CHANGED, REWARDED_STATE.FAILED)
+        } else {
+            this.emit(EVENT_NAME.INTERSTITIAL_STATE_CHANGED, INTERSTITIAL_STATE.FAILED)
+        }
     }
 
     // The host refusing because of its own interval is not an ad failure worth a popup.

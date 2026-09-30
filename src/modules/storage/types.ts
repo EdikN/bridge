@@ -36,6 +36,10 @@ export interface StorageBridgeContract extends PlatformBridgeLike {
     // (i.e. while cloud storage is unavailable). Lets a platform mirror local/guest writes to a
     // secondary backend. Fire-and-forget — its result is ignored.
     notifyLocalDataChanged?(batch: WriteBatch): void
+    // Optional prefix for the keys the module keeps in LOCAL storage. Platforms whose games share
+    // one origin (and so one localStorage) set it to keep each game's local data apart; the
+    // module then never reads, migrates or deletes unprefixed keys. Absent / '' = plain keys.
+    localStorageKeyPrefix?: string
 }
 
 // A single set entry. Its value is already serialized by the time it reaches a backend.

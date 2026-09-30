@@ -34,10 +34,14 @@ export const GW_ERROR_CODE = {
 
 export const GW_PROTOCOL_VERSION = 1
 
-// The portal origins a game may trust: the production portal, and a local dev server.
-const ALLOWED_ORIGIN_REGEX = /^(https:\/\/(www\.)?choclategames\.ru|http:\/\/(localhost|127\.0\.0\.1):\d+)$/
+// The portal origins a game may trust: the production portal, and a local dev server
+// (with or without a port).
+const ALLOWED_ORIGIN_REGEX = /^(https:\/\/(www\.)?choclategames\.ru|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)$/
 
 const HELLO_TIMEOUT = 5000
+// The host page may attach its listener after the iframe started loading, so hello is re-sent
+// (same id) until it is answered or times out.
+const HELLO_RETRY_INTERVAL = 500
 const DEFAULT_TIMEOUT = 15000
 const ADS_TIMEOUT = 180000
 const AUTHORIZE_TIMEOUT = 300000
@@ -223,6 +227,7 @@ interface PendingRequest {
     resolve: (value: unknown) => void
     reject: (error: GwError) => void
     timer: ReturnType<typeof setTimeout>
+    retryTimer: ReturnType<typeof setInterval> | null
 }
 
 interface GwMessage {
@@ -270,7 +275,7 @@ export class GwPostMessageClient implements GwClient {
         this.#origin = origin
         this.#listen()
 
-        return this.#request('hello', { ...params })
+        return this.#request('hello', { ...params }, HELLO_RETRY_INTERVAL)
             .then((result) => {
                 if (!result || typeof result !== 'object') {
                     return null
@@ -359,8 +364,7 @@ export class GwPostMessageClient implements GwClient {
                 return
             }
 
-            this.#pending.delete(id)
-            clearTimeout(pending.timer)
+            this.#settle(id, pending)
             if (message.ok) {
                 pending.resolve(message.result)
             } else {
@@ -385,28 +389,45 @@ export class GwPostMessageClient implements GwClient {
         }
     }
 
-    #request(method: string, params: Record<string, unknown>): Promise<unknown> {
+    #request(method: string, params: Record<string, unknown>, retryInterval = 0): Promise<unknown> {
         const id = this.#nextId
         this.#nextId += 1
 
+        const message = {
+            gw: 1, kind: 'req', id, method, params,
+        }
+
         return new Promise((resolve, reject) => {
-            const timer = setTimeout(() => {
-                this.#pending.delete(id)
-                reject(new GwError(GW_ERROR_CODE.TIMEOUT, `${method} timed out`))
-            }, getGwTimeout(method))
+            const pending: PendingRequest = {
+                resolve,
+                reject,
+                timer: setTimeout(() => {
+                    this.#settle(id, pending)
+                    reject(new GwError(GW_ERROR_CODE.TIMEOUT, `${method} timed out`))
+                }, getGwTimeout(method)),
+                retryTimer: null,
+            }
 
-            this.#pending.set(id, { resolve, reject, timer })
+            this.#pending.set(id, pending)
 
-            const isPosted = this.#post({
-                gw: 1, kind: 'req', id, method, params,
-            })
-
-            if (!isPosted) {
-                clearTimeout(timer)
-                this.#pending.delete(id)
+            if (!this.#post(message)) {
+                this.#settle(id, pending)
                 reject(new GwError(GW_ERROR_CODE.FAILED, 'postMessage failed'))
+                return
+            }
+
+            if (retryInterval > 0) {
+                pending.retryTimer = setInterval(() => this.#post(message), retryInterval)
             }
         })
+    }
+
+    #settle(id: number, pending: PendingRequest): void {
+        this.#pending.delete(id)
+        clearTimeout(pending.timer)
+        if (pending.retryTimer !== null) {
+            clearInterval(pending.retryTimer)
+        }
     }
 
     #post(message: Record<string, unknown>): boolean {

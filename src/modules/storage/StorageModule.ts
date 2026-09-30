@@ -206,8 +206,8 @@ class StorageModule extends ModuleBase<StorageBridgeContract> {
         }
 
         try {
-            batch.sets.forEach((entry) => localStorage.setItem(entry.key, entry.value as string))
-            batch.deletes.forEach((key) => localStorage.removeItem(key))
+            batch.sets.forEach((entry) => localStorage.setItem(this.#localKey(entry.key), entry.value as string))
+            batch.deletes.forEach((key) => localStorage.removeItem(this.#localKey(key)))
         } catch (error) {
             if (error && (error as Error).name === 'QuotaExceededError') {
                 throw new BridgeError(ERROR_CODE.STORAGE_QUOTA_EXCEEDED)
@@ -269,7 +269,7 @@ class StorageModule extends ModuleBase<StorageBridgeContract> {
         if (localStorage.isAvailable) {
             this.#cache.keys().forEach((key) => {
                 try {
-                    localStorage.setItem(key, serializeValue(this.#cache.get(key)) as string)
+                    localStorage.setItem(this.#localKey(key), serializeValue(this.#cache.get(key)) as string)
                 } catch {
                     // Ignore a single failed key (e.g. quota) — the rest still get written.
                 }
@@ -294,7 +294,7 @@ class StorageModule extends ModuleBase<StorageBridgeContract> {
                 return null
             }
 
-            const raw = localStorage.getItem(key)
+            const raw = localStorage.getItem(this.#localKey(key))
             // Read from local storage; treat as unconfirmed in the cloud until proven otherwise.
             this.#cache.setDirty(key, raw)
             return parseValue(raw, tryParseJson)
@@ -302,14 +302,21 @@ class StorageModule extends ModuleBase<StorageBridgeContract> {
     }
 
     #getLocalItem(key: string): string | null {
-        return localStorage.isAvailable ? localStorage.getItem(key) : null
+        return localStorage.isAvailable ? localStorage.getItem(this.#localKey(key)) : null
     }
 
     #deleteFromLocal(keys: string[]): void {
         if (!localStorage.isAvailable) {
             return
         }
-        keys.forEach((key) => localStorage.removeItem(key))
+        keys.forEach((key) => localStorage.removeItem(this.#localKey(key)))
+    }
+
+    // The local storage key of a game key: plain, unless the platform asks for a prefix
+    // (games sharing one origin, e.g. GamesWeb).
+    #localKey(key: string): string {
+        const prefix = this._platformBridge.localStorageKeyPrefix
+        return typeof prefix === 'string' && prefix !== '' ? `${prefix}${key}` : key
     }
 
     // Mirrors a write batch into the cache. `dirty` means the batch is not yet confirmed in the

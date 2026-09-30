@@ -135,8 +135,27 @@ const flush = () => new Promise((resolve) => { setTimeout(resolve, 0) })
 let host: FakeHost
 const originalParent = window.parent
 
-function setUrl(search: string) {
-    window.history.replaceState({}, '', `/${search}`)
+const GW_QUERY = `?gw=1&gw_mode=bridge&gw_origin=${encodeURIComponent(HOST_ORIGIN)}&lang=ru`
+
+function setUrl(search: string, path = '/') {
+    window.history.replaceState({}, '', `${path}${search}`)
+}
+
+// A save the fake host keeps like the portal does: one string map per game.
+function useHostSave(hostSave: Record<string, string>) {
+    host.handlers['storage.get'] = ({ keys }) => ({
+        data: Object.fromEntries((keys as string[])
+            .filter((key) => key in hostSave)
+            .map((key) => [key, hostSave[key]])),
+    })
+    host.handlers['storage.set'] = ({ data }) => {
+        Object.assign(hostSave, data)
+        return {}
+    }
+    host.handlers['storage.delete'] = ({ keys }) => {
+        (keys as string[]).forEach((key) => { delete hostSave[key] })
+        return {}
+    }
 }
 
 function setParent(value: unknown) {
@@ -160,7 +179,7 @@ describe('GamesWebPlatformBridge', () => {
     beforeEach(() => {
         host = new FakeHost()
         setParent(host.parent)
-        setUrl(`?gw=1&gw_mode=bridge&gw_origin=${encodeURIComponent(HOST_ORIGIN)}&lang=ru`)
+        setUrl(GW_QUERY)
         delete window.GWHost
         window.localStorage.clear()
     })
@@ -286,6 +305,36 @@ describe('GamesWebPlatformBridge', () => {
             expect(isResolved).toBe(true)
             expect(bridge.isOnline).toBe(false)
             expect(bridge.isPlatformStorageAvailable).toBe(false)
+            // re-sent every 500 ms until the timeout, then no more
+            const helloCount = host.requests('hello').length
+            expect(helloCount).toBe(10)
+            await vi.advanceTimersByTimeAsync(2000)
+            expect(host.requests('hello')).toHaveLength(helloCount)
+        })
+
+        test('hello is re-sent with the same id until a late host answers', async () => {
+            vi.useFakeTimers()
+            host.autoRespond = false
+            const bridge = new GamesWebPlatformBridge()
+            let isResolved = false
+            bridge.initialize().then(() => { isResolved = true })
+
+            await vi.advanceTimersByTimeAsync(1600)
+            const hellos = host.requests('hello')
+            expect(hellos).toHaveLength(4)
+            expect(new Set(hellos.map((hello) => hello.id)).size).toBe(1)
+            expect(isResolved).toBe(false)
+
+            // The host page attached its listener late and answers one of the copies.
+            host.deliver({
+                gw: 1, kind: 'res', id: hellos[0].id, ok: true, result: HELLO,
+            })
+            await vi.advanceTimersByTimeAsync(0)
+            expect(isResolved).toBe(true)
+            expect(bridge.isOnline).toBe(true)
+
+            await vi.advanceTimersByTimeAsync(3000)
+            expect(host.requests('hello')).toHaveLength(4)
         })
     })
 
@@ -336,7 +385,11 @@ describe('GamesWebPlatformBridge', () => {
             expect(isAllowedGwOrigin('http://choclategames.ru')).toBe(false)
             expect(isAllowedGwOrigin('https://choclategames.ru.evil.com')).toBe(false)
             expect(isAllowedGwOrigin('https://evilchoclategames.ru')).toBe(false)
-            expect(isAllowedGwOrigin('http://localhost')).toBe(false)
+            expect(isAllowedGwOrigin('http://localhost')).toBe(true)
+            expect(isAllowedGwOrigin('http://127.0.0.1')).toBe(true)
+            expect(isAllowedGwOrigin('http://localhost:')).toBe(false)
+            expect(isAllowedGwOrigin('http://localhost.evil.com')).toBe(false)
+            expect(isAllowedGwOrigin('https://localhost:8000')).toBe(false)
             expect(isAllowedGwOrigin(null)).toBe(false)
 
             expect(getGwTimeout('hello')).toBe(5000)
@@ -411,8 +464,28 @@ describe('GamesWebPlatformBridge', () => {
 
             const data = await bridge.getDataFromStorage(['coins', 'skin', 'level'])
 
-            expect(host.requests('storage.get')[0].params).toEqual({ keys: ['coins', 'skin', 'level'] })
+            expect(host.requests('storage.get')[0].params).toEqual({
+                keys: ['coins', 'skin', 'level', 'ya:coins', 'ya:skin', 'ya:level'],
+            })
             expect(data).toEqual({ coins: '10' })
+        })
+
+        test('non-string values from the host are coerced to JSON strings', async () => {
+            host.handlers['storage.get'] = () => ({
+                data: {
+                    coins: 10, progress: { level: 2 }, flag: false, text: 'hi',
+                },
+            })
+            const bridge = await createOnlineBridge()
+            const storage = new StorageModule().initialize(bridge as unknown as StorageBridgeContract)
+
+            await expect(bridge.getDataFromStorage(['coins', 'progress', 'flag', 'text'])).resolves.toEqual({
+                coins: '10', progress: '{"level":2}', flag: 'false', text: 'hi',
+            })
+            await expect(storage.get(['coins', 'progress', 'flag', 'text'])).resolves.toEqual([
+                10, { level: 2 }, false, 'hi',
+            ])
+            await expect(storage.get(['coins', 'progress'], false)).resolves.toEqual(['10', '{"level":2}'])
         })
 
         test('set sends strings, delete sends keys', async () => {
@@ -426,31 +499,148 @@ describe('GamesWebPlatformBridge', () => {
             expect(host.requests('storage.set')[0].params).toEqual({
                 data: { coins: '10', progress: '{"level":2}' },
             })
-            expect(host.requests('storage.delete')[0].params).toEqual({ keys: ['skin'] })
+            expect(host.requests('storage.delete')[0].params).toEqual({ keys: ['skin', 'ya:skin'] })
         })
 
-        test('progress saved locally before (offline) moves up to the host on the first read', async () => {
-            const hostSave: Record<string, string> = {}
-            host.handlers['storage.get'] = ({ keys }) => ({
-                data: Object.fromEntries((keys as string[])
-                    .filter((key) => key in hostSave)
-                    .map((key) => [key, hostSave[key]])),
-            })
-            host.handlers['storage.set'] = ({ data }) => {
-                Object.assign(hostSave, data)
-                return {}
+        test('a save of the Yandex emulator (ya:<key>) is read and re-saved as <key>', async () => {
+            // As the emulator writes them: `ya:<key>` = JSON.stringify(value given to player.setData).
+            const hostSave: Record<string, string> = {
+                // bridge 1.x kept raw game values in the Yandex data object
+                'ya:coins': JSON.stringify(7),
+                'ya:progress': JSON.stringify({ level: 4 }),
+                'ya:name': JSON.stringify('Bob'),
+                // bridge 2.x kept the strings its StorageModule serialized — double-encoded here
+                'ya:inventory': JSON.stringify(JSON.stringify({ items: [1, 2] })),
+                'ya:skin': JSON.stringify('red'),
+                skin: 'blue',
+                __ya_keys: JSON.stringify(['coins', 'progress', 'name', 'inventory', 'skin']),
             }
-            window.localStorage.setItem('coins', '7')
+            useHostSave(hostSave)
+            const bridge = await createOnlineBridge()
+            const storage = new StorageModule().initialize(bridge as unknown as StorageBridgeContract)
+
+            await expect(storage.get(['coins', 'progress', 'name', 'inventory', 'skin', 'level'])).resolves.toEqual([
+                7, { level: 4 }, 'Bob', { items: [1, 2] }, 'blue', null,
+            ])
+            await expect(storage.get('inventory', false)).resolves.toBe('{"items":[1,2]}')
+
+            // One re-save of the migrated keys only; the native key wins, `ya:` stays in place.
+            const sets = host.requests('storage.set')
+            expect(sets).toHaveLength(1)
+            expect(sets[0].params).toEqual({
+                data: {
+                    coins: '7', progress: '{"level":4}', name: 'Bob', inventory: '{"items":[1,2]}',
+                },
+            })
+            expect(hostSave).toMatchObject({
+                coins: '7',
+                progress: '{"level":4}',
+                name: 'Bob',
+                inventory: '{"items":[1,2]}',
+                skin: 'blue',
+                'ya:coins': '7',
+                'ya:progress': '{"level":4}',
+                'ya:skin': '"red"',
+            })
+
+            // From now on the native key is used.
+            await storage.set('coins', 8)
+            const fresh = await createOnlineBridge()
+            await expect(fresh.getDataFromStorage(['coins'])).resolves.toEqual({ coins: '8' })
+            expect(host.requests('storage.set')).toHaveLength(2)
+
+            // A delete removes the `ya:` copy too, so the value does not come back.
+            await storage.delete('progress')
+            expect(hostSave.progress).toBeUndefined()
+            expect(hostSave['ya:progress']).toBeUndefined()
+            await expect(fresh.getDataFromStorage(['progress'])).resolves.toEqual({})
+        })
+
+        test('a failed re-save of a ya: key still returns the value', async () => {
+            const hostSave: Record<string, string> = { 'ya:coins': '7', 'ya:raw': 'not json' }
+            useHostSave(hostSave)
+            host.handlers['storage.set'] = () => new HostError('failed')
+            const bridge = await createOnlineBridge()
+
+            await expect(bridge.getDataFromStorage(['coins', 'raw'])).resolves.toEqual({ coins: '7', raw: 'not json' })
+            expect(hostSave).toEqual({ 'ya:coins': '7', 'ya:raw': 'not json' })
+        })
+
+        test('local fallback keys carry a per-game prefix from the /play/<slug>/ path', () => {
+            setUrl(GW_QUERY, '/play/aim/index.html')
+            const bridge = new GamesWebPlatformBridge()
+            expect(bridge.localStorageKeyPrefix).toBe('gw:aim:')
+
+            setUrl(GW_QUERY, '/games/other/index.html')
+            expect(bridge.localStorageKeyPrefix).toBe('gw:/games/other/:')
+        })
+
+        test('progress saved locally by this game (offline) moves up to the host on the first read', async () => {
+            setUrl(GW_QUERY, '/play/aim/index.html')
+            const hostSave: Record<string, string> = {}
+            useHostSave(hostSave)
+            window.localStorage.setItem('gw:aim:coins', '7')
 
             const bridge = await createOnlineBridge()
             const storage = new StorageModule().initialize(bridge as unknown as StorageBridgeContract)
 
             await expect(storage.get('coins')).resolves.toBe(7)
             expect(hostSave).toEqual({ coins: '7' })
-            expect(window.localStorage.getItem('coins')).toBeNull()
+            expect(window.localStorage.getItem('gw:aim:coins')).toBeNull()
 
             await storage.set('coins', 8)
             expect(hostSave).toEqual({ coins: '8' })
+        })
+
+        test('unprefixed local keys (other games on the same origin) are never imported or deleted', async () => {
+            setUrl(GW_QUERY, '/play/aim/index.html')
+            const hostSave: Record<string, string> = {}
+            useHostSave(hostSave)
+            window.localStorage.setItem('save', '{"otherGame":true}')
+            window.localStorage.setItem('gw:tetris:save', '{"tetris":true}')
+
+            const bridge = await createOnlineBridge()
+            const storage = new StorageModule().initialize(bridge as unknown as StorageBridgeContract)
+
+            await expect(storage.get('save')).resolves.toBeNull()
+            await storage.delete('save')
+            expect(host.requests('storage.set')).toHaveLength(0)
+            expect(hostSave).toEqual({})
+            expect(window.localStorage.getItem('save')).toBe('{"otherGame":true}')
+            expect(window.localStorage.getItem('gw:tetris:save')).toBe('{"tetris":true}')
+        })
+
+        test('offline the local fallback reads and writes only prefixed keys', async () => {
+            setUrl('', '/play/aim/index.html')
+            window.localStorage.setItem('save', '{"otherGame":true}')
+            const bridge = new GamesWebPlatformBridge()
+            await bridge.initialize()
+            const storage = new StorageModule().initialize(bridge as unknown as StorageBridgeContract)
+
+            await expect(storage.get('save')).resolves.toBeNull()
+            await storage.set('save', { level: 1 })
+            expect(window.localStorage.getItem('gw:aim:save')).toBe('{"level":1}')
+            expect(window.localStorage.getItem('save')).toBe('{"otherGame":true}')
+
+            await storage.delete('save')
+            expect(window.localStorage.getItem('gw:aim:save')).toBeNull()
+            expect(window.localStorage.getItem('save')).toBe('{"otherGame":true}')
+        })
+
+        test('a platform without a prefix keeps plain local keys', async () => {
+            const plainBridge = {
+                isPlatformStorageAvailable: false,
+                on: () => {},
+                getDataFromStorage: () => Promise.resolve({}),
+                setDataToStorage: () => Promise.resolve(),
+                deleteDataFromStorage: () => Promise.resolve(),
+            }
+            window.localStorage.setItem('save', '"old"')
+            const storage = new StorageModule().initialize(plainBridge as unknown as StorageBridgeContract)
+
+            await expect(storage.get('save')).resolves.toBe('old')
+            await storage.set('save', 'new')
+            expect(window.localStorage.getItem('save')).toBe('new')
         })
 
         test('a host error rejects so StorageModule falls back to local storage', async () => {
@@ -589,6 +779,83 @@ describe('GamesWebPlatformBridge', () => {
             await flush()
 
             expect(states).toEqual(['failed'])
+        })
+
+        test('rewarded: a second show while the first is in flight fails alone, the reward still comes', async () => {
+            const bridge = await createOnlineBridge()
+            host.autoRespond = false
+            const states = recordStates(bridge, EVENT_NAME.REWARDED_STATE_CHANGED)
+            const pauses = recordStates(bridge, EVENT_NAME.PAUSE_STATE_CHANGED)
+            const popup = vi.spyOn(bridge as unknown as { _showAdFailurePopup: () => void }, '_showAdFailurePopup')
+
+            bridge.showRewarded()
+            const [request] = host.requests('ads.rewarded')
+            host.event('ads.state', { type: 'rewarded', state: 'opened' })
+
+            bridge.showRewarded()
+            expect(host.requests('ads.rewarded')).toHaveLength(1)
+            expect(popup).not.toHaveBeenCalled()
+            expect(states).toEqual(['opened', 'failed'])
+            expect(pauses).toEqual([true])
+
+            host.event('ads.state', { type: 'rewarded', state: 'rewarded' })
+            host.event('ads.state', { type: 'rewarded', state: 'closed' })
+            host.deliver({
+                gw: 1, kind: 'res', id: request.id, ok: true, result: { rewarded: true },
+            })
+            await flush()
+
+            expect(states).toEqual(['opened', 'failed', 'rewarded', 'closed'])
+            expect(pauses).toEqual([true, false])
+
+            // Idle again: the next show goes to the host.
+            bridge.showRewarded()
+            expect(host.requests('ads.rewarded')).toHaveLength(2)
+        })
+
+        test('rewarded: a second show before the ad opened does not drop the response', async () => {
+            const bridge = await createOnlineBridge()
+            host.autoRespond = false
+            const states = recordStates(bridge, EVENT_NAME.REWARDED_STATE_CHANGED)
+
+            bridge.showRewarded()
+            bridge.showRewarded()
+            const requests = host.requests('ads.rewarded')
+            expect(requests).toHaveLength(1)
+            host.deliver({
+                gw: 1, kind: 'res', id: requests[0].id, ok: true, result: { rewarded: true },
+            })
+            await flush()
+
+            expect(states).toEqual(['failed', 'opened', 'rewarded', 'closed'])
+        })
+
+        test('interstitial: a second show while the first is on screen keeps the game paused', async () => {
+            const bridge = await createOnlineBridge()
+            host.autoRespond = false
+            const states = recordStates(bridge, EVENT_NAME.INTERSTITIAL_STATE_CHANGED)
+            const pauses = recordStates(bridge, EVENT_NAME.PAUSE_STATE_CHANGED)
+            const popup = vi.spyOn(bridge as unknown as { _showAdFailurePopup: () => void }, '_showAdFailurePopup')
+
+            bridge.showInterstitial()
+            const [request] = host.requests('ads.interstitial')
+            host.event('ads.state', { type: 'interstitial', state: 'opened' })
+
+            bridge.showInterstitial()
+            expect(host.requests('ads.interstitial')).toHaveLength(1)
+            expect(popup).not.toHaveBeenCalled()
+            expect(states).toEqual(['opened', 'failed'])
+            expect(pauses).toEqual([true])
+            expect(bridge.isPlatformPaused).toBe(true)
+
+            host.event('ads.state', { type: 'interstitial', state: 'closed' })
+            host.deliver({
+                gw: 1, kind: 'res', id: request.id, ok: true, result: { shown: true },
+            })
+            await flush()
+
+            expect(states).toEqual(['opened', 'failed', 'closed'])
+            expect(pauses).toEqual([true, false])
         })
 
         test('banner show / hide and host-side banner events', async () => {
@@ -795,7 +1062,7 @@ describe('GamesWebPlatformBridge', () => {
             expect(bridge.isOnline).toBe(true)
             expect(bridge.isPlatformStorageAvailable).toBe(true)
             await expect(bridge.getDataFromStorage(['coins'])).resolves.toEqual({ coins: '5' })
-            expect(call).toHaveBeenCalledWith('storage.get', { keys: ['coins'] })
+            expect(call).toHaveBeenCalledWith('storage.get', { keys: ['coins', 'ya:coins'] })
 
             const pauses = recordStates(bridge, EVENT_NAME.PAUSE_STATE_CHANGED)
             listeners.pause({ paused: true })
