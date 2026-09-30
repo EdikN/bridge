@@ -35,6 +35,14 @@ export interface PlatformDetector {
 // Each entry is conditionally included based on the build-time __INCLUDE_*__ flag
 // so platforms excluded from the bundle do not ship their detector code.
 export const PLATFORM_DETECTORS: PlatformDetector[] = [
+    // Fork: GamesWeb portal. The portal launches games with gw=1 and injects window.GWHost, so this
+    // explicit marker goes first; platform_id in the URL (e.g. platform_id=yandex for games that run
+    // through the Yandex SDK emulator) still wins, because it is checked before the detectors.
+    ...(__INCLUDE_GAMESWEB__ ? [{
+        platformId: PLATFORM_ID.GAMESWEB,
+        predicate: ({ searchParams, win }: PlatformDetectorContext) => searchParams.get('gw') === '1'
+            || typeof win.GWHost !== 'undefined',
+    }] : []),
     ...(__INCLUDE_YANDEX__ ? [{
         platformId: PLATFORM_ID.YANDEX,
         predicate: ({ hostname, hash }: PlatformDetectorContext) => hostname.includes(['y', 'a', 'n', 'd', 'e', 'x', '.', 'n', 'e', 't'].join('')) || hash.includes('yandex'),

@@ -49,6 +49,8 @@ export const PLATFORM_ID = {
     SAMSUNG: 'samsung',
     GAME_MONETIZE: 'game_monetize',
     ANDROID: 'android',
+    // Fork: the GamesWeb portal (choclategames.ru), GamesWeb Host Protocol v1.
+    GAMESWEB: 'gamesweb',
 } as const
 export type PlatformId = typeof PLATFORM_ID[keyof typeof PLATFORM_ID]
 

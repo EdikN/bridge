@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.2.0-fork.2] - 2026-09-30
+
+### Добавлено
+- **GamesWeb Platform:** новая платформа `gamesweb` — портал GamesWeb (`choclategames.ru`) по
+  GamesWeb Host Protocol v1 (`docs/gamesweb.md`).
+  - Работает через внедрённый порталом рантайм `window.GWHost`, а без него — по собственному
+    postMessage-транспорту с проверкой `gw_origin` / `event.source` / `event.origin` и таймаутами.
+  - Вне портала (нет `gw=1`/доверенного `gw_origin`, hello не ответил за 5 с) — офлайн-режим:
+    localStorage, реклама `failed`, лидерборды недоступны, гость. Инициализация никогда не висит.
+  - Хранилище хоста (для гостей и авторизованных), interstitial / rewarded / banner, авторизация,
+    лидерборды `in_game`, share / invite / rate / favorites / community, remote config, серверное
+    время хоста, пауза и звук от хоста.
+  - Автоопределение по `gw=1` или `window.GWHost`; `platform_id` в URL по-прежнему приоритетнее.
+
 ## [Unreleased]
 
 ### Изменено

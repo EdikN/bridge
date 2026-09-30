@@ -17,6 +17,12 @@ anything opened there is visible to Playgama.
 - PRs target `main` of `EdikN/bridge`. A PR that was opened against `Playgama/bridge` by
   mistake must be closed immediately and reported to the user (it happened once: #253).
 
+## Fork-only features
+
+- **GamesWeb** (`GamesWebPlatformBridge.ts` + `src/platform-bridges/gamesweb/GwHostClient.ts`) — portal `choclategames.ru`, GamesWeb Host Protocol v1 over `window.GWHost` or its own postMessage transport (trusted `gw_origin` only), offline mode outside the portal; detector `gw=1` / `window.GWHost` goes first; platform storage is on whenever the host answers (guests too). See `docs/gamesweb.md`
+
+The full list of fork-only features is in `CLAUDE.md` and `UPSTREAM_MERGE.md`.
+
 ## Build Commands
 
 ```bash

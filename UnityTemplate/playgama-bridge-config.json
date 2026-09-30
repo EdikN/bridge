@@ -15,6 +15,7 @@
             "gameId": ""
         },
         "ok": {},
+        "gamesweb": {},
         "yandex": {
             "useSignedData": false,
             "sendAnalyticsEvents": false

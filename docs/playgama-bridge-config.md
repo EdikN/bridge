@@ -390,6 +390,11 @@ These parameters are specific to individual platforms and should be placed at ro
 | `adChannel` | string | AdSense ad channel ID |
 | `testMode` | boolean | Enable test mode for ads |
 
+#### GamesWeb (fork)
+No options — `"gamesweb": {}`. Language, device, player, ad intervals and feature flags come from the
+portal's `hello` answer. Leaderboard ids and ad placements map as usual (`leaderboards[].gamesweb`,
+`placements[].gamesweb`). See [gamesweb.md](gamesweb.md).
+
 #### JioGames
 | Parameter | Type | Description |
 |-----------|------|-------------|
