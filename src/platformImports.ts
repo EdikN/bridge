@@ -113,6 +113,9 @@ if (__INCLUDE_GAME_MONETIZE__) {
 if (__INCLUDE_ANDROID__) {
     platformImports[PLATFORM_ID.ANDROID] = () => import('./platform-bridges/AndroidPlatformBridge')
 }
+if (__INCLUDE_GAMESWEB__) {
+    platformImports[PLATFORM_ID.GAMESWEB] = () => import('./platform-bridges/GamesWebPlatformBridge')
+}
 
 export async function fetchPlatformBridge(platformId: PlatformId): Promise<PlatformBridgeConstructor> {
     const importPlatform = platformImports[platformId]

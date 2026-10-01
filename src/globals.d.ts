@@ -35,8 +35,21 @@ declare global {
     const __INCLUDE_SAMSUNG__: boolean
     const __INCLUDE_GAME_MONETIZE__: boolean
     const __INCLUDE_ANDROID__: boolean
+    const __INCLUDE_GAMESWEB__: boolean
+
+    // Runtime the GamesWeb portal injects into the game page (GamesWeb Host Protocol v1, docs/gamesweb.md).
+    interface GWHostApi {
+        ready: Promise<unknown>
+        isOnline: boolean
+        info?: unknown
+        call(method: string, params?: unknown): Promise<unknown>
+        on(event: string, handler: (data: unknown) => void): void
+        off?(event: string, handler: (data: unknown) => void): void
+        emit(event: string, data?: unknown): void
+    }
 
     interface Window {
+        GWHost?: GWHostApi
         Capacitor?: {
             isNativePlatform?: () => boolean
             Plugins?: Record<string, unknown>

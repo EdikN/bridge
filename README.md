@@ -27,6 +27,7 @@ One SDK for cross-platform publishing HTML5 games.
 + [Portal](https://portalapp.games)
 + [TikTok](https://developers.tiktok.com/doc/mini-games-sdk-overview)
 + [Samsung Instant Plays](https://developer.samsung.com/instant-plays)
++ [GamesWeb](https://choclategames.ru) (fork: GamesWeb Host Protocol v1, see [docs/gamesweb.md](docs/gamesweb.md))
 + Other [Work In Progress]
 
 ## Plugins for game engines

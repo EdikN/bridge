@@ -26,17 +26,19 @@ Never remove or overwrite our exclusive integrations:
 - **OK** (`OkPlatformBridge.ts` **extends VkPlatformBridge** — OK runs through VK Bridge; `ok-vk` params, no leaderboards, OK share fallback link)
 - **GameMonetize** (`GameMonetizePlatformBridge.ts`, reward only on ad COMPLETE, launch interstitial after `AD_SDK_MANAGER_READY` + 500ms)
 - **Android** (`AndroidPlatformBridge.ts`, Capacitor + YandexMobileAds)
+- **GamesWeb** (`GamesWebPlatformBridge.ts` + `src/platform-bridges/gamesweb/GwHostClient.ts`, GamesWeb Host Protocol v1, `docs/gamesweb.md`; tests `tests/src/platform-bridges/gamesWebPlatformBridge.spec.ts`)
 
 ### Detection Logic
 Ensure `src/platformDetectors.ts` retains:
+- GamesWeb detector (`gw=1` / `window.GWHost`) **first** in the list
 - OK detector (`vk_client=ok` / `vk_ok_app_id`) **before** the VK detector
 - GameMonetize detector (gamemonetize.com/.co, distributegames.com)
 - Android detector (`window.Capacitor.isNativePlatform()`)
 - `ok-vk` → `ok` normalization in `normalizePlatformId`
 
-And `src/modules/platform/constants.ts` retains `OK_VK`, `GAME_MONETIZE`, `ANDROID` in `PLATFORM_ID`,
-`src/platformImports.ts` retains the GameMonetize/Android imports, and `src/globals.d.ts` the
-`__INCLUDE_GAME_MONETIZE__` / `__INCLUDE_ANDROID__` flags.
+And `src/modules/platform/constants.ts` retains `OK_VK`, `GAME_MONETIZE`, `ANDROID`, `GAMESWEB` in `PLATFORM_ID`,
+`src/platformImports.ts` retains the GameMonetize/Android/GamesWeb imports, and `src/globals.d.ts` the
+`__INCLUDE_GAME_MONETIZE__` / `__INCLUDE_ANDROID__` / `__INCLUDE_GAMESWEB__` flags and the `window.GWHost` type.
 
 ### Other fork points
 - `src/modules/advertisement/constants.ts` — `DEFAULT_MINIMUM_DELAY_BETWEEN_INTERSTITIAL = 80` (upstream: 60)
