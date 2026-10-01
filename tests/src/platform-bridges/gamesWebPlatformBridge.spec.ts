@@ -1036,6 +1036,29 @@ describe('GamesWebPlatformBridge', () => {
         })
     })
 
+    describe('payments', () => {
+        test('are never supported and reject at once without asking the host', async () => {
+            const bridge = await createOnlineBridge()
+
+            expect(bridge.isPaymentsSupported).toBe(false)
+            for (const call of [
+                () => bridge.paymentsPurchase(),
+                () => bridge.paymentsConsumePurchase(),
+                () => bridge.paymentsGetCatalog(),
+                () => bridge.paymentsGetPurchases(),
+            ]) {
+                await expect(call()).rejects.toMatchObject({ code: 'not_supported' })
+            }
+            expect(host.posted.filter((p) => String(p.message.method || '').startsWith('payments.'))).toHaveLength(0)
+        })
+
+        test('stay unsupported even if the host claims payments', async () => {
+            const bridge = await createOnlineBridge({ ...HELLO, features: { ...HELLO.features, payments: true } })
+
+            expect(bridge.isPaymentsSupported).toBe(false)
+        })
+    })
+
     describe('injected runtime (window.GWHost)', () => {
         test('uses GWHost instead of postMessage', async () => {
             const listeners: Record<string, (data: unknown) => void> = {}

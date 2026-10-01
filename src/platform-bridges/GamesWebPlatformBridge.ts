@@ -202,6 +202,13 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
             : LEADERBOARD_TYPE.NOT_AVAILABLE
     }
 
+    // payments — the portal has no payment provider (the host answers `features.payments: false`
+    // and `not_supported` to every `payments.*` call), so payments are never supported here,
+    // even if a future host flips the flag before it actually implements them.
+    get isPaymentsSupported(): boolean {
+        return false
+    }
+
     // config
     get isRemoteConfigSupported(): boolean {
         return this.#isOnline && this.#features.remoteConfig === true
@@ -558,6 +565,24 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
         }
 
         return promiseDecorator.promise
+    }
+
+    // payments — fail fast without a host round trip and never resolve a fake purchase
+    // (PlatformBridgeBase resolves purchases locally, which would hand out free items).
+    paymentsPurchase(): Promise<unknown> {
+        return Promise.reject(new GwError(GW_ERROR_CODE.NOT_SUPPORTED, 'GamesWeb has no payments'))
+    }
+
+    paymentsConsumePurchase(): Promise<unknown> {
+        return Promise.reject(new GwError(GW_ERROR_CODE.NOT_SUPPORTED, 'GamesWeb has no payments'))
+    }
+
+    paymentsGetCatalog(): Promise<unknown> {
+        return Promise.reject(new GwError(GW_ERROR_CODE.NOT_SUPPORTED, 'GamesWeb has no payments'))
+    }
+
+    paymentsGetPurchases(): Promise<unknown> {
+        return Promise.reject(new GwError(GW_ERROR_CODE.NOT_SUPPORTED, 'GamesWeb has no payments'))
     }
 
     // leaderboards
