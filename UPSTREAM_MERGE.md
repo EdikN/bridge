@@ -1,6 +1,6 @@
 # Upgrading Over Upstream (Merge Skill)
 
-> **Status:** synced with upstream **v2.2.0** on 2026-09-23 (previous sync: v2.1.0 on 2026-09-03).
+> **Status:** synced with upstream **v2.3.0** on 2026-10-01 (previous sync: v2.2.0 on 2026-09-23).
 > The codebase is now TypeScript; all custom features below live in `.ts` files.
 
 When updating the bridge library from the official upstream (`Playgama/bridge`), strictly adhere to the following steps to preserve our custom features:
@@ -57,6 +57,10 @@ And `src/modules/platform/constants.ts` retains `OK_VK`, `GAME_MONETIZE`, `ANDRO
 - **Release workflows** — upstream's `.github/workflows/release.yml` is deleted in the fork:
   `npm-release.yml` attaches both the npm tarball and `dist/playgama-bridge.js` to the release.
   Delete `release.yml` again if a merge brings it back.
+- **Vite plugin** (`vite/index.cjs`, since 2.3.0) — default `mode` is `'local'` in the fork
+  (upstream: `'cdn'`). The CDN serves upstream's runtime without the fork's platforms, so the
+  game must get `dist/playgama-bridge.js` from the fork's tarball. Since 2.3.0 the npm entry
+  (`src/npm.ts`) is a shim over `window.bridge` and no longer bundles the runtime.
 - `src/PlaygamaBridge.ts` — module getters return their module type (`typeof storageModule`),
   not `unknown`. Without it the npm package cannot be used from TypeScript at all.
 

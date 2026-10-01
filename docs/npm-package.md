@@ -24,30 +24,55 @@ Releases — игра пишет привычное `import { bridge } from '@pl
 
 | Импорт | Что отдаёт |
 | --- | --- |
-| `@playgama/bridge` | синглтон `bridge` (он же `default`) и все публичные константы |
+| `@playgama/bridge` | синглтон `bridge` (он же `default`) и все публичные константы — сам рантайм не содержит, см. ниже |
 | `@playgama/bridge/constants` | только константы, без создания моста |
 | `@playgama/bridge/global` | типы для `window.bridge` / `window.playgamaBridge` |
-| `@playgama/bridge/dist/playgama-bridge.js` | сборка для `<script>`, если модульный импорт не нужен |
+| `@playgama/bridge/vite` | Vite-плагин: подключает рантайм `playgama-bridge.js` тегом `<script>` и кладёт его в сборку |
+| `@playgama/bridge/dist/playgama-bridge.js` | сам рантайм для `<script>` |
 
-Синглтон один. `src/npm.ts` не создаёт мост, а забирает тот, который повесил на
-`window` `src/index.ts`: игра, которая заодно грузит `playgama-bridge.js` тегом
-`<script>`, обязана говорить с тем же экземпляром — два моста на странице это две
-инициализации и два набора слушателей площадки.
+Синглтон один. С 2.3.0 (как и у апстрима) `src/npm.ts` — только прослойка: рантайм
+в модульные бандлы **не вшит**, `bridge` из импорта это `window.bridge`, который
+создаёт `playgama-bridge.js`, загруженный тегом `<script>` раньше кода игры. Если
+рантайма на странице нет, импорт отдаёт прокси, и первое же обращение к нему бросает
+ошибку с подсказкой.
+
+Поэтому игра на npm-пакете подключает рантайм одним из способов:
+
+```js
+// vite.config.js
+import playgamaBridge from '@playgama/bridge/vite'
+
+export default { plugins: [playgamaBridge()] }
+```
+
+или кладёт `playgama-bridge.js` рядом с `index.html` и грузит его тегом `<script>`
+до скрипта игры.
+
+**Отличие форка:** у Vite-плагина режим по умолчанию `local` — рантайм берётся из
+пакета (то есть сборка форка). В апстриме по умолчанию `cdn`, а CDN
+`bridge.playgama.com` раздаёт апстримовский рантайм без GamesWeb, доработок VK/OK,
+GameMonetize и Android. `mode: 'cdn'` в форке включать не надо.
+
+Игры, которые обновляют тарбол с `2.2.0-fork.*` и раньше не грузили рантайм тегом,
+должны добавить плагин или тег — иначе `bridge.initialize()` упадёт с ошибкой
+«Playgama Bridge runtime is not loaded».
 
 ## Как собрать локально
 
 ```bash
-npm run build:package   # скриптовая сборка + ESM/UMD + d.ts
+npm run build:package   # рантайм + ESM/CJS-прослойки + d.ts
 npm pack                # playgama-bridge-<версия>.tgz
 ```
 
 `build:package` = `build` (скриптовый бандл в `dist/playgama-bridge.js`) +
-`build:npm` (webpack `--env npm`: ESM, UMD и два бандла констант) +
-`build:types` (`tsc -p tsconfig.types.json` → `dist/types`).
+`build:npm` (webpack `--env npm`: `playgama-bridge.esm.mjs`, `playgama-bridge.cjs.js` и два
+бандла констант) + `build:types` (`tsc -p tsconfig.types.json` → `dist/types`).
+В апстриме `build:package` не запускает `build`; в форке запускает, потому что
+`dist/playgama-bridge.js` — это и есть рантайм, который плагин и тарбол обязаны везти.
 
-Все npm-бандлы собираются **сплошными**: мосты площадок вшиты в файл, а не вынесены
-в асинхронные чанки. Чанк пришлось бы тянуть в рантайме с `publicPath`, о котором
-сборщик игры ничего не знает, и игра не нашла бы свою площадку при первом же запуске.
+Рантайм `dist/playgama-bridge.js` собирается **сплошным** (`bundled`): мосты площадок
+вшиты в файл, а не вынесены в асинхронные чанки — чанк пришлось бы тянуть с
+`publicPath`, о котором сборщик игры ничего не знает.
 
 ## Как выпустить релиз
 
@@ -81,4 +106,5 @@ git push origin v2.0.3-fork.1
   представляется площадке (Яндекс пишет его как `pluginName`). Оно не должно
   меняться из-за того, что пакет стал скоупнутым;
 * `repository` / `homepage` / `bugs`, указывающие на форк;
-* типизированные геттеры модулей в `src/PlaygamaBridge.ts`.
+* типизированные геттеры модулей в `src/PlaygamaBridge.ts`;
+* `mode` по умолчанию `'local'` в `vite/index.cjs` (с 2.3.0).

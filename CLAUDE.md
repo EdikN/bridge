@@ -24,7 +24,7 @@ anything opened there is visible to Playgama.
 ```bash
 npm run build          # Production build (bundled - single file)
 npm run build:dynamic  # Production build with code splitting (separate chunk per platform)
-npm run build:package  # Fork-only: npm package (script bundle + ESM/UMD + d.ts) for release
+npm run build:package  # npm package (runtime script bundle + ESM/CJS shim + d.ts) for release
 npm run dev            # Dev server on port 3535
 npm run develop        # Development build (non-minified)
 npm run lint           # Check code style (ESLint over .ts)
@@ -81,6 +81,7 @@ Local projects listed in `bridge-deploy.config.json` get the bridge two ways:
 - **npm package** — the fork is consumable as `@playgama/bridge` from a GitHub Release tarball:
   `src/npm.ts` / `src/publicConstants.ts` / `src/global.ts`,
   `tsconfig.types.json`, webpack `--env npm`, `.github/workflows/npm-release.yml`.
+  Vite plugin `vite/index.cjs` defaults to `mode: 'local'` (upstream: `'cdn'` = upstream runtime).
   `PLUGIN_NAME` stays `'playgama-bridge'` even though the package is scoped — it is what
   Yandex records as the plugin, not a packaging detail. See `docs/npm-package.md`
 - **Typed module getters** — `bridge.storage`, `bridge.advertisement` and friends return their

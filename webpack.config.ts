@@ -219,9 +219,9 @@ export default (env: WebpackEnv = {}, argv: WebpackArgv = {}): Configuration | C
         ],
     }
 
-    // npm-consumable bundles. Same source, but with a real module export
-    // (src/npm.ts) so `import bridge from '@playgama/bridge'` works. Everything
-    // is inlined into a single file (no platform-bridges/ chunks to fetch).
+    // npm entry bundles (src/npm.ts): a shim that re-exports window.bridge plus
+    // the public constants and types. The runtime is not bundled here; it ships
+    // as dist/playgama-bridge.js and is loaded via <script> (see vite/).
     if (env.npm) {
         const singleChunk = new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })
         // Fork: the npm bundles are not what the Unity template ships, so they
@@ -234,22 +234,21 @@ export default (env: WebpackEnv = {}, argv: WebpackArgv = {}): Configuration | C
             entry: './src/npm',
             experiments: { outputModule: true },
             output: {
-                filename: 'playgama-bridge.esm.js',
+                filename: 'playgama-bridge.esm.mjs',
                 path: path.resolve(__dirname, 'dist'),
                 library: { type: 'module' },
             },
             plugins: [...npmPlugins, singleChunk],
         }
 
-        const npmUmdConfig: Configuration = {
+        const npmCjsConfig: Configuration = {
             ...baseConfig,
-            name: 'npm-umd',
+            name: 'npm-cjs',
             entry: './src/npm',
             output: {
-                filename: 'playgama-bridge.umd.js',
+                filename: 'playgama-bridge.cjs.js',
                 path: path.resolve(__dirname, 'dist'),
-                library: { name: 'bridge', type: 'umd' },
-                globalObject: 'this',
+                library: { type: 'commonjs2' },
             },
             plugins: [...npmPlugins, singleChunk],
         }
@@ -263,7 +262,7 @@ export default (env: WebpackEnv = {}, argv: WebpackArgv = {}): Configuration | C
             entry: './src/publicConstants',
             experiments: { outputModule: true },
             output: {
-                filename: 'constants.esm.js',
+                filename: 'constants.esm.mjs',
                 path: path.resolve(__dirname, 'dist'),
                 library: { type: 'module' },
             },
@@ -282,7 +281,7 @@ export default (env: WebpackEnv = {}, argv: WebpackArgv = {}): Configuration | C
             plugins: [...npmPlugins, singleChunk],
         }
 
-        return [npmEsmConfig, npmUmdConfig, constantsEsmConfig, constantsCjsConfig]
+        return [npmEsmConfig, npmCjsConfig, constantsEsmConfig, constantsCjsConfig]
     }
 
     return [dynamicConfig, bundledConfig]
