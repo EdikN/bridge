@@ -1,6 +1,6 @@
 # Upgrading Over Upstream (Merge Skill)
 
-> **Status:** synced with upstream **v2.3.0** on 2026-10-01 (previous sync: v2.2.0 on 2026-09-23).
+> **Status:** synced with upstream **v2.3.1** on 2026-10-08 (previous sync: v2.3.0 on 2026-10-01).
 > The codebase is now TypeScript; all custom features below live in `.ts` files.
 
 When updating the bridge library from the official upstream (`Playgama/bridge`), strictly adhere to the following steps to preserve our custom features:
