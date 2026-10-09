@@ -23,7 +23,7 @@ import type { AchievementMapping } from '../../modules/achievements/types'
 import type { CrossPromoConfig } from '../../modules/cross-promo/types'
 import type { LeaderboardMapping } from '../../modules/leaderboards'
 import type { SocialConfig } from '../../modules/social/types'
-import type { NotificationMapping } from '../../modules/notifications/types'
+import type { NotificationMapping, NotificationSettings } from '../../modules/notifications/types'
 import type { DeviceConfig } from '../../modules/device'
 
 export interface SaasFeatureConfig {
@@ -80,6 +80,7 @@ export interface ConfigFileOptions extends AnyRecord {
     leaderboards?: LeaderboardMapping[]
     social?: SocialConfig
     notifications?: NotificationMapping[]
+    notificationSettings?: NotificationSettings
     disableAutoNotifications?: boolean
     device?: DeviceConfig
     crossPromo?: CrossPromoConfig

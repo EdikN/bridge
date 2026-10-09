@@ -206,8 +206,10 @@ function rebuildBridge() {
 
     if (fs.existsSync(projectPublic)) {
         const content = fs.readFileSync(projectPublic, 'utf8');
-        if (content.includes('isNativePlatform')) {
-            ok('playgama-bridge.js уже содержит Android-детекцию');
+        // Маркер — самая новая Android-возможность (уведомления), чтобы старая
+        // сборка bridge без неё пересобиралась.
+        if (content.includes('isNativePlatform') && content.includes('getLaunchNotification')) {
+            ok('playgama-bridge.js уже содержит Android-детекцию и уведомления');
             return;
         }
     }
@@ -302,6 +304,30 @@ function patchYandexPlugin() {
             ok('YandexMobileAdsManager.kt уже обновлён');
         }
     }
+
+    patchNotifications(pluginDir);
+}
+
+// Локальные уведомления (bridge.notifications). Нативный код лежит в
+// scripts/android-templates и копируется в плагин, так что для старой версии
+// плагина в игре достаточно обновить bridge и перезапустить этот скрипт.
+function patchNotifications(pluginDir) {
+    const templates = path.join(__dirname, 'android-templates');
+    const kotlinDir = path.join(pluginDir, 'src', 'main', 'java', 'com', 'playgama', 'yandexads');
+    const files = [
+        ['PlaygamaNotifications.kt', path.join(kotlinDir, 'PlaygamaNotifications.kt')],
+        ['YandexMobileAdsPlugin.kt', path.join(kotlinDir, 'YandexMobileAdsPlugin.kt')],
+        ['AndroidManifest.xml', path.join(pluginDir, 'src', 'main', 'AndroidManifest.xml')],
+    ];
+
+    let changed = 0;
+    for (const [name, target] of files) {
+        const content = fs.readFileSync(path.join(templates, name), 'utf8');
+        if (fs.existsSync(target) && fs.readFileSync(target, 'utf8') === content) continue;
+        write(target, content);
+        changed++;
+    }
+    ok(changed ? `Уведомления: обновлено файлов плагина — ${changed}` : 'Уведомления уже встроены в плагин');
 }
 
 // ─── ШАГ 7: gradle.properties ────────────────────────────────────────────
