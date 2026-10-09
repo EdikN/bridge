@@ -70,7 +70,7 @@ Local projects listed in `bridge-deploy.config.json` get the bridge two ways:
 
 - **GameMonetize** (`GameMonetizePlatformBridge.ts`) — reward granted only on ad COMPLETE; launch interstitial 500ms after `AD_SDK_MANAGER_READY`
 - **GamesWeb** (`GamesWebPlatformBridge.ts` + `src/platform-bridges/gamesweb/GwHostClient.ts`) — portal `choclategames.ru`, GamesWeb Host Protocol v1 over `window.GWHost` or its own postMessage transport (trusted `gw_origin` only), offline mode outside the portal; detector `gw=1` / `window.GWHost` goes first; platform storage is on whenever the host answers (guests too); local fallback keys are prefixed `gw:<slug>:` (StorageModule `localStorageKeyPrefix`, shared origin); `ya:<key>` fallback for saves of the Yandex emulator. See `docs/gamesweb.md`
-- **Android** (`AndroidPlatformBridge.ts`) — Capacitor + YandexMobileAds plugin (interstitial/rewarded/banner)
+- **Android** (`AndroidPlatformBridge.ts`) — Capacitor + YandexMobileAds plugin (interstitial/rewarded/banner, local notifications from config; native code in `scripts/android-templates/`, copied into the plugin by `android-setup.js`)
 - **VK customizations** (`VkPlatformBridge.ts`) — real auth check via `VKWebAppGetAuthToken`, storage retry-after-reauth, payments via `VKWebAppShowOrderBox` + external catalog (`storage.choclategames.ru`), joinCommunity from config without `window.open`, `initialInterstitialDelay = 30`
 - **OK via VK Bridge** (`OkPlatformBridge.ts` extends `VkPlatformBridge`) — `ok-vk` launch params, OK catalog, share with `ok.ru/game/<id>` fallback link, no leaderboards
 - **CustomLoader** — cookie-splash loading screen in `src/lib/loading-screen/LoadingScreen.ts`

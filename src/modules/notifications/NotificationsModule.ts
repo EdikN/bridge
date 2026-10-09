@@ -19,10 +19,12 @@ import ModuleBase, { type PlatformBridgeLike } from '../ModuleBase'
 import type { PlatformId } from '../platform/constants'
 import { BridgeError, ERROR_CODE } from '../../constants'
 import type { ScheduledNotification } from './types'
+import { fillNotificationFromConfig } from './utils'
 import bridgeConfig from '../../lib/bridge-config'
 
 export interface NotificationsBridgeContract extends PlatformBridgeLike {
     platformId: PlatformId
+    platformLanguage: string
     isNotificationsSupported: boolean
     notificationsSchedule(
         notification: ScheduledNotification,
@@ -39,7 +41,12 @@ class NotificationsModule extends ModuleBase<NotificationsBridgeContract> {
 
     // The payload of the notification the game was launched from is delivered
     // through the regular platform payload — see bridge.platform.payload.
-    schedule(notification: ScheduledNotification): Promise<unknown> {
+    // Fields missing in the call are taken from the "notifications" config entry with the same id.
+    schedule(input: ScheduledNotification): Promise<unknown> {
+        const notification = input && typeof input === 'object' && typeof input.id === 'string'
+            ? fillNotificationFromConfig(input, this._platformBridge.platformLanguage)
+            : input
+
         const validationError = this.#validate(notification)
         if (validationError) {
             return Promise.reject(new BridgeError(ERROR_CODE.NOTIFICATION_INVALID_PARAMETERS, validationError))

@@ -53,6 +53,7 @@ Ad unit ID получают в [Yandex Advertising Network](https://partner.yand
 | Banner реклама (10% снизу) | ✓ |
 | localStorage | ✓ |
 | Fullscreen (без статус-бара) | ✓ |
+| Локальные уведомления | ✓ (см. ниже) |
 | Платежи | ✗ |
 | Лидерборды | ✗ |
 | Авторизация | ✗ |
@@ -207,6 +208,60 @@ android/
 При скрытии баннера (`hideBanner`) WebView автоматически восстанавливается до 100%.
 
 При ошибке загрузки баннера WebView тоже восстанавливается до 100%.
+
+## Уведомления
+
+Локальные уведомления (`bridge.notifications`) показываются системой Android, даже когда игра закрыта; после перезагрузки телефона они восстанавливаются. Нативный код лежит в плагине `capacitor-plugin-yandex-mobile-ads`. В старую версию плагина его встраивает `android-setup.js` (шаг «Патч Yandex плагина», шаблоны в `scripts/android-templates/`). Поэтому код игры менять не нужно: достаточно обновить bridge, дописать конфиг и пересобрать APK скриптом.
+
+Всё, что показывает уведомление, задаётся в `playgama-bridge-config.json`:
+
+```json
+{
+    "notificationSettings": {
+        "smallIcon": "ic_stat_notify",
+        "color": "#FF8800",
+        "channelName": { "ru": "Напоминания", "en": "Reminders" },
+        "requestPermission": "onSchedule"
+    },
+    "notifications": [
+        {
+            "id": "comeback",
+            "auto": true,
+            "delaySeconds": 86400,
+            "title": { "ru": "Возвращайся!", "en": "Come back!" },
+            "description": { "ru": "Ежедневная награда ждёт", "en": "Your daily reward is waiting" },
+            "image": "images/push.png",
+            "payload": "from=comeback"
+        },
+        { "id": "energy_full", "title": "Энергия восстановлена", "description": "Можно играть дальше" }
+    ]
+}
+```
+
+`notifications[]`:
+
+| Поле | Описание |
+|------|----------|
+| `id` | Идентификатор уведомления. Повторный `schedule` с тем же id заменяет предыдущее |
+| `title`, `description` | Текст: строка или объект по языкам (`platform.language`, затем `en`, затем первый) |
+| `delaySeconds` | Через сколько секунд показать |
+| `image` | Картинка: `https://...` или путь внутри веб-сборки (`images/push.png` → `public/images/push.png`) |
+| `payload` | При запуске игры из уведомления приходит в `bridge.platform.payload` |
+| `auto` | `true` — bridge ставит уведомление сам при каждом запуске игры, отсчёт идёт от последнего запуска |
+
+Уведомления без `auto` игра ставит сама: `bridge.notifications.schedule({ id: 'energy_full', delaySeconds: 3600 })`. Недостающие поля берутся из записи конфига с тем же `id`. Отменить уведомление: `cancel(id)`, все сразу: `cancelAll()`.
+
+`notificationSettings`:
+
+| Поле | По умолчанию | Описание |
+|------|--------------|----------|
+| `smallIcon` | иконка приложения | Имя drawable/mipmap ресурса для статус-бара (белый силуэт на прозрачном фоне), например `android/app/src/main/res/drawable/ic_stat_notify.png` |
+| `color` | — | Цвет акцента |
+| `channelName` | `Notifications` | Название канала в настройках Android (строка или по языкам) |
+| `channelId` | `playgama_default` | Идентификатор канала |
+| `requestPermission` | `onSchedule` | Когда запросить разрешение на уведомления (Android 13+): `onStart`, `onSchedule` (при первом `schedule`) или `never` |
+
+Время показа неточное (`setAndAllowWhileIdle`): Android может сдвинуть его на несколько минут, зато не нужно разрешение `SCHEDULE_EXACT_ALARM`.
 
 ## Fullscreen
 

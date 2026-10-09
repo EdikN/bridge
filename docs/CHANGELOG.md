@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Добавлено
+- **Android:** локальные уведомления (`bridge.notifications`). Тексты (можно по языкам), картинка,
+  иконка и канал задаются в конфиге (`notifications[]`, `notificationSettings`); записи с
+  `"auto": true` ставятся при каждом запуске, `schedule({ id })` берёт недостающие поля из конфига,
+  `payload` уведомления приходит в `bridge.platform.payload`. Нативная часть есть в плагине
+  `capacitor-plugin-yandex-mobile-ads`, а в старую версию плагина её встраивает `android-setup.js`.
+  См. `docs/android-setup.md`.
+
 ## [2.2.0-fork.2] - 2026-09-30
 
 ### Добавлено

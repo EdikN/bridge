@@ -53,6 +53,7 @@ declare global {
         Capacitor?: {
             isNativePlatform?: () => boolean
             Plugins?: Record<string, unknown>
+            PluginHeaders?: Array<{ name: string, methods?: Array<{ name: string }> }>
         }
         adsbygoogle?: unknown[] & { push?: (config: Record<string, unknown>) => unknown }
         system?: { postMessage: (message: unknown) => void }

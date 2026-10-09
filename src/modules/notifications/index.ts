@@ -18,6 +18,11 @@
 import NotificationsModule from './NotificationsModule'
 
 export type { NotificationsBridgeContract } from './NotificationsModule'
-export type { ScheduledNotification, NotificationMapping } from './types'
+export type {
+    ScheduledNotification,
+    NotificationMapping,
+    NotificationSettings,
+    LocalizedText,
+} from './types'
 
 export default new NotificationsModule()
