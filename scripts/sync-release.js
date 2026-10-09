@@ -6,8 +6,8 @@
 // не узнавали: игры неделями жили на мосте, от которого давно ушли.
 //
 // Этот скрипт спрашивает у GitHub последний релиз и, если в проекте лежит
-// более старый, кладёт туда `playgama-bridge.js` из этого релиза — ровно тот
-// файл, что выпущен, а не то, что лежит в рабочей копии. Что куда уже
+// более старый, кладёт туда dynamic-сборку из этого релиза (`playgama-bridge.js`
+// + `platform-bridges/`) — ровно то, что выпущено, а не то, что лежит в рабочей копии. Что куда уже
 // разложено, помнится в .deploy-state.json, поэтому гонять его можно сколько
 // угодно часто: без нового релиза он ничего не трогает. Запускает его
 // планировщик Windows (scripts/install-sync-task.ps1).
@@ -18,7 +18,9 @@
 //   node scripts/sync-release.js --tag v2.1.0-fork.1   конкретный релиз
 
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
+const { execFileSync } = require('child_process')
 
 const ROOT = path.resolve(__dirname, '..')
 const CONFIG_PATH = path.join(ROOT, 'bridge-deploy.config.json')
@@ -26,6 +28,10 @@ const STATE_PATH = path.join(ROOT, '.deploy-state.json')
 const LOG_PATH = path.join(ROOT, '.deploy-sync.log')
 const REPO = 'EdikN/bridge'
 const ASSET = 'playgama-bridge.js'
+// Релизы с 2.3.1-fork.3 — dynamic: ядро + чанки platform-bridges/ в архиве.
+// Старые релизы несут только bundled playgama-bridge.js.
+const DYNAMIC_ASSET = 'playgama-bridge-dynamic.tar.gz'
+const PLATFORMS_DIR = 'platform-bridges'
 // Меньше этого настоящим мостом быть не может: так выглядит страница ошибки.
 const MIN_ASSET_BYTES = 50 * 1024
 
@@ -71,11 +77,16 @@ async function fetchRelease() {
         throw new Error(`GitHub ответил ${response.status} на ${url}`)
     }
     const release = await response.json()
-    const asset = (release.assets || []).find((item) => item.name === ASSET)
-    if (!asset) {
-        throw new Error(`в релизе ${release.tag_name} нет ${ASSET}`)
+    const assets = release.assets || []
+    const dynamic = assets.find((item) => item.name === DYNAMIC_ASSET)
+    if (dynamic) {
+        return { tag: release.tag_name, url: dynamic.browser_download_url, dynamic: true }
     }
-    return { tag: release.tag_name, url: asset.browser_download_url }
+    const asset = assets.find((item) => item.name === ASSET)
+    if (!asset) {
+        throw new Error(`в релизе ${release.tag_name} нет ни ${DYNAMIC_ASSET}, ни ${ASSET}`)
+    }
+    return { tag: release.tag_name, url: asset.browser_download_url, dynamic: false }
 }
 
 async function download(url) {
@@ -84,10 +95,27 @@ async function download(url) {
         throw new Error(`скачивание ${url}: ${response.status}`)
     }
     const body = Buffer.from(await response.arrayBuffer())
-    if (body.length < MIN_ASSET_BYTES) {
-        throw new Error(`скачалось ${body.length} байт — это не мост`)
-    }
     return body
+}
+
+// Распаковывает архив dynamic-релиза во временную папку (tar есть и в Windows 10+).
+function unpack(archive) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bridge-sync-'))
+    const file = path.join(dir, DYNAMIC_ASSET)
+    fs.writeFileSync(file, archive)
+    execFileSync('tar', ['-xzf', DYNAMIC_ASSET], { cwd: dir })
+    fs.unlinkSync(file)
+    return dir
+}
+
+function copyRecursive(src, dest) {
+    fs.mkdirSync(dest, { recursive: true })
+    for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+        const from = path.join(src, entry.name)
+        const to = path.join(dest, entry.name)
+        if (entry.isDirectory()) copyRecursive(from, to)
+        else fs.copyFileSync(from, to)
+    }
 }
 
 async function main() {
@@ -120,7 +148,20 @@ async function main() {
         return
     }
 
-    const body = dryRun ? null : await download(release.url)
+    let body = null
+    let unpacked = null
+    if (!dryRun) {
+        const downloaded = await download(release.url)
+        if (release.dynamic) {
+            unpacked = unpack(downloaded)
+            body = fs.readFileSync(path.join(unpacked, ASSET))
+        } else {
+            body = downloaded
+        }
+        if (body.length < MIN_ASSET_BYTES) {
+            throw new Error(`${ASSET}: ${body.length} байт — это не мост`)
+        }
+    }
     let copied = 0
 
     for (const target of targets) {
@@ -139,6 +180,10 @@ async function main() {
         const file = path.join(target.path, ASSET)
         const temp = `${file}.sync-tmp`
         try {
+            // Сначала чанки, потом ядро: новое ядро не должно остаться без своих чанков.
+            if (unpacked) {
+                copyRecursive(path.join(unpacked, PLATFORMS_DIR), path.join(target.path, PLATFORMS_DIR))
+            }
             fs.writeFileSync(temp, body)
             fs.renameSync(temp, file)
         } catch (error) {
@@ -150,6 +195,8 @@ async function main() {
         log(`[OK]   ${label}: ${was} → ${release.tag}`)
         copied++
     }
+
+    if (unpacked) fs.rmSync(unpacked, { recursive: true, force: true })
 
     if (!dryRun) {
         fs.writeFileSync(STATE_PATH, `${JSON.stringify(state, null, 4)}\n`)
