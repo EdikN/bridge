@@ -1,6 +1,7 @@
 import {
     describe, test, expect, vi, beforeEach, afterEach,
 } from 'vitest'
+import type { Mock } from 'vitest'
 import PikabuGamesPlatformBridge from '../../../src/platform-bridges/PikabuGamesPlatformBridge'
 import StorageModule from '../../../src/modules/storage/StorageModule'
 import type { StorageBridgeContract } from '../../../src/modules/storage/types'
@@ -585,6 +586,149 @@ describe('PikabuGamesPlatformBridge', () => {
             await expect(bridge.paymentsConsumePurchase('coins')).rejects.toBeUndefined()
             await expect(bridge.paymentsGetCatalog()).rejects.toBeUndefined()
             await expect(bridge.paymentsGetPurchases()).rejects.toBeUndefined()
+        })
+    })
+
+    describe('purchase verification', () => {
+        const VERIFY_BASE = 'https://storage.choclategames.ru/payments/pikabu/'
+        const originalPath = window.location.pathname + window.location.search + window.location.hash
+        let fetchMock: Mock
+
+        function respond(status: number, body: unknown) {
+            return {
+                ok: status >= 200 && status < 300,
+                status,
+                json: async () => body,
+            }
+        }
+
+        function storedPurchases(bridge: PikabuGamesPlatformBridge): unknown[] {
+            return (bridge as unknown as { _paymentsPurchases: unknown[] })._paymentsPurchases
+        }
+
+        beforeEach(() => {
+            fetchMock = vi.fn(async () => respond(200, { ok: true }))
+            vi.stubGlobal('fetch', fetchMock)
+        })
+
+        afterEach(() => {
+            vi.unstubAllGlobals()
+            vi.stubGlobal('PLUGIN_VERSION', 'test-version')
+            window.history.replaceState(null, '', originalPath)
+        })
+
+        test('no options → fetch is never called', async () => {
+            fake.sdk.store.getPurchases.mockResolvedValue([createPurchase('pkb_coins', 'tx-5')])
+            const bridge = await createBridge()
+
+            await bridge.paymentsPurchase('coins')
+            await bridge.paymentsGetPurchases()
+
+            expect(fetchMock).not.toHaveBeenCalled()
+        })
+
+        test('purchaseVerifyUrl → POST text/plain {token} to that URL', async () => {
+            const bridge = await createBridge({ payments: PAYMENTS, purchaseVerifyUrl: 'https://example.test/verify' })
+
+            const purchase = await bridge.paymentsPurchase('coins')
+
+            expect(purchase).toMatchObject({ id: 'coins', purchaseId: 'tx-1' })
+            expect(fetchMock).toHaveBeenCalledTimes(1)
+            const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+            expect(url).toBe('https://example.test/verify')
+            expect(init.method).toBe('POST')
+            expect(init.headers).toEqual({ 'Content-Type': 'text/plain' })
+            expect(JSON.parse(init.body as string)).toEqual({ token: 'signed-tx-1' })
+            expect(storedPurchases(bridge)).toHaveLength(1)
+        })
+
+        test('verifyPurchases + gameSlug → VkStorage URL with the encoded slug', async () => {
+            const bridge = await createBridge({ payments: PAYMENTS, verifyPurchases: true, gameSlug: 'my game/1' })
+
+            await bridge.paymentsPurchase('coins')
+
+            expect(fetchMock.mock.calls[0][0]).toBe(`${VERIFY_BASE}my%20game%2F1/`)
+        })
+
+        test('verifyPurchases without gameSlug takes the slug from /play/<slug>/', async () => {
+            window.history.replaceState(null, '', '/play/cookie-clicker/index.html')
+            const bridge = await createBridge({ payments: PAYMENTS, verifyPurchases: true })
+
+            await bridge.paymentsPurchase('coins')
+
+            expect(fetchMock.mock.calls[0][0]).toBe(`${VERIFY_BASE}cookie-clicker/`)
+        })
+
+        test('verifyPurchases without any slug → no fetch, purchase still succeeds', async () => {
+            window.history.replaceState(null, '', '/games/index.html')
+            const bridge = await createBridge({ payments: PAYMENTS, verifyPurchases: true })
+
+            await expect(bridge.paymentsPurchase('coins')).resolves.toMatchObject({ id: 'coins' })
+
+            expect(fetchMock).not.toHaveBeenCalled()
+            expect(storedPurchases(bridge)).toHaveLength(1)
+        })
+
+        test('server {ok: true, duplicate: true} → resolves', async () => {
+            fetchMock.mockResolvedValue(respond(200, { ok: true, duplicate: true }))
+            const bridge = await createBridge({ payments: PAYMENTS, verifyPurchases: true, gameSlug: 'g' })
+
+            await expect(bridge.paymentsPurchase('coins')).resolves.toMatchObject({ id: 'coins', purchaseId: 'tx-1' })
+            expect(storedPurchases(bridge)).toHaveLength(1)
+        })
+
+        test('server 4xx {ok: false, error} → rejects, purchase not stored, consume rejects', async () => {
+            fetchMock.mockResolvedValue(respond(400, { ok: false, error: 'bad_signature' }))
+            const bridge = await createBridge({ payments: PAYMENTS, verifyPurchases: true, gameSlug: 'g' })
+
+            await expect(bridge.paymentsPurchase('coins')).rejects.toThrow('bad_signature')
+
+            expect(storedPurchases(bridge)).toEqual([])
+            expect(bridge.isPlatformPaused).toBe(false)
+            await expect(bridge.paymentsConsumePurchase('coins')).rejects.toBeUndefined()
+            expect(fake.sdk.store.consumePurchase).not.toHaveBeenCalled()
+        })
+
+        test('200 without ok: true → rejects', async () => {
+            fetchMock.mockResolvedValue(respond(200, { ok: false }))
+            const bridge = await createBridge({ payments: PAYMENTS, verifyPurchases: true, gameSlug: 'g' })
+
+            await expect(bridge.paymentsPurchase('coins')).rejects.toThrow('verification failed')
+            expect(storedPurchases(bridge)).toEqual([])
+        })
+
+        test('network error → rejects, purchase not stored', async () => {
+            fetchMock.mockRejectedValue(new TypeError('Failed to fetch'))
+            const bridge = await createBridge({ payments: PAYMENTS, verifyPurchases: true, gameSlug: 'g' })
+
+            await expect(bridge.paymentsPurchase('coins')).rejects.toThrow('Failed to fetch')
+            expect(storedPurchases(bridge)).toEqual([])
+            expect(bridge.isPlatformPaused).toBe(false)
+        })
+
+        test('getPurchases keeps verified purchases and drops failed ones', async () => {
+            fake.sdk.store.getPurchases.mockResolvedValue([
+                createPurchase('pkb_coins', 'tx-1'),
+                createPurchase('no_ads', 'tx-2', false),
+                createPurchase('pkb_coins', 'tx-3'),
+            ])
+            fetchMock.mockImplementation(async (_url: string, init: RequestInit) => {
+                const { token } = JSON.parse(init.body as string) as { token: string }
+                if (token === 'signed-tx-2') {
+                    return respond(403, { ok: false, error: 'forbidden' })
+                }
+                if (token === 'signed-tx-3') {
+                    throw new TypeError('Failed to fetch')
+                }
+                return respond(200, { ok: true, duplicate: true })
+            })
+            const bridge = await createBridge({ payments: PAYMENTS, verifyPurchases: true, gameSlug: 'g' })
+
+            const purchases = await bridge.paymentsGetPurchases() as Record<string, unknown>[]
+
+            expect(fetchMock).toHaveBeenCalledTimes(3)
+            expect(purchases.map((p) => [p.id, p.purchaseId])).toEqual([['coins', 'tx-1']])
+            expect(storedPurchases(bridge)).toEqual(purchases)
         })
     })
 

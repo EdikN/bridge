@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.1-fork.5] - 2026-10-14
+
+### Добавлено
+- **Pikabu Games:** необязательная серверная проверка покупок через VkStorage
+  (`POST https://storage.choclategames.ru/payments/pikabu/<slug>/`, `docs/pikabu-games.md`).
+  - Включается `platforms.pikabu_games.verifyPurchases: true` (+ `gameSlug`; по умолчанию slug берётся
+    из пути `/play/<slug>/`) или полным адресом `purchaseVerifyUrl`. По умолчанию выключено.
+  - Бридж отправляет `{ token }` (JWT из `purchase.getSignedData()`) как `text/plain` без CORS-preflight;
+    покупка засчитывается только при HTTP 2xx и `{ ok: true }` (повтор `duplicate: true` тоже ок).
+  - `purchase()` не проходит проверку → reject, покупка не попадает в список (на Пикабу она остаётся
+    непотреблённой и вернётся в `getPurchases()`); `getPurchases()` отбрасывает непроверенные покупки.
+  - Секретный ключ Пикабу должен быть задан в кабинете VkStorage до включения опции — иначе сервер
+    отвечает 409 и все покупки отклоняются.
+
 ## [2.3.1-fork.4] - 2026-10-14
 
 ### Добавлено

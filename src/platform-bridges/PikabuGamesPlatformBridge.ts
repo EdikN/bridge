@@ -25,6 +25,8 @@ import { INTERSTITIAL_STATE, REWARDED_STATE } from '../modules/advertisement/con
 import logger from '../lib/logger'
 
 const SDK_URL = 'https://games.pikabu.ru/sdk/sdk.js'
+// Fork backend (VkStorage) that checks the signed purchase JWT with the game's Pikabu secret key.
+const PURCHASE_VERIFY_BASE_URL = 'https://storage.choclategames.ru/payments/pikabu/'
 // PkbSDK.init() has no timeout of its own: outside the portal it never settles.
 const SDK_INIT_TIMEOUT = 15000
 
@@ -362,8 +364,12 @@ class PikabuGamesPlatformBridge extends PlatformBridgeBase {
                     }
 
                     const purchase = this.#toBridgePurchase(result.purchase)
-                    this._paymentsPurchases.push(purchase)
-                    this._resolvePromiseDecorator(ACTION_NAME.PURCHASE, purchase)
+                    // An unverified purchase stays unconsumed on Pikabu and comes back in getPurchases().
+                    return this.#verifyPurchase(result.purchase)
+                        .then(() => {
+                            this._paymentsPurchases.push(purchase)
+                            this._resolvePromiseDecorator(ACTION_NAME.PURCHASE, purchase)
+                        })
                 })
                 .catch((error) => {
                     this.#setOverlayOpened(false)
@@ -463,8 +469,14 @@ class PikabuGamesPlatformBridge extends PlatformBridgeBase {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_PURCHASES)
 
             sdk.store.getPurchases()
+                .then((purchases) => Promise.all(purchases.map((purchase) => this.#verifyPurchase(purchase)
+                    .then(() => this.#toBridgePurchase(purchase))
+                    .catch((error) => {
+                        logger.warn(`Pikabu purchase '${purchase.purchaseId}' failed verification:`, error)
+                        return null
+                    }))))
                 .then((purchases) => {
-                    this._paymentsPurchases = purchases.map((purchase) => this.#toBridgePurchase(purchase))
+                    this._paymentsPurchases = purchases.filter((purchase) => purchase !== null)
                     this._resolvePromiseDecorator(ACTION_NAME.GET_PURCHASES, this._paymentsPurchases)
                 })
                 .catch((error) => {
@@ -535,6 +547,58 @@ class PikabuGamesPlatformBridge extends PlatformBridgeBase {
     #setOverlayOpened(isOpened: boolean): void {
         this._setPauseState(isOpened)
         this._setAudioState(!isOpened)
+    }
+
+    // platforms.pikabu_games: purchaseVerifyUrl (full URL), or verifyPurchases: true with gameSlug
+    // (defaults to the /play/<slug>/ folder the game is served from on VkStorage). Off by default.
+    #getPurchaseVerifyUrl(): string | null {
+        const options = this._options ?? {}
+        if (typeof options.purchaseVerifyUrl === 'string' && options.purchaseVerifyUrl) {
+            return options.purchaseVerifyUrl
+        }
+
+        if (options.verifyPurchases !== true) {
+            return null
+        }
+
+        const pathSlug = window.location.pathname.match(/\/play\/([^/]+)\//)?.[1]
+        const slug = typeof options.gameSlug === 'string' && options.gameSlug
+            ? options.gameSlug
+            : pathSlug && decodeURIComponent(pathSlug)
+
+        if (!slug) {
+            logger.warn('Pikabu purchase verification is on, but gameSlug is not set')
+            return null
+        }
+
+        return `${PURCHASE_VERIFY_BASE_URL}${encodeURIComponent(slug)}/`
+    }
+
+    async #verifyPurchase(purchase: PikabuPurchase): Promise<void> {
+        const url = this.#getPurchaseVerifyUrl()
+        if (!url) {
+            return
+        }
+
+        const token = await purchase.getSignedData()
+        // text/plain keeps the request "simple", so the browser sends no CORS preflight.
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ token }),
+        })
+
+        let body: AnyRecord | null = null
+        try {
+            body = await response.json() as AnyRecord
+        } catch {
+            body = null
+        }
+
+        // duplicate: the server already recorded this purchaseId, which is fine for a retry or a restore.
+        if (!response.ok || !body || body.ok !== true) {
+            throw new Error(`Pikabu purchase verification failed: ${body?.error ?? response.status}`)
+        }
     }
 
     #updatePlayer(): void {
