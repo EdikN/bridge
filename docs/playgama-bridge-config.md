@@ -399,6 +399,15 @@ portal's `hello` answer. Leaderboard ids and ad placements map as usual (`leader
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `preloaderAd` | boolean | Show the Pikabu preloader ad while the game loads (mobile only, if the SDK allows it). `gameStarted()` is delayed until the ad closes. Default: off |
+| `verifyPurchases` | boolean | Verify every purchase on VkStorage: `POST https://storage.choclategames.ru/payments/pikabu/<slug>/`. Default: off |
+| `gameSlug` | string | VkStorage game slug for `verifyPurchases`. Default: the `/play/<slug>/` segment of the page path; if none is found, verification is skipped with a warning |
+| `purchaseVerifyUrl` | string | Full verification URL instead of the VkStorage one; enables verification on its own |
+
+Purchase verification sends `{"token": "<purchase.getSignedData()>"}` as a `text/plain` POST (no CORS
+preflight) and accepts the purchase only on HTTP 2xx with `{"ok": true}` (`"duplicate": true` is fine).
+A failed check rejects `purchase()` without storing the purchase, and `getPurchases()` drops purchases
+that fail it. The VkStorage endpoint needs the game's Pikabu secret key set in the VkStorage dashboard;
+without it the server answers 409 and every purchase fails — enable the option only after setting the key.
 
 Product ids map through `payments[].pikabu_games.id` (the Studio catalog id); without it the bridge
 `id` is used as is. Pikabu requires at least 120 s between fullscreen ads, so consider raising
