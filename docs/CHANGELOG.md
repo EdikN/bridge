@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.3.1-fork.4] - 2026-10-14
+
+### Добавлено
+- **Pikabu Games Platform:** новая платформа `pikabu_games` — портал Пикабу Игры
+  (`games.pikabu.ru`) на `PkbSDK` (`docs/pikabu-games.md`).
+  - SDK `https://games.pikabu.ru/sdk/sdk.js`, `PkbSDK.init()` один раз; вне iframe инициализация
+    отклоняется сразу, в iframe — по таймауту 15 с. `game_ready` → `sdk.gameStarted()`.
+  - Interstitial (`ads.fullscreen`) и rewarded (`ads.rewarded`) с `canShow()` перед показом;
+    награда только при `reward: true`; баннеров нет. Опция `platforms.pikabu_games.preloaderAd`
+    показывает мобильную preloader-рекламу и откладывает `gameStarted()` до её закрытия.
+  - Облачное хранилище для гостей и авторизованных на autosave SDK (без `flush()` из-за лимита).
+  - Авторизация через диалог портала (с паузой и мьютом), платежи по каталогу Студии в рублях:
+    `payments[].pikabu_games.id`, `developerPayload`, `getSignedData()` для проверки на сервере.
+  - Язык всегда `ru`. Автоопределение по `pikabu=true` / `_platform-key=pikabu` в URL или
+    `games.pikabu.ru` в referrer / `ancestorOrigins`; `platform_id` в URL по-прежнему приоритетнее.
+
 ## [2.3.1-fork.2] - 2026-10-09
 
 ### Добавлено

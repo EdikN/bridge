@@ -20,6 +20,7 @@ anything opened there is visible to Playgama.
 ## Fork-only features
 
 - **GamesWeb** (`GamesWebPlatformBridge.ts` + `src/platform-bridges/gamesweb/GwHostClient.ts`) — portal `choclategames.ru`, GamesWeb Host Protocol v1 over `window.GWHost` or its own postMessage transport (trusted `gw_origin` only), offline mode outside the portal; detector `gw=1` / `window.GWHost` goes first; platform storage is on whenever the host answers (guests too). See `docs/gamesweb.md`
+- **Pikabu Games** (`PikabuGamesPlatformBridge.ts`) — portal `games.pikabu.ru`, `PkbSDK` (`https://games.pikabu.ru/sdk/sdk.js`); detector `pikabu=true` / `_platform-key=pikabu` / `games.pikabu.ru` in referrer or `ancestorOrigins` (builds are self-hosted); init rejects outside an iframe and after a 15 s timeout; language always `ru`; rewarded only on `reward: true`; cloud storage for guests via SDK autosave (no `flush()`, rate limit); RUB payments via `payments[].pikabu_games.id`; `preloaderAd` option delays `gameStarted()`. See `docs/pikabu-games.md`
 
 The full list of fork-only features is in `CLAUDE.md` and `UPSTREAM_MERGE.md`.
 

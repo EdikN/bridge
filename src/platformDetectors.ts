@@ -128,6 +128,15 @@ export const PLATFORM_DETECTORS: PlatformDetector[] = [
         platformId: PLATFORM_ID.GAME_MONETIZE,
         predicate: ({ hostname }: PlatformDetectorContext) => hostname.includes('gamemonetize.com') || hostname.includes('gamemonetize.co') || hostname.includes('distributegames.com'),
     }] : []),
+    // Fork: Pikabu Games. Builds are hosted by the developer and framed by games.pikabu.ru, so the
+    // game's own hostname says nothing; rely on the embedding page and Pikabu launch params instead.
+    ...(__INCLUDE_PIKABU_GAMES__ ? [{
+        platformId: PLATFORM_ID.PIKABU_GAMES,
+        predicate: ({ searchParams, referrer, win }: PlatformDetectorContext) => searchParams.get('pikabu') === 'true'
+            || searchParams.get('_platform-key') === 'pikabu'
+            || referrer.includes('games.pikabu.ru')
+            || Array.from(win.location.ancestorOrigins ?? []).some((origin) => origin.includes('games.pikabu.ru')),
+    }] : []),
     ...(__INCLUDE_ANDROID__ ? [{
         platformId: PLATFORM_ID.ANDROID,
         predicate: ({ win }: PlatformDetectorContext) => Boolean(win.Capacitor?.isNativePlatform?.()),

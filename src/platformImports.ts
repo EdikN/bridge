@@ -116,6 +116,9 @@ if (__INCLUDE_ANDROID__) {
 if (__INCLUDE_GAMESWEB__) {
     platformImports[PLATFORM_ID.GAMESWEB] = () => import('./platform-bridges/GamesWebPlatformBridge')
 }
+if (__INCLUDE_PIKABU_GAMES__) {
+    platformImports[PLATFORM_ID.PIKABU_GAMES] = () => import('./platform-bridges/PikabuGamesPlatformBridge')
+}
 
 export async function fetchPlatformBridge(platformId: PlatformId): Promise<PlatformBridgeConstructor> {
     const importPlatform = platformImports[platformId]

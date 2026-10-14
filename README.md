@@ -124,7 +124,7 @@ Full API reference: [wiki.playgama.com](https://wiki.playgama.com/playgama/bridg
     </tr>
 </table>
 
-**Fork-only platforms** (EdikN fork): [GamesWeb](https://choclategames.ru) (GamesWeb Host Protocol v1, see [docs/gamesweb.md](docs/gamesweb.md)), GameMonetize, Android (Capacitor + Yandex Mobile Ads), OK via VK Bridge.
+**Fork-only platforms** (EdikN fork): [GamesWeb](https://choclategames.ru) (GamesWeb Host Protocol v1, see [docs/gamesweb.md](docs/gamesweb.md)), [Pikabu Games](https://games.pikabu.ru) (PkbSDK, see [docs/pikabu-games.md](docs/pikabu-games.md)), GameMonetize, Android (Capacitor + Yandex Mobile Ads), OK via VK Bridge.
 
 More platforms are in progress. You choose where to publish when you [submit the game](https://developer.playgama.com/?utm_source=github&utm_medium=bridge).
 

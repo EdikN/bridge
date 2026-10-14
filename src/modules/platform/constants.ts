@@ -51,6 +51,8 @@ export const PLATFORM_ID = {
     ANDROID: 'android',
     // Fork: the GamesWeb portal (choclategames.ru), GamesWeb Host Protocol v1.
     GAMESWEB: 'gamesweb',
+    // Fork: Pikabu Games (games.pikabu.ru), PkbSDK.
+    PIKABU_GAMES: 'pikabu_games',
 } as const
 export type PlatformId = typeof PLATFORM_ID[keyof typeof PLATFORM_ID]
 
