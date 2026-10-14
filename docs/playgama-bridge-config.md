@@ -395,6 +395,29 @@ No options — `"gamesweb": {}`. Language, device, player, ad intervals and feat
 portal's `hello` answer. Leaderboard ids and ad placements map as usual (`leaderboards[].gamesweb`,
 `placements[].gamesweb`). See [gamesweb.md](gamesweb.md).
 
+#### Pikabu Games (fork)
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `preloaderAd` | boolean | Show the Pikabu preloader ad while the game loads (mobile only, if the SDK allows it). `gameStarted()` is delayed until the ad closes. Default: off |
+
+Product ids map through `payments[].pikabu_games.id` (the Studio catalog id); without it the bridge
+`id` is used as is. Pikabu requires at least 120 s between fullscreen ads, so consider raising
+`advertisement.minimumDelayBetweenInterstitial` for this platform. See [pikabu-games.md](pikabu-games.md).
+
+```json
+{
+    "platforms": {
+        "pikabu_games": {
+            "preloaderAd": true,
+            "advertisement": { "minimumDelayBetweenInterstitial": 120 }
+        }
+    },
+    "payments": [
+        { "id": "coins_100", "pikabu_games": { "id": "coins100" } }
+    ]
+}
+```
+
 #### JioGames
 | Parameter | Type | Description |
 |-----------|------|-------------|

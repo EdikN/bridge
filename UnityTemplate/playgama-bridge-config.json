@@ -16,6 +16,7 @@
         },
         "ok": {},
         "gamesweb": {},
+        "pikabu_games": {},
         "yandex": {
             "useSignedData": false,
             "sendAnalyticsEvents": false

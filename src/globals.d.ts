@@ -36,6 +36,7 @@ declare global {
     const __INCLUDE_GAME_MONETIZE__: boolean
     const __INCLUDE_ANDROID__: boolean
     const __INCLUDE_GAMESWEB__: boolean
+    const __INCLUDE_PIKABU_GAMES__: boolean
 
     // Runtime the GamesWeb portal injects into the game page (GamesWeb Host Protocol v1, docs/gamesweb.md).
     interface GWHostApi {

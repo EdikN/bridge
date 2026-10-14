@@ -27,18 +27,20 @@ Never remove or overwrite our exclusive integrations:
 - **GameMonetize** (`GameMonetizePlatformBridge.ts`, reward only on ad COMPLETE, launch interstitial after `AD_SDK_MANAGER_READY` + 500ms)
 - **Android** (`AndroidPlatformBridge.ts`, Capacitor + YandexMobileAds)
 - **GamesWeb** (`GamesWebPlatformBridge.ts` + `src/platform-bridges/gamesweb/GwHostClient.ts`, GamesWeb Host Protocol v1, `docs/gamesweb.md`; tests `tests/src/platform-bridges/gamesWebPlatformBridge.spec.ts`)
+- **Pikabu Games** (`PikabuGamesPlatformBridge.ts`, `PkbSDK` of `games.pikabu.ru`, `docs/pikabu-games.md`)
 
 ### Detection Logic
 Ensure `src/platformDetectors.ts` retains:
 - GamesWeb detector (`gw=1` / `window.GWHost`) **first** in the list
 - OK detector (`vk_client=ok` / `vk_ok_app_id`) **before** the VK detector
 - GameMonetize detector (gamemonetize.com/.co, distributegames.com)
+- Pikabu Games detector (`pikabu=true` / `_platform-key=pikabu` / `games.pikabu.ru` in referrer or `ancestorOrigins`)
 - Android detector (`window.Capacitor.isNativePlatform()`)
 - `ok-vk` → `ok` normalization in `normalizePlatformId`
 
-And `src/modules/platform/constants.ts` retains `OK_VK`, `GAME_MONETIZE`, `ANDROID`, `GAMESWEB` in `PLATFORM_ID`,
-`src/platformImports.ts` retains the GameMonetize/Android/GamesWeb imports, and `src/globals.d.ts` the
-`__INCLUDE_GAME_MONETIZE__` / `__INCLUDE_ANDROID__` / `__INCLUDE_GAMESWEB__` flags and the `window.GWHost` type.
+And `src/modules/platform/constants.ts` retains `OK_VK`, `GAME_MONETIZE`, `ANDROID`, `GAMESWEB`, `PIKABU_GAMES` in `PLATFORM_ID`,
+`src/platformImports.ts` retains the GameMonetize/Android/GamesWeb/Pikabu Games imports, and `src/globals.d.ts` the
+`__INCLUDE_GAME_MONETIZE__` / `__INCLUDE_ANDROID__` / `__INCLUDE_GAMESWEB__` / `__INCLUDE_PIKABU_GAMES__` flags and the `window.GWHost` type.
 
 ### Other fork points
 - `src/modules/advertisement/constants.ts` — `DEFAULT_MINIMUM_DELAY_BETWEEN_INTERSTITIAL = 80` (upstream: 60)
