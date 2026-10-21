@@ -122,21 +122,36 @@ class AnalyticsModule extends ModuleBase<AnalyticsBridgeContract> {
     }
 
     send(eventName: string, data: Record<string, unknown> = {}): void {
-        if (this.#isDisabled) {
-            return
-        }
-
         if (typeof eventName !== 'string' || eventName.length === 0) {
             logger.warn('Analytics event name must be a non-empty string', eventName)
             return
         }
 
         const safeData = data && typeof data === 'object' && !Array.isArray(data) ? data : {}
+
+        // Platform analytics does not depend on Playgama's being enabled.
+        this._platformBridge?.sendPlatformAnalyticsEvent?.(eventName, safeData)
+
+        if (this.#isDisabled) {
+            return
+        }
+
         this.#customEventQueue.push(this.#createEvent(eventName, safeData))
 
         if (this.#customEventQueue.length > CUSTOM_EVENTS_QUEUE_LIMIT) {
             this.#customEventQueue.splice(0, this.#customEventQueue.length - CUSTOM_EVENTS_QUEUE_LIMIT)
         }
+    }
+
+    // Player-level properties (max level, total fights...) for platforms whose
+    // analytics keeps a user profile. A null value clears the property.
+    setUserProperties(properties: Record<string, unknown>): void {
+        if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
+            logger.warn('Analytics user properties must be an object', properties)
+            return
+        }
+
+        this._platformBridge?.setPlatformAnalyticsUserProperties?.(properties)
     }
 
     #sendInternal(eventName: string, data: Record<string, unknown> = {}): void {

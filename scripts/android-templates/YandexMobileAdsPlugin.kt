@@ -92,6 +92,44 @@ class YandexMobileAdsPlugin : Plugin() {
         call.resolve()
     }
 
+    // analytics — AppMetrica, active only when initialize got an appMetricaKey
+    @PluginMethod
+    fun reportEvent(call: PluginCall) {
+        val name = call.getString("name")
+        if (name.isNullOrEmpty()) {
+            call.reject("Missing name")
+            return
+        }
+        implementation.reportGameEvent(name, call.getObject("params"))
+        call.resolve()
+    }
+
+    @PluginMethod
+    fun reportUserProfile(call: PluginCall) {
+        implementation.reportUserProfile(call.getObject("attributes") ?: JSObject())
+        call.resolve()
+    }
+
+    @PluginMethod
+    fun sendEventsBuffer(call: PluginCall) {
+        implementation.sendEventsBuffer()
+        call.resolve()
+    }
+
+    // The WebView keeps running while the app is in the background, so the game
+    // is told explicitly to pause. Fullscreen ads pause the activity too, which
+    // is harmless: the game is paused for them anyway.
+    override fun handleOnPause() {
+        super.handleOnPause()
+        implementation.sendEventsBuffer()
+        emit("appPaused")
+    }
+
+    override fun handleOnResume() {
+        super.handleOnResume()
+        emit("appResumed")
+    }
+
     // notifications — see PlaygamaNotifications
     @PluginMethod
     fun scheduleNotification(call: PluginCall) {

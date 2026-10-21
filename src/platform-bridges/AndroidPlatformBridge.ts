@@ -41,9 +41,13 @@ interface YandexMobileAdsPlugin {
     cancelAllNotifications?(): Promise<unknown>
     requestNotificationPermission?(): Promise<unknown>
     getLaunchNotification?(): Promise<{ id?: string, payload?: string }>
+    reportEvent?(options: AnyRecord): Promise<unknown>
+    reportUserProfile?(options: AnyRecord): Promise<unknown>
 }
 
 const NOTIFICATION_METHODS = ['scheduleNotification', 'cancelNotification', 'cancelAllNotifications']
+
+const ANALYTICS_METHODS = ['reportEvent', 'reportUserProfile']
 
 interface AdUnitOptions {
     adUnitId?: string
@@ -92,6 +96,8 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
     #yandexMobileAds: YandexMobileAdsPlugin | null = null
 
     #isNotificationsSupported = false
+
+    #isAnalyticsSupported = false
 
     #isNotificationPermissionRequested = false
 
@@ -230,6 +236,23 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
             .then(() => undefined)
     }
 
+    // analytics — custom events and user properties go to AppMetrica
+    sendPlatformAnalyticsEvent(eventName: string, data: Record<string, unknown>): void {
+        if (!this.#isAnalyticsSupported) {
+            return
+        }
+
+        this.#yandexMobileAds?.reportEvent?.({ name: eventName, params: data }).catch(() => {})
+    }
+
+    setPlatformAnalyticsUserProperties(properties: Record<string, unknown>): void {
+        if (!this.#isAnalyticsSupported) {
+            return
+        }
+
+        this.#yandexMobileAds?.reportUserProfile?.({ attributes: properties }).catch(() => {})
+    }
+
     // private methods
     get #notificationSettings(): NotificationSettings {
         return this._options?.notificationSettings ?? {}
@@ -247,16 +270,20 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
     // A plugin built before notifications existed has no such methods, and the
     // Capacitor proxy would still hand out a function for any name, so the
     // registered plugin headers are checked instead.
-    #detectNotificationsSupport(): boolean {
+    #detectPluginMethods(required: string[]): boolean {
         const headers = window.Capacitor?.PluginHeaders
         if (Array.isArray(headers)) {
             const header = headers.find((h) => h.name === 'YandexMobileAds')
             const methods = header?.methods?.map((m) => m.name) ?? []
-            return NOTIFICATION_METHODS.every((name) => methods.includes(name))
+            return required.every((name) => methods.includes(name))
         }
 
         const plugin = this.#yandexMobileAds as unknown as AnyRecord
-        return NOTIFICATION_METHODS.every((name) => typeof plugin[name] === 'function')
+        return required.every((name) => typeof plugin[name] === 'function')
+    }
+
+    #detectNotificationsSupport(): boolean {
+        return this.#detectPluginMethods(NOTIFICATION_METHODS)
     }
 
     async #initializeNotifications(): Promise<void> {
@@ -313,7 +340,14 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
             const appMetricaKey = this._options?.appMetricaKey as string | undefined
             await this.#yandexMobileAds.initialize(appMetricaKey ? { appMetricaKey } : {})
 
+            this.#isAnalyticsSupported = Boolean(appMetricaKey) && this.#detectPluginMethods(ANALYTICS_METHODS)
             this.#setupAdListeners()
+            this.#setupLifecycleListeners()
+            // Warm the native ad cache so the first interstitial/rewarded is
+            // shown from a loaded ad instead of waiting on a fresh request. The
+            // plugin keeps one ad per format and reloads it after each show.
+            this.preloadInterstitial()
+            this.preloadRewarded()
             await this.#initializeNotifications()
 
             this._setPlatformStorageAvailable(false)
@@ -358,6 +392,20 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
         })
         ads.addListener('bannerFailed', () => {
             this._setBannerState(BANNER_STATE.FAILED)
+        })
+    }
+
+    // The WebView is not paused with the app, so without this the game keeps
+    // running and playing sound in the background. Older plugins never emit
+    // these events, which leaves the behaviour as it was.
+    #setupLifecycleListeners(): void {
+        const ads = this.#yandexMobileAds as YandexMobileAdsPlugin
+
+        ads.addListener('appPaused', () => {
+            this._setPauseState(true)
+        })
+        ads.addListener('appResumed', () => {
+            this._setPauseState(false)
         })
     }
 }

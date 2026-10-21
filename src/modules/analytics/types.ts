@@ -36,6 +36,10 @@ export interface AnalyticsBridgeContract extends PlatformBridgeLike {
     isPlatformExternalCallsSupported: boolean
     isPlatformPaused: boolean
     data?: { clid?: string } & Record<string, unknown>
+    // Platform's own analytics (e.g. AppMetrica on Android), fed with the same
+    // custom events the game sends to Playgama.
+    sendPlatformAnalyticsEvent?(eventName: string, data: Record<string, unknown>): void
+    setPlatformAnalyticsUserProperties?(properties: Record<string, unknown>): void
 }
 
 export interface AnalyticsSender {

@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.3.1-fork.6] - 2026-10-21
+
+### Добавлено
+- **Аналитика → AppMetrica (Android):** `bridge.analytics.send(name, data)` на Android дублируется
+  в AppMetrica через `capacitor-plugin-yandex-mobile-ads` (`reportEvent`), даже при
+  `sendAnalyticsEvents: false`. Новый `bridge.analytics.setUserProperties({ key: value })` —
+  атрибуты профиля игрока (`null` сбрасывает); на платформах без своей аналитики — no-op.
+  Нужен плагин с `reportEvent` / `reportUserProfile` и `appMetricaKey` в `platforms.android`.
+- **Пауза при сворачивании (Android):** плагин шлёт `appPaused` / `appResumed`, бридж выставляет
+  паузу — срабатывает `platform.on('pause_state_changed')`, как при скрытии вкладки на вебе.
+
+### Исправлено
+- **Реклама Android:** interstitial и rewarded предзагружаются сразу после инициализации; нативный
+  менеджер (шаблон `scripts/android-templates`, ревизия 4) хранит загруженную рекламу и показывает
+  её из кэша вместо повторной загрузки, повторы с back-off от 30 с, Ad Revenue в AppMetrica.
+- **`android-setup.js`:** Yandex Mobile Ads SDK и AppMetrica 8.6.0, `consumer-rules.pro` с
+  keep-правилами для R8; менеджер в плагине перезаписывается только более новой ревизией.
+
 ## [2.3.1-fork.5] - 2026-10-14
 
 ### Добавлено
