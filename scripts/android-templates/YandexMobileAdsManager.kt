@@ -1,6 +1,6 @@
 package com.playgama.yandexads
 
-// playgama-ads-manager-revision: 3
+// playgama-ads-manager-revision: 4
 // ^ android-setup.js (bridge) overwrites a plugin copy whose revision is lower
 //   than its template's. Bump it on every change to this file.
 
@@ -17,6 +17,8 @@ import io.appmetrica.analytics.AdRevenue
 import io.appmetrica.analytics.AdType
 import io.appmetrica.analytics.AppMetrica
 import io.appmetrica.analytics.AppMetricaConfig
+import io.appmetrica.analytics.profile.Attribute
+import io.appmetrica.analytics.profile.UserProfile
 import com.yandex.mobile.ads.banner.BannerAdEventListener
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
@@ -95,6 +97,50 @@ class YandexMobileAdsManager(
     }
 
     // ─── Analytics ───────────────────────────────────────────────────────
+
+    // Game events from JS (bridge.analytics.send). Params arrive as a JSON
+    // object and go to AppMetrica as is; nested objects are kept.
+    fun reportGameEvent(name: String, params: JSONObject?) {
+        if (!appMetricaActive) return
+        try {
+            if (params == null || params.length() == 0) {
+                AppMetrica.reportEvent(name)
+            } else {
+                AppMetrica.reportEvent(name, params.toString())
+            }
+        } catch (e: Throwable) {}
+    }
+
+    // Custom profile attributes: numbers, booleans and strings; null resets
+    // the attribute. Anything else is sent as its string form.
+    fun reportUserProfile(attributes: JSONObject) {
+        if (!appMetricaActive) return
+        try {
+            val builder = UserProfile.newBuilder()
+            val keys = attributes.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val value = attributes.opt(key)
+                val update = when (value) {
+                    null, JSONObject.NULL -> Attribute.customString(key).withValueReset()
+                    is Boolean -> Attribute.customBoolean(key).withValue(value)
+                    is Number -> Attribute.customNumber(key).withValue(value.toDouble())
+                    else -> Attribute.customString(key).withValue(value.toString())
+                }
+                builder.apply(update)
+            }
+            AppMetrica.reportUserProfile(builder.build())
+        } catch (e: Throwable) {}
+    }
+
+    // Events are batched; flushing on pause keeps them from waiting until the
+    // next launch when the player leaves for good.
+    fun sendEventsBuffer() {
+        if (!appMetricaActive) return
+        try {
+            AppMetrica.sendEventsBuffer()
+        } catch (e: Throwable) {}
+    }
 
     private fun reportEvent(name: String, format: String, adUnitId: String?, extra: Map<String, Any?> = emptyMap()) {
         if (!appMetricaActive) return
