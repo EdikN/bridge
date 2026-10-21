@@ -31,8 +31,8 @@ const https = require('https');
 
 // ─── Константы ────────────────────────────────────────────────────────────
 const BRIDGE_DIR         = path.resolve(__dirname, '..');   // корень bridge-репозитория
-const YANDEX_SDK_VERSION = '8.3.0';
-const APPMETRICA_VERSION = '7.14.3';
+const YANDEX_SDK_VERSION = '8.6.0';
+const APPMETRICA_VERSION = '8.6.0';   // mobileads 8.6.0 требует analytics [8.5.1, 9.0.0)
 
 // ─── Аргументы командной строки ───────────────────────────────────────────
 const args        = process.argv.slice(2);
@@ -277,32 +277,59 @@ function patchYandexPlugin() {
         // relied upon transitively: the ads SDK may or may not pull it in
         // depending on version, and the manager references its classes directly.
         content = fs.readFileSync(buildGradle, 'utf8');
-        if (!content.includes('io.appmetrica.analytics:analytics')) {
+        const amMatch = content.match(/io\.appmetrica\.analytics:analytics:([\d.]+)/);
+        if (!amMatch) {
             content = content.replace(
                 /(implementation 'com\.yandex\.android:mobileads:[\d.]+')/,
                 `$1\n    implementation 'io.appmetrica.analytics:analytics:${APPMETRICA_VERSION}'`,
             );
             fs.writeFileSync(buildGradle, content, 'utf8');
             ok(`AppMetrica ${APPMETRICA_VERSION} добавлена в зависимости плагина`);
+        } else if (amMatch[1] !== APPMETRICA_VERSION) {
+            content = content.replace(
+                /io\.appmetrica\.analytics:analytics:[\d.]+/,
+                `io.appmetrica.analytics:analytics:${APPMETRICA_VERSION}`,
+            );
+            fs.writeFileSync(buildGradle, content, 'utf8');
+            ok(`AppMetrica: ${amMatch[1]} → ${APPMETRICA_VERSION}`);
         } else {
-            ok('AppMetrica уже в зависимостях плагина');
+            ok(`AppMetrica уже ${APPMETRICA_VERSION}`);
+        }
+
+        // R8 keep-правила для приложения: consumer-rules.pro плагина.
+        content = fs.readFileSync(buildGradle, 'utf8');
+        if (!content.includes('consumerProguardFiles')) {
+            content = content.replace(
+                /(defaultConfig\s*\{)/,
+                `$1\n        consumerProguardFiles 'consumer-rules.pro'`,
+            );
+            fs.writeFileSync(buildGradle, content, 'utf8');
+            ok('consumerProguardFiles подключён в build.gradle плагина');
         }
     }
 
-    // YandexMobileAdsManager.kt — баннер 10%/90%
+    const templates = path.join(__dirname, 'android-templates');
+    const rulesTarget = path.join(pluginDir, 'consumer-rules.pro');
+    const rules = fs.readFileSync(path.join(templates, 'consumer-rules.pro'), 'utf8');
+    if (!fs.existsSync(rulesTarget) || fs.readFileSync(rulesTarget, 'utf8') !== rules) {
+        write(rulesTarget, rules);
+        ok('consumer-rules.pro (keep для com.yandex.mobile.ads / io.appmetrica) записан');
+    }
+
+    // YandexMobileAdsManager.kt — кэш preload, back-off, Ad Revenue → AppMetrica,
+    // баннер не перекрывает игру. Перезаписывается, только если ревизия копии в
+    // плагине ниже ревизии шаблона: плагин из свежего репозитория не откатывается.
     const managerKt = path.join(
         pluginDir, 'src', 'main', 'java', 'com', 'playgama', 'yandexads', 'YandexMobileAdsManager.kt',
     );
-    if (fs.existsSync(managerKt)) {
-        // Marker tracks the NEWEST edit in the template, so an older patched
-        // copy is still recognised as stale and gets rewritten.
-        const content = fs.readFileSync(managerKt, 'utf8');
-        if (!content.includes('removeAllBanners')) {
-            write(managerKt, YANDEX_MANAGER_KT);
-            ok('YandexMobileAdsManager.kt обновлён (баннер не перекрывает игру, AppMetrica)');
-        } else {
-            ok('YandexMobileAdsManager.kt уже обновлён');
-        }
+    const managerTemplate = fs.readFileSync(path.join(templates, 'YandexMobileAdsManager.kt'), 'utf8');
+    const revisionOf = text => Number((text.match(/playgama-ads-manager-revision:\s*(\d+)/) || [])[1] || 0);
+    const current = fs.existsSync(managerKt) ? fs.readFileSync(managerKt, 'utf8') : '';
+    if (revisionOf(current) < revisionOf(managerTemplate)) {
+        write(managerKt, managerTemplate);
+        ok(`YandexMobileAdsManager.kt обновлён до ревизии ${revisionOf(managerTemplate)}`);
+    } else {
+        ok(`YandexMobileAdsManager.kt уже ревизии ${revisionOf(current)}`);
     }
 
     patchNotifications(pluginDir);
@@ -546,367 +573,6 @@ public class MainActivity extends BridgeActivity {
         controller.setSystemBarsBehavior(
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         );
-    }
-}
-`;
-
-// ─── Шаблон: YandexMobileAdsManager.kt ───────────────────────────────────
-const YANDEX_MANAGER_KT = `package com.playgama.yandexads
-
-import android.util.DisplayMetrics
-import android.view.Gravity
-import android.view.ViewGroup
-import android.widget.FrameLayout
-import androidx.appcompat.app.AppCompatActivity
-import com.getcapacitor.JSObject
-import io.appmetrica.analytics.AppMetrica
-import io.appmetrica.analytics.AppMetricaConfig
-import com.yandex.mobile.ads.banner.BannerAdEventListener
-import com.yandex.mobile.ads.banner.BannerAdSize
-import com.yandex.mobile.ads.banner.BannerAdView
-import com.yandex.mobile.ads.common.AdError
-import com.yandex.mobile.ads.common.AdRequest
-import com.yandex.mobile.ads.common.AdRequestError
-import com.yandex.mobile.ads.common.ImpressionData
-import com.yandex.mobile.ads.common.YandexAds
-import com.yandex.mobile.ads.interstitial.InterstitialAd
-import com.yandex.mobile.ads.interstitial.InterstitialAdEventListener
-import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
-import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
-import com.yandex.mobile.ads.rewarded.Reward
-import com.yandex.mobile.ads.rewarded.RewardedAd
-import com.yandex.mobile.ads.rewarded.RewardedAdEventListener
-import com.yandex.mobile.ads.rewarded.RewardedAdLoadListener
-import com.yandex.mobile.ads.rewarded.RewardedAdLoader
-
-class YandexMobileAdsManager(
-    private val activity: AppCompatActivity,
-    private val plugin: YandexMobileAdsPlugin,
-) {
-    private val bannerViews = mutableMapOf<String, BannerAdView>()
-
-    // Set while a banner is on screen — see applyBannerLayout.
-    private var bannerLayoutListener: android.view.View.OnLayoutChangeListener? = null
-
-    // Which edge the strip sits on, remembered so the WebView gives up its space
-    // on the same side the ad is actually drawn.
-    private var bannerGravity: Int = Gravity.BOTTOM
-
-    // The ad unit whose banner has actually FILLED, as opposed to merely being
-    // requested — a repeat request may only report "shown" for the first.
-    private var loadedBannerUnitId: String? = null
-
-    // AppMetrica is optional: without a key in playgama-bridge-config.json the
-    // ads still work, there is simply no analytics. Activation goes first
-    // because the ads SDK reports through AppMetrica when it is present.
-    fun initialize(appMetricaKey: String?) {
-        if (!appMetricaKey.isNullOrBlank()) {
-            try {
-                val config = AppMetricaConfig.newConfigBuilder(appMetricaKey).build()
-                AppMetrica.activate(activity.applicationContext, config)
-                // Sessions are counted from activity transitions; without this
-                // every launch looks like one endless session.
-                AppMetrica.enableActivityAutoTracking(activity.application)
-            } catch (e: Exception) {
-                // Analytics must never be the reason a game fails to start.
-            }
-        }
-        YandexAds.initialize(activity) {}
-    }
-
-    fun showInterstitial(adUnitId: String, callback: (String?) -> Unit) {
-        val loader = InterstitialAdLoader(activity)
-        loader.loadAd(AdRequest.Builder(adUnitId).build(), object : InterstitialAdLoadListener {
-            override fun onAdLoaded(ad: InterstitialAd) {
-                ad.setAdEventListener(object : InterstitialAdEventListener {
-                    override fun onAdShown() { plugin.emit("interstitialOpened") }
-                    override fun onAdFailedToShow(adError: AdError) {
-                        plugin.emit("interstitialFailed", JSObject().put("error", adError.description))
-                        callback(adError.description)
-                    }
-                    override fun onAdDismissed() {
-                        plugin.emit("interstitialClosed")
-                        ad.setAdEventListener(null)
-                    }
-                    override fun onAdClicked() {}
-                    override fun onAdImpression(data: ImpressionData?) {}
-                })
-                activity.runOnUiThread { ad.show(activity) }
-                callback(null)
-            }
-            override fun onAdFailedToLoad(error: AdRequestError) {
-                plugin.emit("interstitialFailed", JSObject().put("error", error.description))
-                callback(error.description)
-            }
-        })
-    }
-
-    fun preloadInterstitial(adUnitId: String) {
-        val loader = InterstitialAdLoader(activity)
-        loader.loadAd(AdRequest.Builder(adUnitId).build(), object : InterstitialAdLoadListener {
-            override fun onAdLoaded(ad: InterstitialAd) {}
-            override fun onAdFailedToLoad(error: AdRequestError) {}
-        })
-    }
-
-    fun showRewarded(adUnitId: String, callback: (String?) -> Unit) {
-        val loader = RewardedAdLoader(activity)
-        loader.loadAd(AdRequest.Builder(adUnitId).build(), object : RewardedAdLoadListener {
-            override fun onAdLoaded(ad: RewardedAd) {
-                ad.setAdEventListener(object : RewardedAdEventListener {
-                    override fun onAdShown() { plugin.emit("rewardedOpened") }
-                    override fun onAdFailedToShow(adError: AdError) {
-                        plugin.emit("rewardedFailed", JSObject().put("error", adError.description))
-                        callback(adError.description)
-                    }
-                    override fun onAdDismissed() {
-                        plugin.emit("rewardedClosed")
-                        ad.setAdEventListener(null)
-                    }
-                    override fun onRewarded(reward: Reward) {
-                        plugin.emit("userEarned", JSObject().put("type", reward.type).put("amount", reward.amount))
-                    }
-                    override fun onAdClicked() {}
-                    override fun onAdImpression(data: ImpressionData?) {}
-                })
-                activity.runOnUiThread { ad.show(activity) }
-                callback(null)
-            }
-            override fun onAdFailedToLoad(error: AdRequestError) {
-                plugin.emit("rewardedFailed", JSObject().put("error", error.description))
-                callback(error.description)
-            }
-        })
-    }
-
-    fun preloadRewarded(adUnitId: String) {
-        val loader = RewardedAdLoader(activity)
-        loader.loadAd(AdRequest.Builder(adUnitId).build(), object : RewardedAdLoadListener {
-            override fun onAdLoaded(ad: RewardedAd) {}
-            override fun onAdFailedToLoad(error: AdRequestError) {}
-        })
-    }
-
-    // Measure the container the banner is actually placed in, not the display.
-    // getMetrics() reports the screen MINUS the system bars, while a fullscreen
-    // activity's content view spans the whole panel — so sizing the WebView by
-    // the former left a strip of bare activity background between the game and
-    // the banner, exactly as tall as the navigation bar that isn't there.
-    private fun contentView(): ViewGroup =
-        activity.window.decorView.findViewById(android.R.id.content)
-
-    // The window height as the banner layout sees it, measured fresh on every
-    // call — the display metrics are only the fallback for the first pass, while
-    // the content view has no height yet.
-    private fun contentHeightPx(): Int {
-        val rootView = contentView()
-        if (rootView.height > 0) return rootView.height
-        val metrics = DisplayMetrics()
-        @Suppress("DEPRECATION")
-        activity.windowManager.defaultDisplay.getMetrics(metrics)
-        return metrics.heightPixels
-    }
-
-    // How much of the window the banner is taking. The banner view sizes itself
-    // (WRAP_CONTENT) from the ad size the SDK picked, so its measured height is
-    // the only honest answer: forcing the slot to a share of the screen made the
-    // creative render clipped against the bottom edge whenever the sticky size
-    // came out taller than that share — which on a short landscape window is
-    // most of the time, since sticky starts at 50dp and 10% of a 1080px-tall
-    // window is under 40dp. The 10% is only the guess covering the gap before
-    // the first layout pass; the cap keeps a runaway creative from swallowing
-    // the game.
-    private fun bannerHeightPx(bannerAdView: BannerAdView): Int {
-        val screenHeightPx = contentHeightPx()
-        val measured = bannerAdView.height
-        val height = if (measured > 0) measured else (screenHeightPx * 0.10).toInt()
-        return height.coerceAtMost((screenHeightPx * 0.25).toInt())
-    }
-
-    // Keep the WebView clear of the banner. The space is given up as a MARGIN on
-    // a WebView that stays MATCH_PARENT, not as a pixel height: a height is a
-    // snapshot of one window geometry and goes stale the moment the window
-    // changes size — after a rotation the portrait-sized WebView kept its old
-    // value in a landscape window, its bottom rows (the exit buttons among them)
-    // falling past the visible area with the banner drawn over them. A margin is
-    // re-resolved against the parent on every layout pass, so the split follows
-    // the window on its own and the listener below is left with only the
-    // banner's own height to watch. It also puts the reserve on the right SIDE:
-    // a top banner used to shorten the WebView from the bottom and then cover
-    // its first rows anyway.
-    private fun applyBannerLayout(bannerAdView: BannerAdView) {
-        val webView = plugin.bridge.webView
-        val webViewParams = webView.layoutParams
-        val bannerHeight = bannerHeightPx(bannerAdView)
-        val topReserve = if (bannerGravity == Gravity.TOP) bannerHeight else 0
-        val bottomReserve = if (bannerGravity == Gravity.TOP) 0 else bannerHeight
-
-        // Only touch layoutParams when something really changed: this runs from
-        // a layout listener, and an unconditional requestLayout would loop.
-        if (webViewParams is ViewGroup.MarginLayoutParams) {
-            val stale = webViewParams.topMargin != topReserve ||
-                webViewParams.bottomMargin != bottomReserve ||
-                webViewParams.height != ViewGroup.LayoutParams.MATCH_PARENT
-            if (stale) {
-                webViewParams.topMargin = topReserve
-                webViewParams.bottomMargin = bottomReserve
-                webViewParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                webView.layoutParams = webViewParams
-            }
-            return
-        }
-
-        // A parent whose layout params carry no margins: fall back to splitting
-        // the window in pixels, re-measured on every call.
-        val webViewHeightPx = contentHeightPx() - bannerHeight
-        if (webViewParams.height != webViewHeightPx) {
-            webViewParams.height = webViewHeightPx
-            webView.layoutParams = webViewParams
-        }
-    }
-
-    private fun restoreWebViewBounds() {
-        val webView = plugin.bridge.webView
-        val webViewParams = webView.layoutParams
-        if (webViewParams is ViewGroup.MarginLayoutParams) {
-            webViewParams.topMargin = 0
-            webViewParams.bottomMargin = 0
-        }
-        webViewParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-        webView.layoutParams = webViewParams
-    }
-
-    private fun stopWatchingLayout() {
-        bannerLayoutListener?.let { listener ->
-            contentView().removeOnLayoutChangeListener(listener)
-            bannerViews.values.forEach { it.removeOnLayoutChangeListener(listener) }
-        }
-        bannerLayoutListener = null
-    }
-
-    // Take every banner off the screen and hand the whole window back to the
-    // WebView. Everything that removes a banner goes through here: the map used
-    // to be trimmed in one place and the views detached in another, and a view
-    // that fell between the two stayed drawn over a game that had just been
-    // given its full height back. Returns whether anything was actually up.
-    private fun removeAllBanners(): Boolean {
-        stopWatchingLayout()
-        loadedBannerUnitId = null
-        val had = bannerViews.isNotEmpty()
-        bannerViews.values.forEach { view ->
-            (view.parent as? ViewGroup)?.removeView(view)
-            view.destroy()
-        }
-        bannerViews.clear()
-        restoreWebViewBounds()
-        return had
-    }
-
-    fun showBanner(adUnitId: String, position: String, callback: (String?) -> Unit) {
-        activity.runOnUiThread {
-            try {
-                bannerGravity = if (position == "top") Gravity.TOP else Gravity.BOTTOM
-
-                // The game asks for the banner again on every screen change it
-                // counts as idle. Each request used to build a NEW BannerAdView
-                // and overwrite the map entry, so hideBanner could only ever take
-                // the last one down: every earlier ad stayed on screen — over a
-                // WebView that had just been handed its full height back — and
-                // covered the game and the buttons under it for the rest of the
-                // session. A banner that is already up is re-reported instead.
-                bannerViews[adUnitId]?.let { existing ->
-                    existing.post { applyBannerLayout(existing) }
-                    // Only a banner that has already filled may be reported as
-                    // shown; one still loading reports itself when it lands, and
-                    // saying "shown" for it would tell the game an ad is on
-                    // screen while the strip is still empty. The call itself is
-                    // answered either way — an unanswered one leaves a promise
-                    // hanging on the JS side.
-                    if (loadedBannerUnitId == adUnitId) plugin.emit("bannerShown")
-                    callback(null)
-                    return@runOnUiThread
-                }
-
-                // One strip at a time: a request for a different ad unit replaces
-                // whatever is up rather than stacking on top of it.
-                removeAllBanners()
-
-                val metrics = DisplayMetrics()
-                @Suppress("DEPRECATION")
-                activity.windowManager.defaultDisplay.getMetrics(metrics)
-
-                val rootView = contentView()
-                val widthDp = (metrics.widthPixels / metrics.density).toInt()
-                val bannerAdView = BannerAdView(activity)
-                // The ad rarely fills its slot to the pixel; a black backing
-                // keeps whatever is left over reading as part of the frame
-                // rather than as a grey seam.
-                bannerAdView.setBackgroundColor(android.graphics.Color.BLACK)
-                // WRAP_CONTENT, so the view is exactly as tall as the ad size
-                // the SDK settled on — see bannerHeightPx.
-                bannerAdView.setAdSize(BannerAdSize.sticky(activity, widthDp))
-                bannerAdView.setBannerAdEventListener(object : BannerAdEventListener {
-                    override fun onAdLoaded() {
-                        loadedBannerUnitId = adUnitId
-                        // The view may not be measured yet; the layout listener
-                        // below picks up the real height when it is.
-                        bannerAdView.post { applyBannerLayout(bannerAdView) }
-                        plugin.emit("bannerShown")
-                        callback(null)
-                    }
-                    override fun onAdFailedToLoad(error: AdRequestError) {
-                        // Drop the dead view, don't just give the WebView its
-                        // height back: the view carries no ad, and left in place
-                        // it both sat over the game (a sticky banner can fail a
-                        // refresh while the previous ad is still on screen) and
-                        // made the next request believe a banner was already up.
-                        removeAllBanners()
-                        plugin.emit("bannerFailed", JSObject().put("error", error.description))
-                        callback(error.description)
-                    }
-                    override fun onAdClicked() {}
-                    override fun onImpression(data: ImpressionData?) {}
-                })
-
-                val params = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    bannerGravity,
-                )
-                rootView.addView(bannerAdView, params)
-                // In the map before the request goes out: loading is async, but
-                // a failure arriving early has to find the view it must clean up.
-                bannerViews[adUnitId] = bannerAdView
-
-                // Two things invalidate the split, and both are watched: the
-                // window changing height (rotation, a resumed activity, an
-                // immersive-mode re-layout) and the banner arriving at — or
-                // changing — its own height. Posted rather than applied inline:
-                // a requestLayout from inside a layout pass is discarded.
-                val layoutListener = android.view.View.OnLayoutChangeListener {
-                    view, _, _, _, _, _, _, _, _ ->
-                    view.post { applyBannerLayout(bannerAdView) }
-                }
-                rootView.addOnLayoutChangeListener(layoutListener)
-                bannerAdView.addOnLayoutChangeListener(layoutListener)
-                bannerLayoutListener = layoutListener
-
-                // Since SDK 8 the ad unit travels in the request rather than on
-                // the view — setAdUnitId no longer exists.
-                bannerAdView.loadAd(AdRequest.Builder(adUnitId).build())
-            } catch (e: Exception) {
-                callback(e.message)
-            }
-        }
-    }
-
-    // The ad unit is accepted for symmetry with showBanner, but everything on
-    // screen comes down: the game runs a single strip, and a view that outlived
-    // its map entry is exactly what used to be left sitting over the game.
-    fun hideBanner(adUnitId: String) {
-        activity.runOnUiThread {
-            if (removeAllBanners()) plugin.emit("bannerHidden")
-        }
     }
 }
 `;

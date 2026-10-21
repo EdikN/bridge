@@ -314,6 +314,11 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
             await this.#yandexMobileAds.initialize(appMetricaKey ? { appMetricaKey } : {})
 
             this.#setupAdListeners()
+            // Warm the native ad cache so the first interstitial/rewarded is
+            // shown from a loaded ad instead of waiting on a fresh request. The
+            // plugin keeps one ad per format and reloads it after each show.
+            this.preloadInterstitial()
+            this.preloadRewarded()
             await this.#initializeNotifications()
 
             this._setPlatformStorageAvailable(false)
