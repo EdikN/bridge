@@ -21,17 +21,33 @@ class YandexMobileAdsPlugin : Plugin() {
         implementation = YandexMobileAdsManager(activity, this)
     }
 
+    // Resolves with the formats configured natively (see NativeAdConfig), so a
+    // bridge whose config carries no ad unit ids still knows ads are there.
+    // Only flags — the ids themselves never travel back to JS.
     @PluginMethod
     fun initialize(call: PluginCall) {
-        val appMetricaKey = call.getString("appMetricaKey")
+        val appMetricaKey = NativeAdConfig.get(context, NativeAdConfig.APP_METRICA_KEY)
+            ?: call.getString("appMetricaKey")?.takeIf { it.isNotBlank() }
         implementation.initialize(appMetricaKey)
-        call.resolve()
+        call.resolve(JSObject()
+            .put("adUnits", JSObject()
+                .put(NativeAdConfig.INTERSTITIAL, NativeAdConfig.has(context, NativeAdConfig.INTERSTITIAL))
+                .put(NativeAdConfig.REWARDED, NativeAdConfig.has(context, NativeAdConfig.REWARDED))
+                .put(NativeAdConfig.BANNER, NativeAdConfig.has(context, NativeAdConfig.BANNER)))
+            .put("appMetrica", appMetricaKey != null))
     }
+
+    // The id compiled into the app wins: it is the one the build was set up
+    // with, while an id still sitting in an old bridge config may be a unit
+    // that was retired after it leaked. An id from JS is the fallback for
+    // games set up the old way.
+    private fun adUnitId(call: PluginCall, format: String): String? =
+        NativeAdConfig.get(context, format) ?: call.getString("adUnitId")?.takeIf { it.isNotBlank() }
 
     @PluginMethod
     fun showInterstitial(call: PluginCall) {
-        val adUnitId = call.getString("adUnitId") ?: run {
-            call.reject("Missing adUnitId")
+        val adUnitId = adUnitId(call, NativeAdConfig.INTERSTITIAL) ?: run {
+            call.reject("No interstitial ad unit configured")
             return
         }
         implementation.showInterstitial(adUnitId) { error ->
@@ -41,8 +57,8 @@ class YandexMobileAdsPlugin : Plugin() {
 
     @PluginMethod
     fun preloadInterstitial(call: PluginCall) {
-        val adUnitId = call.getString("adUnitId") ?: run {
-            call.reject("Missing adUnitId")
+        val adUnitId = adUnitId(call, NativeAdConfig.INTERSTITIAL) ?: run {
+            call.reject("No interstitial ad unit configured")
             return
         }
         implementation.preloadInterstitial(adUnitId)
@@ -51,8 +67,8 @@ class YandexMobileAdsPlugin : Plugin() {
 
     @PluginMethod
     fun showRewarded(call: PluginCall) {
-        val adUnitId = call.getString("adUnitId") ?: run {
-            call.reject("Missing adUnitId")
+        val adUnitId = adUnitId(call, NativeAdConfig.REWARDED) ?: run {
+            call.reject("No rewarded ad unit configured")
             return
         }
         implementation.showRewarded(adUnitId) { error ->
@@ -62,8 +78,8 @@ class YandexMobileAdsPlugin : Plugin() {
 
     @PluginMethod
     fun preloadRewarded(call: PluginCall) {
-        val adUnitId = call.getString("adUnitId") ?: run {
-            call.reject("Missing adUnitId")
+        val adUnitId = adUnitId(call, NativeAdConfig.REWARDED) ?: run {
+            call.reject("No rewarded ad unit configured")
             return
         }
         implementation.preloadRewarded(adUnitId)
@@ -72,8 +88,8 @@ class YandexMobileAdsPlugin : Plugin() {
 
     @PluginMethod
     fun showBanner(call: PluginCall) {
-        val adUnitId = call.getString("adUnitId") ?: run {
-            call.reject("Missing adUnitId")
+        val adUnitId = adUnitId(call, NativeAdConfig.BANNER) ?: run {
+            call.reject("No banner ad unit configured")
             return
         }
         val position = call.getString("position") ?: "bottom"
@@ -82,13 +98,11 @@ class YandexMobileAdsPlugin : Plugin() {
         }
     }
 
+    // Takes every banner down whatever the unit (see YandexMobileAdsManager),
+    // so a missing id is no reason to leave one on screen.
     @PluginMethod
     fun hideBanner(call: PluginCall) {
-        val adUnitId = call.getString("adUnitId") ?: run {
-            call.reject("Missing adUnitId")
-            return
-        }
-        implementation.hideBanner(adUnitId)
+        implementation.hideBanner(adUnitId(call, NativeAdConfig.BANNER) ?: "")
         call.resolve()
     }
 

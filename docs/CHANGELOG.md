@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.1-fork.7] - 2026-10-23
+
+### Безопасность
+- **id рекламы Android больше не лежат в APK открытым текстом.** С `capacitor-plugin-yandex-mobile-ads`
+  1.2.0 id блоков и ключ AppMetrica берутся из `android/yandex-ads.properties` (или переменных
+  `YANDEX_ADS_*` / `YANDEX_APPMETRICA_KEY`) и зашиваются в APK закодированным ресурсом. Повод — PunchBox:
+  id из `playgama-bridge-config.json` (открытый JSON в `assets/`) собрал бот, с 7.10 на них шли пачки
+  фальшивых запросов и кликов, и РСЯ урезала рекламу настоящим игрокам.
+  - `AndroidPlatformBridge` узнаёт из ответа `initialize` плагина, какие форматы настроены (только флаги),
+    и вызывает плагин без id. Со старым плагином id из конфига работают как раньше.
+  - `android-setup.js`: новый шаг переносит `advertisement.<вид>.adUnitId` и `appMetricaKey` из конфига
+    моста в `android/yandex-ads.properties`; шаблоны плагина дополнены `NativeAdConfig.kt` и
+    `yandex-ads-config.gradle` (по ревизии), `build.gradle` плагина его подключает.
+
 ## [2.3.1-fork.6] - 2026-10-21
 
 ### Добавлено

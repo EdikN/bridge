@@ -187,6 +187,93 @@ function checkProject() {
     return pkg;
 }
 
+// ─── ШАГ 1б: id рекламы — из конфига моста в нативную сборку ─────────────
+// playgama-bridge-config.json уезжает в APK обычным JSON (assets/public), и id
+// блоков R-M-… оттуда собирают боты: у PunchBox на украденные id шли пачки
+// фальшивых запросов и кликов, а сеть в ответ урезала рекламу настоящим
+// игрокам. Плагин ≥ 1.2.0 берёт id и ключ AppMetrica из
+// android/yandex-ads.properties и зашивает в APK закодированным ресурсом
+// (yandex-ads-config.gradle), поэтому из конфига они убираются.
+const AD_PROPERTIES = 'yandex-ads.properties';
+const AD_KINDS = ['interstitial', 'rewarded', 'banner'];
+const AD_PROPERTIES_HEADER = [
+    '# id блоков Yandex Mobile Ads и ключ AppMetrica для capacitor-plugin-yandex-mobile-ads.',
+    '# Плагин зашивает их в APK закодированным ресурсом. В playgama-bridge-config.json',
+    '# их не возвращать: он лежит в APK открытым JSON, и id оттуда крадут боты.',
+    '# Переменные окружения YANDEX_ADS_BANNER, YANDEX_ADS_INTERSTITIAL,',
+    '# YANDEX_ADS_REWARDED, YANDEX_APPMETRICA_KEY главнее этого файла.',
+];
+
+function readProperties(file) {
+    const result = {};
+    if (!fs.existsSync(file)) return result;
+    for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
+        const match = line.match(/^\s*([^#!=:\s][^=:]*?)\s*[=:]\s*(.*?)\s*$/);
+        if (match && match[2]) result[match[1]] = match[2];
+    }
+    return result;
+}
+
+function moveAdIdsToNative() {
+    title(`id рекламы → android/${AD_PROPERTIES}`);
+    const propsPath = path.join(PROJECT, 'android', AD_PROPERTIES);
+    const props = readProperties(propsPath);
+
+    const found = {};
+    const configs = ['public/playgama-bridge-config.json', 'playgama-bridge-config.json']
+        .map(rel => path.join(PROJECT, rel))
+        .filter(file => fs.existsSync(file));
+    for (const file of configs) {
+        const text = fs.readFileSync(file, 'utf8');
+        let config;
+        try {
+            config = JSON.parse(text.replace(/^﻿/, ''));
+        } catch {
+            warn(`${path.relative(PROJECT, file)} — не JSON, id рекламы из него не перенесены`);
+            continue;
+        }
+        let changed = false;
+        const take = (key, holder, field) => {
+            const value = holder && holder[field];
+            if (typeof value !== 'string' || !value.trim()) return;
+            if (!found[key]) found[key] = value.trim();
+            delete holder[field];
+            changed = true;
+        };
+        for (const scope of [config, config.platforms && config.platforms.android]) {
+            if (!scope) continue;
+            take('appMetricaKey', scope, 'appMetricaKey');
+            for (const kind of AD_KINDS) take(kind, scope.advertisement && scope.advertisement[kind], 'adUnitId');
+        }
+        if (changed) {
+            const indent = (text.match(/\n( +)"/) || [])[1]?.length || 4;
+            write(file, `${JSON.stringify(config, null, indent)}\n`);
+            ok(`${path.relative(PROJECT, file)}: id рекламы и ключ AppMetrica убраны`);
+        }
+    }
+
+    // Файл главнее конфига: его заполняли сознательно, а в конфиге мог
+    // остаться id блока, который уже заменён.
+    const missing = Object.keys(found).filter(key => !props[key]);
+    if (missing.length) {
+        const lines = fs.existsSync(propsPath)
+            ? [fs.readFileSync(propsPath, 'utf8').replace(/\s*$/, '')]
+            : AD_PROPERTIES_HEADER;
+        write(propsPath, `${[...lines, ...missing.map(key => `${key}=${found[key]}`)].join('\n')}\n`);
+        ok(`android/${AD_PROPERTIES}: ${missing.join(', ')}`);
+    }
+
+    const all = { ...found, ...props };
+    const absent = AD_KINDS.filter(kind => !all[kind]);
+    if (absent.length === AD_KINDS.length) {
+        warn(`id рекламы нет ни в конфиге, ни в android/${AD_PROPERTIES} — реклама в APK не заработает`);
+    } else if (absent.length) {
+        warn(`нет id для: ${absent.join(', ')}`);
+    } else {
+        ok('id рекламы будут зашиты в APK, в конфиге моста их нет');
+    }
+}
+
 // ─── ШАГ 2: npm install ───────────────────────────────────────────────────
 function npmInstall() {
     title('Установка зависимостей');
@@ -206,10 +293,12 @@ function rebuildBridge() {
 
     if (fs.existsSync(projectPublic)) {
         const content = fs.readFileSync(projectPublic, 'utf8');
-        // Маркер — самая новая Android-возможность (уведомления), чтобы старая
-        // сборка bridge без неё пересобиралась.
-        if (content.includes('isNativePlatform') && content.includes('getLaunchNotification')) {
-            ok('playgama-bridge.js уже содержит Android-детекцию и уведомления');
+        // Маркер — самая новая Android-возможность (id рекламы из нативной
+        // сборки, `adUnits` в ответе initialize), чтобы старая сборка bridge
+        // без неё пересобиралась.
+        if (content.includes('isNativePlatform') && content.includes('getLaunchNotification')
+            && content.includes('adUnits')) {
+            ok('playgama-bridge.js уже умеет брать id рекламы из нативной сборки');
             return;
         }
     }
@@ -309,6 +398,29 @@ function patchYandexPlugin() {
     }
 
     const templates = path.join(__dirname, 'android-templates');
+
+    // yandex-ads-config.gradle — id рекламы из android/yandex-ads.properties в
+    // закодированный ресурс плагина (см. moveAdIdsToNative). Перезаписывается
+    // по ревизии, как менеджер; build.gradle плагина его подключает.
+    const configGradle = path.join(pluginDir, 'yandex-ads-config.gradle');
+    const configTemplate = fs.readFileSync(path.join(templates, 'yandex-ads-config.gradle'), 'utf8');
+    const configRevisionOf = text =>
+        Number((text.match(/playgama-yandex-ads-config-revision:\s*(\d+)/) || [])[1] || 0);
+    const currentConfig = fs.existsSync(configGradle) ? fs.readFileSync(configGradle, 'utf8') : '';
+    if (configRevisionOf(currentConfig) < configRevisionOf(configTemplate)) {
+        write(configGradle, configTemplate);
+        ok(`yandex-ads-config.gradle ревизии ${configRevisionOf(configTemplate)} записан`);
+    }
+    if (fs.existsSync(buildGradle)) {
+        const content = fs.readFileSync(buildGradle, 'utf8');
+        if (!content.includes('yandex-ads-config.gradle')) {
+            fs.writeFileSync(buildGradle, `${content.replace(/\s*$/, '')}\n\n`
+                + '// id рекламы из android/yandex-ads.properties — см. yandex-ads-config.gradle\n'
+                + "apply from: 'yandex-ads-config.gradle'\n", 'utf8');
+            ok('yandex-ads-config.gradle подключён в build.gradle плагина');
+        }
+    }
+
     const rulesTarget = path.join(pluginDir, 'consumer-rules.pro');
     const rules = fs.readFileSync(path.join(templates, 'consumer-rules.pro'), 'utf8');
     if (!fs.existsSync(rulesTarget) || fs.readFileSync(rulesTarget, 'utf8') !== rules) {
@@ -341,9 +453,12 @@ function patchYandexPlugin() {
 function patchNotifications(pluginDir) {
     const templates = path.join(__dirname, 'android-templates');
     const kotlinDir = path.join(pluginDir, 'src', 'main', 'java', 'com', 'playgama', 'yandexads');
+    // NativeAdConfig.kt — вместе с плагином: YandexMobileAdsPlugin.kt из
+    // шаблона без него не соберётся.
     const files = [
         ['PlaygamaNotifications.kt', path.join(kotlinDir, 'PlaygamaNotifications.kt')],
         ['YandexMobileAdsPlugin.kt', path.join(kotlinDir, 'YandexMobileAdsPlugin.kt')],
+        ['NativeAdConfig.kt', path.join(kotlinDir, 'NativeAdConfig.kt')],
         ['AndroidManifest.xml', path.join(pluginDir, 'src', 'main', 'AndroidManifest.xml')],
     ];
 
@@ -584,6 +699,7 @@ async function main() {
     console.log(`Режим:  ${clr.cyan}${IS_RELEASE ? 'release' : 'debug'}${clr.reset}\n`);
 
     checkProject();
+    moveAdIdsToNative();
     npmInstall();
     rebuildBridge();
     buildWeb();

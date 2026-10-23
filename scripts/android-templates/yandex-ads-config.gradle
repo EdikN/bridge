@@ -1,0 +1,64 @@
+// Ad unit ids and the AppMetrica key, compiled into the app instead of being
+// read from playgama-bridge-config.json. That JSON ships as plain text in the
+// APK's assets/, and bots that harvest "R-M-..." ids from published APKs spent
+// them on fake requests and clicks: the network then cut fill and prices for
+// the real players. Here the values only exist as an XOR'd, base64 string
+// resource (pg_yma_cfg) that NativeAdConfig.kt decodes at runtime — nothing in
+// the APK reads as an ad unit id any more.
+//
+// Where the values come from, first match wins per key:
+//   1. environment: YANDEX_ADS_BANNER, YANDEX_ADS_INTERSTITIAL,
+//      YANDEX_ADS_REWARDED, YANDEX_APPMETRICA_KEY (CI secrets);
+//   2. <android project>/yandex-ads.properties:
+//        banner=R-M-...
+//        interstitial=R-M-...
+//        rewarded=R-M-...
+//        appMetricaKey=...
+// Nothing configured → an empty resource, and ids passed from JS (the old
+// way, via the bridge config) keep working.
+//
+// playgama-yandex-ads-config-revision: 1
+// ^ android-setup.js (bridge) overwrites a plugin copy whose revision is lower
+//   than its template's. Bump it on every change to this file.
+
+def pgYmaKeys = [
+    banner       : 'YANDEX_ADS_BANNER',
+    interstitial : 'YANDEX_ADS_INTERSTITIAL',
+    rewarded     : 'YANDEX_ADS_REWARDED',
+    appMetricaKey: 'YANDEX_APPMETRICA_KEY',
+]
+
+def pgYmaValues = [:]
+def pgYmaProps = new Properties()
+def pgYmaFile = rootProject.file('yandex-ads.properties')
+if (pgYmaFile.isFile()) {
+    pgYmaFile.withReader('UTF-8') { pgYmaProps.load(it) }
+}
+pgYmaKeys.each { key, env ->
+    def value = (System.getenv(env) ?: pgYmaProps.getProperty(key) ?: '').trim()
+    if (value) pgYmaValues[key] = value
+}
+
+def pgYmaEncode = { Map values ->
+    if (values.isEmpty()) return ''
+    byte[] data = groovy.json.JsonOutput.toJson(values).getBytes('UTF-8')
+    // The key travels with the data: this is not encryption, only enough that
+    // no scanner grepping the APK for "R-M-" (or base64 of it) finds a match.
+    byte[] digest = java.security.MessageDigest.getInstance('SHA-256').digest(data)
+    byte[] out = new byte[16 + data.length]
+    for (int i = 0; i < 16; i++) out[i] = digest[i]
+    for (int i = 0; i < data.length; i++) out[16 + i] = (byte) (data[i] ^ digest[i % 16])
+    return java.util.Base64.encoder.encodeToString(out)
+}
+
+android {
+    buildFeatures {
+        resValues true
+    }
+    defaultConfig {
+        resValue 'string', 'pg_yma_cfg', pgYmaEncode(pgYmaValues)
+    }
+}
+
+logger.lifecycle("capacitor-plugin-yandex-mobile-ads: native ad config — " +
+    (pgYmaValues.isEmpty() ? 'none (ids come from JS)' : pgYmaValues.keySet().sort().join(', ')))
