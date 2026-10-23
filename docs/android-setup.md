@@ -29,20 +29,29 @@ npx cap init "Название Игры" "com.example.mygame" --web-dir dist
 npx cap add android
 ```
 
-## playgama-bridge-config.json
+## id рекламы — android/yandex-ads.properties
 
-```json
-{
-    "advertisement": {
-        "interstitial": { "adUnitId": "R-M-XXXXXXXX-1" },
-        "rewarded":     { "adUnitId": "R-M-XXXXXXXX-2" },
-        "banner":       { "adUnitId": "R-M-XXXXXXXX-3" }
-    }
-}
+```properties
+interstitial=R-M-XXXXXXXX-1
+rewarded=R-M-XXXXXXXX-2
+banner=R-M-XXXXXXXX-3
+appMetricaKey=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
+
+Плагин (≥ 1.2.0) зашивает эти значения в APK закодированным ресурсом. В
+`playgama-bridge-config.json` их **не кладём**: он лежит в APK открытым JSON, и
+id оттуда собирают боты — на украденные id идут фальшивые запросы и клики, а
+сеть урезает рекламу настоящим игрокам (так было с PunchBox в октябре 2026).
+`android-setup.js` сам переносит id из конфига в этот файл. Переменные
+окружения `YANDEX_ADS_INTERSTITIAL`, `YANDEX_ADS_REWARDED`, `YANDEX_ADS_BANNER`,
+`YANDEX_APPMETRICA_KEY` главнее файла (секреты CI).
 
 Ad unit ID получают в [Yandex Advertising Network](https://partner.yandex.ru/).  
 Тестовые ID: `demo-interstitial-yandex`, `demo-rewarded-yandex`, `demo-banner-yandex`.
+
+Старый способ — `advertisement.<вид>.adUnitId` и `appMetricaKey` в конфиге моста —
+по-прежнему работает со старым плагином, но с плагином 1.2.0 id из нативной
+сборки главнее.
 
 ## Поддерживаемые функции
 

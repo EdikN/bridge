@@ -70,7 +70,14 @@ The `advertisement` object controls ad behavior across all platforms.
 
 ### Android (Yandex Mobile Ads)
 
-When building an APK with Capacitor and the `capacitor-plugin-yandex-mobile-ads` plugin, specify Yandex ad unit IDs for each ad type. These are used by `AndroidPlatformBridge` at runtime.
+With `capacitor-plugin-yandex-mobile-ads` ≥ 1.2.0, put the ad unit IDs and the AppMetrica key in
+`android/yandex-ads.properties` (`interstitial=`, `rewarded=`, `banner=`, `appMetricaKey=`), **not** in this
+config: the plugin compiles them into the APK as an obfuscated resource, while this JSON ships in the APK's
+`assets/` as plain text, where bots harvest the IDs for fake requests and clicks. `AndroidPlatformBridge` learns
+from the plugin which formats are configured and calls it without an ID. `scripts/android-setup.js` moves IDs
+found in this config into the properties file. See [Android setup](./android-setup.md).
+
+The parameters below are the legacy way, still honoured by older plugins (a newer plugin prefers its compiled IDs):
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|

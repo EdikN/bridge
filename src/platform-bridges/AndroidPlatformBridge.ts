@@ -59,6 +59,18 @@ interface AndroidAdvertisementOptions {
     banner?: AdUnitOptions
 }
 
+type AdFormat = 'interstitial' | 'rewarded' | 'banner'
+
+// What the plugin (≥ 1.2.0) reports from initialize: which formats have an ad
+// unit compiled into the app (android/yandex-ads.properties) and whether
+// AppMetrica got a key. Flags only — the ids stay in the native code, out of
+// the bridge config that ships as plain JSON in the APK. Older plugins resolve
+// with nothing, and the ids from the config are used as before.
+interface PluginInitializeResult {
+    adUnits?: Partial<Record<AdFormat, boolean>>
+    appMetrica?: boolean
+}
+
 class AndroidPlatformBridge extends PlatformBridgeBase {
     // platform
     get platformId(): PlatformId {
@@ -109,6 +121,8 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
 
     #bannerAdUnitId: string | null = null
 
+    #nativeAdUnits: Partial<Record<AdFormat, boolean>> = {}
+
     initialize(): Promise<unknown> {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -124,68 +138,71 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
     }
 
     showInterstitial(): void {
-        if (!this.#yandexMobileAds || !this.#interstitialAdUnitId) {
+        if (!this.#yandexMobileAds || !this.#hasAdUnit('interstitial')) {
             this._showAdFailurePopup(false)
             return
         }
 
         this._setInterstitialState(INTERSTITIAL_STATE.LOADING)
-        this.#yandexMobileAds.showInterstitial({ adUnitId: this.#interstitialAdUnitId })
+        this.#yandexMobileAds.showInterstitial(this.#adUnitOptions(this.#interstitialAdUnitId))
             .catch(() => {
                 this._showAdFailurePopup(false)
             })
     }
 
     preloadInterstitial(): void {
-        if (!this.#yandexMobileAds || !this.#interstitialAdUnitId) {
+        if (!this.#yandexMobileAds || !this.#hasAdUnit('interstitial')) {
             return
         }
 
-        this.#yandexMobileAds.preloadInterstitial({ adUnitId: this.#interstitialAdUnitId })
+        this.#yandexMobileAds.preloadInterstitial(this.#adUnitOptions(this.#interstitialAdUnitId))
             .catch(() => {})
     }
 
     showRewarded(): void {
-        if (!this.#yandexMobileAds || !this.#rewardedAdUnitId) {
+        if (!this.#yandexMobileAds || !this.#hasAdUnit('rewarded')) {
             this._showAdFailurePopup(true)
             return
         }
 
         this._setRewardedState(REWARDED_STATE.LOADING)
-        this.#yandexMobileAds.showRewarded({ adUnitId: this.#rewardedAdUnitId })
+        this.#yandexMobileAds.showRewarded(this.#adUnitOptions(this.#rewardedAdUnitId))
             .catch(() => {
                 this._showAdFailurePopup(true)
             })
     }
 
     preloadRewarded(): void {
-        if (!this.#yandexMobileAds || !this.#rewardedAdUnitId) {
+        if (!this.#yandexMobileAds || !this.#hasAdUnit('rewarded')) {
             return
         }
 
-        this.#yandexMobileAds.preloadRewarded({ adUnitId: this.#rewardedAdUnitId })
+        this.#yandexMobileAds.preloadRewarded(this.#adUnitOptions(this.#rewardedAdUnitId))
             .catch(() => {})
     }
 
     showBanner(position?: unknown): void {
-        if (!this.#yandexMobileAds || !this.#bannerAdUnitId) {
+        if (!this.#yandexMobileAds || !this.#hasAdUnit('banner')) {
             this._setBannerState(BANNER_STATE.FAILED)
             return
         }
 
         this._setBannerState(BANNER_STATE.LOADING)
-        this.#yandexMobileAds.showBanner({ adUnitId: this.#bannerAdUnitId, position: position ?? 'bottom' })
+        this.#yandexMobileAds.showBanner({
+            ...this.#adUnitOptions(this.#bannerAdUnitId),
+            position: position ?? 'bottom',
+        })
             .catch(() => {
                 this._setBannerState(BANNER_STATE.FAILED)
             })
     }
 
     hideBanner(): void {
-        if (!this.#yandexMobileAds || !this.#bannerAdUnitId) {
+        if (!this.#yandexMobileAds || !this.#hasAdUnit('banner')) {
             return
         }
 
-        this.#yandexMobileAds.hideBanner({ adUnitId: this.#bannerAdUnitId })
+        this.#yandexMobileAds.hideBanner(this.#adUnitOptions(this.#bannerAdUnitId))
             .catch(() => {})
     }
 
@@ -254,6 +271,23 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
     }
 
     // private methods
+    // A format is available when the config names a unit for it (the old way)
+    // or the plugin has one compiled in.
+    #hasAdUnit(format: AdFormat): boolean {
+        const fromConfig = {
+            interstitial: this.#interstitialAdUnitId,
+            rewarded: this.#rewardedAdUnitId,
+            banner: this.#bannerAdUnitId,
+        }[format]
+        return Boolean(fromConfig) || this.#nativeAdUnits[format] === true
+    }
+
+    // Without an id from the config the plugin uses its compiled one; it also
+    // prefers that one when both are present.
+    #adUnitOptions(adUnitId: string | null): AnyRecord {
+        return adUnitId ? { adUnitId } : {}
+    }
+
     get #notificationSettings(): NotificationSettings {
         return this._options?.notificationSettings ?? {}
     }
@@ -338,9 +372,12 @@ class AndroidPlatformBridge extends PlatformBridgeBase {
             this.#bannerAdUnitId = adConfig?.banner?.adUnitId ?? null
 
             const appMetricaKey = this._options?.appMetricaKey as string | undefined
-            await this.#yandexMobileAds.initialize(appMetricaKey ? { appMetricaKey } : {})
+            const initResult = await this.#yandexMobileAds.initialize(appMetricaKey ? { appMetricaKey } : {})
+            const native = (initResult && typeof initResult === 'object' ? initResult : {}) as PluginInitializeResult
+            this.#nativeAdUnits = native.adUnits ?? {}
 
-            this.#isAnalyticsSupported = Boolean(appMetricaKey) && this.#detectPluginMethods(ANALYTICS_METHODS)
+            this.#isAnalyticsSupported = (Boolean(appMetricaKey) || native.appMetrica === true)
+                && this.#detectPluginMethods(ANALYTICS_METHODS)
             this.#setupAdListeners()
             this.#setupLifecycleListeners()
             // Warm the native ad cache so the first interstitial/rewarded is
