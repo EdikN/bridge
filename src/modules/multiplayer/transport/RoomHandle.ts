@@ -116,12 +116,6 @@ export default class RoomHandle implements MultiplayerRoom {
 
     get properties(): MultiplayerProperties { return copy(this.metadata.properties) }
 
-    constructor(http: HttpClient, session: Session, removed: () => void) {
-        this.http = http
-        this.session = session
-        this.removed = removed
-    }
-
     get hostPlayerId(): string | null { return this.metadata.hostPlayerId }
 
     get info(): RoomMetadata { return copy(this.metadata) }
@@ -131,6 +125,12 @@ export default class RoomHandle implements MultiplayerRoom {
     get isReady(): boolean { return this.sync ? this.sync.isReady : this.state === 'connected' }
 
     get isHost(): boolean { return this.sync?.isHost || false }
+
+    constructor(http: HttpClient, session: Session, removed: () => void) {
+        this.http = http
+        this.session = session
+        this.removed = removed
+    }
 
     async connect(reservation: Reservation, token?: string, timeoutMs = 10000): Promise<void> {
         if (this.closed) throw new MultiplayerError('CANCELLED')

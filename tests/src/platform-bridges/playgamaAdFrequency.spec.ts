@@ -11,7 +11,12 @@ import eventBus from '../../../src/lib/EventBus'
 import { PLATFORM_MESSAGE } from '../../../src/modules/platform/constants'
 import bridgeConfig from '../../../src/lib/bridge-config'
 import { EVENT_NAME } from '../../../src/constants'
-import { INTERSTITIAL_STATE, REWARDED_STATE } from '../../../src/modules/advertisement/constants'
+import {
+    INTERSTITIAL_STATE,
+    REWARDED_STATE,
+    // Fork-specific default interval (upstream uses 60) — keeps the timer tests value-agnostic.
+    DEFAULT_MINIMUM_DELAY_BETWEEN_INTERSTITIAL,
+} from '../../../src/modules/advertisement/constants'
 
 vi.mock('../../../src/utils', async (importOriginal) => ({
     ...await importOriginal<typeof import('../../../src/utils')>(),
@@ -104,7 +109,7 @@ describe('Playgama ad frequency compatibility', () => {
         sdk.advService.subscribeToAdStateChanges.mock.calls[0][0]('interstitial', 'close')
         controller.show()
         expect(sdk.advService.showInterstitial).toHaveBeenCalledTimes(1)
-        vi.advanceTimersByTime(60_000)
+        vi.advanceTimersByTime(DEFAULT_MINIMUM_DELAY_BETWEEN_INTERSTITIAL * 1000)
         controller.show()
         expect(sdk.advService.showInterstitial).toHaveBeenCalledTimes(2)
     })
