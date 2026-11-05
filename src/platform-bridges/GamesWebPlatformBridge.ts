@@ -127,21 +127,21 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     }
 
     get isOnline(): boolean {
-        return this.#isOnline
+        return this._isOnline
     }
 
     // player
     get isPlayerAuthorizationSupported(): boolean {
-        return this.#isOnline && this.#features.authorization !== false
+        return this._isOnline && this.#features.authorization !== false
     }
 
     // advertisement
     get isInterstitialSupported(): boolean {
-        return this.#isOnline && this.#features.interstitial === true
+        return this._isOnline && this.#features.interstitial === true
     }
 
     get isRewardedSupported(): boolean {
-        return this.#isOnline && this.#features.rewarded === true
+        return this._isOnline && this.#features.rewarded === true
     }
 
     get initialInterstitialDelay(): number {
@@ -155,23 +155,23 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
 
     // social
     get isShareSupported(): boolean {
-        return this.#isOnline && this.#features.share === true
+        return this._isOnline && this.#features.share === true
     }
 
     get isInviteFriendsSupported(): boolean {
-        return this.#isOnline && this.#features.inviteFriends === true
+        return this._isOnline && this.#features.inviteFriends === true
     }
 
     get isRateSupported(): boolean {
-        return this.#isOnline && this.#features.rate === true
+        return this._isOnline && this.#features.rate === true
     }
 
     get isAddToFavoritesSupported(): boolean {
-        return this.#isOnline && this.#features.favorites === true
+        return this._isOnline && this.#features.favorites === true
     }
 
     get isJoinCommunitySupported(): boolean {
-        return this.#isOnline && this.#features.joinCommunity === true
+        return this._isOnline && this.#features.joinCommunity === true
     }
 
     // device
@@ -197,14 +197,14 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
 
     // leaderboards
     get leaderboardsType(): LeaderboardType {
-        return this.#isOnline && this.#features.leaderboards === true
+        return this._isOnline && this.#features.leaderboards === true
             ? LEADERBOARD_TYPE.IN_GAME
             : LEADERBOARD_TYPE.NOT_AVAILABLE
     }
 
     // config
     get isRemoteConfigSupported(): boolean {
-        return this.#isOnline && this.#features.remoteConfig === true
+        return this._isOnline && this.#features.remoteConfig === true
     }
 
     // storage — StorageModule keeps its local fallback under this prefix: `gw:<slug>:` where the
@@ -222,9 +222,12 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
         return `${LOCAL_KEY_PREFIX}${slug}:`
     }
 
-    #client: GwClient | null = null
+    // Protected, not private: since upstream v2.4.0 the base constructor calls
+    // _setVisibilityState() during super() and this subclass override reads it;
+    // reading a private member there throws because it is not declared yet.
+    protected _isOnline = false
 
-    #isOnline = false
+    #client: GwClient | null = null
 
     #info: GwHelloResult | null = null
 
@@ -274,7 +277,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
 
     // platform
     sendMessage(message?: unknown, options?: unknown): Promise<unknown> {
-        if (!this.#isOnline) {
+        if (!this._isOnline) {
             return Promise.resolve()
         }
 
@@ -288,7 +291,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
 
     setLoadingProgress(percent: number): void {
         this.#lastLoadingProgress = percent
-        if (!this.#isOnline) {
+        if (!this._isOnline) {
             return
         }
 
@@ -297,7 +300,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
 
     // Offline there is no trusted clock; Playgama's time API is never used on this platform.
     getServerTime(): Promise<number> {
-        if (!this.#isOnline) {
+        if (!this._isOnline) {
             return Promise.resolve(Date.now())
         }
 
@@ -343,7 +346,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     // for it (`ya:<key>`, a game rebuilt from an old bridge) and is re-saved as `<key>`; the `ya:`
     // copy is left in place (GWHP §6a).
     getDataFromStorage(keys: string[]): Promise<Record<string, unknown>> {
-        if (!this.#isOnline) {
+        if (!this._isOnline) {
             return Promise.reject(new BridgeError(ERROR_CODE.STORAGE_NOT_AVAILABLE))
         }
 
@@ -377,7 +380,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     }
 
     setDataToStorage(data: Record<string, unknown>): Promise<void> {
-        if (!this.#isOnline) {
+        if (!this._isOnline) {
             return Promise.reject(new BridgeError(ERROR_CODE.STORAGE_NOT_AVAILABLE))
         }
 
@@ -391,7 +394,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     }
 
     deleteDataFromStorage(keys: string[]): Promise<void> {
-        if (!this.#isOnline) {
+        if (!this._isOnline) {
             return Promise.reject(new BridgeError(ERROR_CODE.STORAGE_NOT_AVAILABLE))
         }
 
@@ -402,7 +405,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
 
     // advertisement
     showBanner(position?: unknown, placement?: unknown): void {
-        if (!this.#isOnline || !this._isBannerSupported) {
+        if (!this._isOnline || !this._isBannerSupported) {
             this._setBannerState(BANNER_STATE.FAILED)
             return
         }
@@ -421,7 +424,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     }
 
     hideBanner(): void {
-        if (!this.#isOnline) {
+        if (!this._isOnline) {
             this._setBannerState(BANNER_STATE.HIDDEN)
             return
         }
@@ -654,7 +657,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     protected _setVisibilityState(state: VisibilityState): void {
         const isChanged = this._visibilityState !== state
         super._setVisibilityState(state)
-        if (isChanged && this.#isOnline) {
+        if (isChanged && this._isOnline) {
             this.#client?.emit('game.visibility', { visible: state === VISIBILITY_STATE.VISIBLE })
         }
     }
@@ -662,7 +665,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     #applyHello(info: GwHelloResult): void {
         this.#info = info
         this.#features = info.features ?? {}
-        this.#isOnline = true
+        this._isOnline = true
 
         this.#applyPlayer(info.player)
         this._isBannerSupported = this.#features.banner === true
@@ -915,7 +918,7 @@ class GamesWebPlatformBridge extends PlatformBridgeBase {
     }
 
     #call(method: string, params: AnyRecord = {}): Promise<unknown> {
-        if (!this.#client || !this.#isOnline) {
+        if (!this.#client || !this._isOnline) {
             return Promise.reject(new GwError(GW_ERROR_CODE.NOT_SUPPORTED, 'GamesWeb host is offline'))
         }
 

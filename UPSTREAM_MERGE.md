@@ -1,6 +1,6 @@
 # Upgrading Over Upstream (Merge Skill)
 
-> **Status:** synced with upstream **v2.3.1** on 2026-10-08 (previous sync: v2.3.0 on 2026-10-01).
+> **Status:** synced with upstream **v2.4.0** on 2026-11-05 (previous sync: v2.3.1 on 2026-10-08).
 > The codebase is now TypeScript; all custom features below live in `.ts` files.
 
 When updating the bridge library from the official upstream (`Playgama/bridge`), strictly adhere to the following steps to preserve our custom features:
@@ -13,12 +13,15 @@ git merge upstream/main --no-ff
 
 ## 2. Conflict Resolution Rules
 
-### Loading screen (`src/lib/loading-screen/LoadingScreen.ts`)
-**DO NOT** replace our cookie-splash loader with the default Playgama SVG logo.
-The class keeps upstream's public API (`show`, `setProgress(percent, isFallback)`,
-`setHideGate(promise)` — the loading-sound gate added in 2.1.0), but renders the fork's
-`#cookie-splash` overlay. When upstream adds a method to its LoadingScreen, add it here too:
-`PlaygamaBridge.ts` calls it unconditionally.
+### Loading screen (`src/lib/loading-screen/`)
+Since v2.4.0 upstream split the loading screen into views, so can we: `LoadingScreen.ts`
+is upstream-identical (controller: progress, fallback, hide gate) **except** it selects the
+fork's `CookieSplashView.ts` instead of `LogoLoadingView`/`RingLoadingView`. The fork
+ignores the upstream `type`/`logo`/`showLoadingText` options — any choice renders the
+cookie splash. On conflict, take upstream's version of `LoadingScreen.ts` wholesale and
+redo only the view selection; upstream's `LogoLoadingView.ts` / `RingLoadingView.ts`
+files stay in the repo (unused, not bundled). When upstream adds a method to its
+LoadingScreen/Views, apply it here too: `PlaygamaBridge.ts` calls it unconditionally.
 
 ### Custom Platforms
 Never remove or overwrite our exclusive integrations:
@@ -26,7 +29,7 @@ Never remove or overwrite our exclusive integrations:
 - **OK** (`OkPlatformBridge.ts` **extends VkPlatformBridge** — OK runs through VK Bridge; `ok-vk` params, no leaderboards, OK share fallback link)
 - **GameMonetize** (`GameMonetizePlatformBridge.ts`, reward only on ad COMPLETE, launch interstitial after `AD_SDK_MANAGER_READY` + 500ms)
 - **Android** (`AndroidPlatformBridge.ts`, Capacitor + YandexMobileAds)
-- **GamesWeb** (`GamesWebPlatformBridge.ts` + `src/platform-bridges/gamesweb/GwHostClient.ts`, GamesWeb Host Protocol v1, `docs/gamesweb.md`; tests `tests/src/platform-bridges/gamesWebPlatformBridge.spec.ts`)
+- **GamesWeb** (`GamesWebPlatformBridge.ts` + `src/platform-bridges/gamesweb/GwHostClient.ts`, GamesWeb Host Protocol v1, `docs/gamesweb.md`; tests `tests/src/platform-bridges/gamesWebPlatformBridge.spec.ts`). Since v2.4.0 the base constructor calls `_setVisibilityState()` during `super()`, so GamesWeb's override must not touch private members there — online state is the protected `_isOnline` field (declared before `#client`).
 - **Pikabu Games** (`PikabuGamesPlatformBridge.ts`, `PkbSDK` of `games.pikabu.ru`, `docs/pikabu-games.md`)
 
 ### Detection Logic
@@ -43,7 +46,13 @@ And `src/modules/platform/constants.ts` retains `OK_VK`, `GAME_MONETIZE`, `ANDRO
 `__INCLUDE_GAME_MONETIZE__` / `__INCLUDE_ANDROID__` / `__INCLUDE_GAMESWEB__` / `__INCLUDE_PIKABU_GAMES__` flags and the `window.GWHost` type.
 
 ### Other fork points
-- `src/modules/advertisement/constants.ts` — `DEFAULT_MINIMUM_DELAY_BETWEEN_INTERSTITIAL = 80` (upstream: 60)
+- **Analytics module (`src/modules/analytics/`)** — two platform channels since v2.4.0:
+  the fork's `sendPlatformAnalyticsEvent` + `setPlatformAnalyticsUserProperties`
+  (Android AppMetrica, always on — not gated by `sendAnalyticsEvents`) and upstream's
+  `sendAnalyticsEvent` (e.g. Y8, gated on the config switch). Keep both call sites
+  and both contract entries in `types.ts`.
+
+- `src/modules/advertisement/constants.ts` — `DEFAULT_MINIMUM_DELAY_BETWEEN_INTERSTITIAL = 80` (upstream: 60). Upstream's ad-frequency tests (`tests/src/platform-bridges/playgamaAdFrequency.spec.ts`) must stay value-agnostic: advance `DEFAULT_MINIMUM_DELAY_BETWEEN_INTERSTITIAL * 1000`, not a hardcoded `60_000`.
 - `src/lib/bridge-config/BridgeConfig.ts` — top-level `<platformId>` config fallback + `ok-vk` merge for OK
 - `src/modules/advertisement/dom.ts` — `showAdFailurePopup(platformId)` OK styling
 - `src/PlaygamaBridge.ts` — `[Bridge] Platform detected` console.info
