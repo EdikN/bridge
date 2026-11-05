@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.4.0-fork.2] - 2026-11-05
+
+### Добавлено
+- **Новый тип экрана загрузки `_cookie` (форк).** В `loadingScreenType` рядом с
+  апстримовскими `none`/`logo`/`ring` появился `cookie` — печенье можно ставить осознанно.
+  Если опции в конфиге нет, дефолт = `cookie` на `yandex`, `vk`, `ok`, `gamesweb`,
+  `pikabu_games`, `android`; на остальных — как в апстриме, `logo`. Явная опция всегда
+  побеждает. До этого форк рисовал печенье всегда и выбор не давал.
+- И `logo`, и `ring` теперь реально рисуются апстримовскими вьюхами
+  (`LogoLoadingView` / `RingLoadingView`), печенье — `CookieSplashView`.
+- Диагностика выбора: `tests/src/lib/loadingScreen.spec.ts`.
+
+## [2.4.0-fork.1] - 2026-11-05
+
+### Добавлено
+- **Синхронизация с upstream v2.4.0** (PT #19): модуль Multiplayer (Playgama relay,
+  StateSync, свой транспорт WebSocket/MessagePack), loading screen v2 (vьюхи
+  `LogoLoadingView`/`RingLoadingView`, опции `loadingScreenType`/`loadingLogoType`/
+  `showLoadingText`), MSN SDK update, YouTube adblock fix + subscribe-опции,
+  обновление Y8, QA Tool без interstitial задержек, ad frequency compatibility,
+  player avatar.
+- Аналитика: Android AppMetrica (форк, `sendPlatformAnalyticsEvent`) сосуществует
+  с апстримовским `sendAnalyticsEvent` (Y8).
+
+### Исправлено
+- GamesWeb: апстрим v2.4.0 вызывает `_setVisibilityState()` из конструктора базы
+  во время `super()` — оверрайд теперь безопасен (`#isOnline` → `protected _isOnline`).
+
 ## [2.3.1-fork.7] - 2026-10-23
 
 ### Безопасность

@@ -37,7 +37,12 @@ import {
 
 import { applyEventBusMixin } from './lib/EventBus'
 import Deferred from './lib/Deferred'
-import { LoadingScreen, LOADING_SCREEN_TYPE, LOADING_LOGO_TYPE } from './lib/loading-screen'
+import {
+    LoadingScreen,
+    LOADING_SCREEN_TYPE,
+    LOADING_LOGO_TYPE,
+    LOADING_SCREEN_COOKIE_DEFAULT_PLATFORMS,
+} from './lib/loading-screen'
 import { LoadingSound } from './lib/loading-sound'
 import { SafeArea } from './lib/safe-area'
 import bridgeConfig from './lib/bridge-config'
@@ -342,9 +347,18 @@ class PlaygamaBridge {
         const options = bridgeConfig.getValues()
 
         // disableLoadingLogo and showFullLoadingLogo are legacy options, used only
-        // when the new ones are not set.
-        const type = options.loadingScreenType
-            ?? (options.disableLoadingLogo ? LOADING_SCREEN_TYPE.NONE : LOADING_SCREEN_TYPE.LOGO)
+        // when the new ones are not set. Fork: when the game picks nothing, the
+        // studio's portals get the cookie splash, the rest keep upstream's logo.
+        let type = options.loadingScreenType
+        if (type === undefined) {
+            if (options.disableLoadingLogo) {
+                type = LOADING_SCREEN_TYPE.NONE
+            } else if (LOADING_SCREEN_COOKIE_DEFAULT_PLATFORMS.includes(bridge.platformId)) {
+                type = LOADING_SCREEN_TYPE.COOKIE
+            } else {
+                type = LOADING_SCREEN_TYPE.LOGO
+            }
+        }
 
         if (type !== LOADING_SCREEN_TYPE.NONE) {
             const isBrandingRestricted = bridge.platformId === PLATFORM_ID.YANDEX

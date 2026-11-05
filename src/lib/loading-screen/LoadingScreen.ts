@@ -15,15 +15,25 @@
  * along with Playgama Bridge. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Fork note: the stock Playgama SVG-logo / ring loading screens are replaced
-// with the fork's custom "cookie splash" loader. The class keeps upstream's
-// public API (show / setProgress with fallback semantics / setHideGate — the
-// loading-sound gate) so PlaygamaBridge is unchanged; on every conflict with
-// upstream only the CookieSplashView import below must stay fork-specific.
+// Fork note: upstream built the loading screen around the stock SVG logo and
+// the new ring view, but the default type resolves the fork's cookie splash
+// first (PlaygamaBridge + constants LOADING_SCREEN_COOKIE_DEFAULT_PLATFORMS).
+// The class keeps upstream's public API (show / setProgress with fallback
+// semantics / setHideGate — the loading-sound gate) so PlaygamaBridge is
+// unchanged; on every conflict with upstream only the CookieSplashView import
+// and the cookie branch in show() must stay fork-specific.
 
-import { LOADING_SCREEN_HIDE_GATE_TIMEOUT } from './constants'
-import type { LoadingScreenType, LoadingLogoType } from './constants'
+import {
+    LOADING_SCREEN_TYPE,
+    LOADING_LOGO_TYPE,
+    LOADING_SCREEN_LOGO_PRESETS,
+    LOADING_SCREEN_HIDE_GATE_TIMEOUT,
+    type LoadingScreenType,
+    type LoadingLogoType,
+} from './constants'
 import type { LoadingScreenView } from './types'
+import LogoLoadingView from './LogoLoadingView'
+import RingLoadingView from './RingLoadingView'
 import CookieSplashView from './CookieSplashView'
 
 export interface LoadingScreenOptions {
@@ -47,8 +57,22 @@ class LoadingScreen {
         this.#hideGate = gate
     }
 
-    show(_options: LoadingScreenOptions = {}): void {
-        this.#view = new CookieSplashView()
+    // The options mirror upstream's; the fork only adds COOKIE, whose visual
+    // lives in CookieSplashView. logo/showLoadingText still only affect logo.
+    show({
+        type = LOADING_SCREEN_TYPE.LOGO,
+        logo = LOADING_LOGO_TYPE.FULL,
+        showLoadingText = false,
+    }: LoadingScreenOptions = {}): void {
+        const preset = LOADING_SCREEN_LOGO_PRESETS[logo] ?? LOADING_SCREEN_LOGO_PRESETS[LOADING_LOGO_TYPE.FULL]
+
+        if (type === LOADING_SCREEN_TYPE.RING) {
+            this.#view = new RingLoadingView()
+        } else if (type === LOADING_SCREEN_TYPE.COOKIE) {
+            this.#view = new CookieSplashView()
+        } else {
+            this.#view = new LogoLoadingView(preset, showLoadingText)
+        }
         this.#view.show()
     }
 

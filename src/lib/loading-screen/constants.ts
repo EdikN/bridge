@@ -15,6 +15,8 @@
  * along with Playgama Bridge. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { PLATFORM_ID, type PlatformId } from '../../modules/platform/constants'
+
 export interface ProgressLogoPathItem {
     d: string
     fillRule?: string
@@ -34,8 +36,23 @@ export const LOADING_SCREEN_TYPE = {
     NONE: 'none',
     LOGO: 'logo',
     RING: 'ring',
+    // Fork: the studio's cookie splash, on top of the upstream logo/ring types.
+    COOKIE: 'cookie',
 } as const
 export type LoadingScreenType = typeof LOADING_SCREEN_TYPE[keyof typeof LOADING_SCREEN_TYPE]
+
+// Fork: platforms whose default loading screen is the cookie splash even when
+// the config is silent about loadingScreenType. All other platforms fall back
+// to the upstream defaults. Not exported as a Set on purpose: future upstream
+// merges to this file touch a plain const block with minimal friction.
+export const LOADING_SCREEN_COOKIE_DEFAULT_PLATFORMS: readonly PlatformId[] = [
+    PLATFORM_ID.YANDEX,
+    PLATFORM_ID.VK,
+    PLATFORM_ID.OK,
+    PLATFORM_ID.GAMESWEB,
+    PLATFORM_ID.PIKABU_GAMES,
+    PLATFORM_ID.ANDROID,
+]
 
 // full: icon + "BRIDGE" + "playgama", medium: icon + "BRIDGE", short: icon only.
 export const LOADING_LOGO_TYPE = {
