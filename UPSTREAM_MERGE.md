@@ -14,14 +14,17 @@ git merge upstream/main --no-ff
 ## 2. Conflict Resolution Rules
 
 ### Loading screen (`src/lib/loading-screen/`)
-Since v2.4.0 upstream split the loading screen into views, so can we: `LoadingScreen.ts`
-is upstream-identical (controller: progress, fallback, hide gate) **except** it selects the
-fork's `CookieSplashView.ts` instead of `LogoLoadingView`/`RingLoadingView`. The fork
-ignores the upstream `type`/`logo`/`showLoadingText` options — any choice renders the
-cookie splash. On conflict, take upstream's version of `LoadingScreen.ts` wholesale and
-redo only the view selection; upstream's `LogoLoadingView.ts` / `RingLoadingView.ts`
-files stay in the repo (unused, not bundled). When upstream adds a method to its
-LoadingScreen/Views, apply it here too: `PlaygamaBridge.ts` calls it unconditionally.
+Since v2.4.0 upstream split the loading screen into views, and the fork rides on it:
+`LoadingScreen.ts` is upstream-identical (controller: progress, fallback, hide gate)
+**except** `show()` also maps the fork's `COOKIE` type to `CookieSplashView.ts`
+(`logo`/`ring` render the stock upstream views). Fork additions in `constants.ts`:
+`LOADING_SCREEN_TYPE.COOKIE` and `LOADING_SCREEN_COOKIE_DEFAULT_PLATFORMS`
+(`yandex`, `vk`, `ok`, `gamesweb`, `pikabu_games`, `android`) — `PlaygamaBridge.ts`
+resolves an unset `loadingScreenType` to `COOKIE` on those platforms, else upstream's
+`logo`/legacy `none`. On conflict, take upstream's version of `LoadingScreen.ts`
+wholesale and redo only the cookie branch; keep the two fork exports in
+`constants.ts`. When upstream adds a method to its LoadingScreen/Views, apply it
+here too: `PlaygamaBridge.ts` calls it unconditionally.
 
 ### Custom Platforms
 Never remove or overwrite our exclusive integrations:

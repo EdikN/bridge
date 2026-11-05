@@ -23,8 +23,17 @@ This document describes all available configuration parameters for `playgama-bri
 | `$schema` | string | - | JSON schema URL for config validation |
 | `forciblySetPlatformId` | string | `undefined` | Forces a specific platform ID regardless of URL detection (e.g., `playgama`, `msn`, `crazy_games`) |
 | `sendAnalyticsEvents` | boolean | `true` | Enable/disable sending analytics events to Playgama servers |
-| `disableLoadingLogo` | boolean | `false` | Hide the loading progress logo during initialization |
-| `showFullLoadingLogo` | boolean | `false` | Show full Playgama Bridge branding in loading screen (hardcode `false` for Yandex) |
+| `loadingScreenType` | string | platform-dependent (see below) | Loading screen: `_cookie` (fork cookie splash), `logo`, `ring`, `none` |
+| `loadingLogoType` | string | `full` | Logo composition for `logo`: `full` (icon + BRIDGE + playgama), `medium` (icon + BRIDGE), `short` (icon only) |
+| `showLoadingText` | boolean | `false` | Rotating tech hints under the `logo` loading screen |
+| `disableLoadingLogo` | boolean | `false` | Legacy. Used only when `loadingScreenType` is not set: `true` = `none` |
+| `showFullLoadingLogo` | boolean | `false` | Legacy. Used only when `loadingLogoType` is not set: `false` = `medium`, otherwise `full` |
+
+**Default loading screen (fork, 2.4.0-fork.2).** When `loadingScreenType` is not set:
+`cookie` on `yandex`, `vk`, `ok`, `gamesweb`, `pikabu_games`, `android`;
+upstream's `logo` on every other platform. An explicit `loadingScreenType` always
+wins on all platforms; `cookie` renders the cookie splash, `logo`/`ring` render
+the stock Playgama views.
 
 ---
 
