@@ -40,6 +40,8 @@ export interface AnalyticsBridgeContract extends PlatformBridgeLike {
     // custom events the game sends to Playgama.
     sendPlatformAnalyticsEvent?(eventName: string, data: Record<string, unknown>): void
     setPlatformAnalyticsUserProperties?(properties: Record<string, unknown>): void
+    // Upstream platform analytics (e.g. Y8), gated on the config switch.
+    sendAnalyticsEvent?(eventName: string, data: Record<string, unknown>): void
 }
 
 export interface AnalyticsSender {

@@ -114,7 +114,11 @@ class AnalyticsModule extends ModuleBase<AnalyticsBridgeContract> {
 
         this.#fetchTimeDiff()
         this.#sendInternal(`${MODULE_NAME.CORE}_initialization_started`)
-        this.#startFlushInterval()
+
+        if (document.visibilityState === 'visible') {
+            this.#startFlushInterval()
+        }
+
         this.#setupPageUnloadHandler()
         this.#setupGameplayMilestones()
 
@@ -129,8 +133,16 @@ class AnalyticsModule extends ModuleBase<AnalyticsBridgeContract> {
 
         const safeData = data && typeof data === 'object' && !Array.isArray(data) ? data : {}
 
-        // Platform analytics does not depend on Playgama's being enabled.
+        // Fork platform analytics (Android AppMetrica) does not depend on
+        // Playgama's being enabled: it feeds the platform SDK with the same
+        // custom events the game sends to Playgama.
         this._platformBridge?.sendPlatformAnalyticsEvent?.(eventName, safeData)
+
+        // Upstream platform tracking (e.g. Y8) follows only the config switch,
+        // not the environment checks
+        if (bridgeConfig.getValues().sendAnalyticsEvents !== false) {
+            this._platformBridge?.sendAnalyticsEvent?.(eventName, safeData)
+        }
 
         if (this.#isDisabled) {
             return
@@ -361,18 +373,20 @@ class AnalyticsModule extends ModuleBase<AnalyticsBridgeContract> {
         const { platformId } = this._platformBridge
         const options = bridgeConfig.getValues()
 
-        const optionKeyMap: Partial<Record<PlatformId, string>> = {
-            [PLATFORM_ID.GAME_DISTRIBUTION]: 'gameId',
-            [PLATFORM_ID.Y8]: 'gameId',
-            [PLATFORM_ID.MSN]: 'gameId',
-            [PLATFORM_ID.HUAWEI]: 'appId',
-            [PLATFORM_ID.DISCORD]: 'appId',
-            [PLATFORM_ID.GAMEPUSH]: 'projectId',
-            [PLATFORM_ID.MICROSOFT_STORE]: 'gameId',
+        // Option keys in priority order: Y8 keeps its app id in appId, or in gameId in legacy configs
+        const optionKeyMap: Partial<Record<PlatformId, string[]>> = {
+            [PLATFORM_ID.GAME_DISTRIBUTION]: ['gameId'],
+            [PLATFORM_ID.Y8]: ['appId', 'gameId'],
+            [PLATFORM_ID.MSN]: ['gameId'],
+            [PLATFORM_ID.HUAWEI]: ['appId'],
+            [PLATFORM_ID.DISCORD]: ['appId'],
+            [PLATFORM_ID.GAMEPUSH]: ['projectId'],
+            [PLATFORM_ID.MICROSOFT_STORE]: ['gameId'],
         }
 
-        const optionKey = optionKeyMap[platformId]
-        const gameId = optionKey ? (options as Record<string, unknown>)?.[optionKey] : null
+        const values = (options ?? {}) as Record<string, unknown>
+        const optionKey = optionKeyMap[platformId]?.find((key) => values[key])
+        const gameId = optionKey ? values[optionKey] : null
 
         return (typeof gameId === 'string' && gameId)
             ? gameId
